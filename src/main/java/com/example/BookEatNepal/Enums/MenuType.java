@@ -1,6 +1,6 @@
 package com.example.BookEatNepal.Enums;
 
-public enum PackageType {
+public enum MenuType {
     BASIC,
     PREMIUM,
     CUSTOM,

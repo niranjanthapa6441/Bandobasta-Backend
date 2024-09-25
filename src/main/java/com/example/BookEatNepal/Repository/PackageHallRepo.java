@@ -1,4 +1,9 @@
 package com.example.BookEatNepal.Repository;
 
-public interface PackageHallRepo {
+import com.example.BookEatNepal.Model.PackageHall;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface PackageHallRepo extends JpaRepository<PackageHall, Integer> {
 }

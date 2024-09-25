@@ -1,9 +1,8 @@
 package com.example.BookEatNepal.Enums;
 
-public enum HallStatus {
+public enum AmenityStatus {
     AVAILABLE,
-    BOOKED,
+    OUT_OF_ORDER,
     UNDER_MAINTENANCE,
-    RESERVED,
-    CLOSED
+    RESERVED
 }

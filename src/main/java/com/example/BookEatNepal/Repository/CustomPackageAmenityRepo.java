@@ -1,4 +1,9 @@
 package com.example.BookEatNepal.Repository;
 
-public interface CustomPackageAmenityRepo {
+import com.example.BookEatNepal.Model.CustomPackage;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CustomPackageAmenityRepo extends JpaRepository<CustomPackage, Integer> {
 }

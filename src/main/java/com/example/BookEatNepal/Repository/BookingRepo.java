@@ -1,4 +1,9 @@
 package com.example.BookEatNepal.Repository;
 
-public interface BookingRepo {
+import com.example.BookEatNepal.Model.Booking;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface BookingRepo extends JpaRepository<Booking,Integer> {
 }

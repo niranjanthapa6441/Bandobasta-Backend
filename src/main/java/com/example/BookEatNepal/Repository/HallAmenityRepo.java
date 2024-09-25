@@ -1,4 +1,9 @@
 package com.example.BookEatNepal.Repository;
 
-public interface HallAmenityRepo {
+import com.example.BookEatNepal.Model.HallAmenity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface HallAmenityRepo extends JpaRepository<HallAmenity, Integer> {
 }
