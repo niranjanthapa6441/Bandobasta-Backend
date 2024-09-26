@@ -1,7 +1,6 @@
 package com.example.BookEatNepal.Service;
 
 import com.example.BookEatNepal.DTO.VenueDTO;
-import com.example.BookEatNepal.DTO.VenueDTOs;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Request.VenueRequest;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ public interface VenueService {
     String delete(int id);
 
 
-    VenueDTOs findAll(String name, String location, int rating, int page, int size);
+    VenueDTO findAll(String name, String location, int rating, int page, int size);
 
     Venue findById(int id);
 

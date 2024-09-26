@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.ServiceImpl;
 
+import com.example.BookEatNepal.DTO.VenueDetails;
 import com.example.BookEatNepal.DTO.VenueDTO;
-import com.example.BookEatNepal.DTO.VenueDTOs;
 import com.example.BookEatNepal.Enums.VenueStatus;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Model.VenueImage;
@@ -31,10 +31,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class VenueServiceImpl implements VenueService {
-    private static String SUCCESS_MESSAGE = "successful";
+    private static final String SUCCESS_MESSAGE = "successful";
     @Autowired
     private VenueRepo venueRepo;
     @Autowired
@@ -60,7 +61,7 @@ public class VenueServiceImpl implements VenueService {
 
 
     @Override
-    public VenueDTOs findAll(String venue, String location,int rating, int page, int size) {
+    public VenueDTO findAll(String venue, String location, int rating, int page, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Venue> query = cb.createQuery(Venue.class);
         Root<Venue> venueRoot = query.from(Venue.class);
@@ -93,15 +94,14 @@ public class VenueServiceImpl implements VenueService {
         int totalElements = venues.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
 
-        return toVenueDTOs(pagedVenues, currentPage, totalElements, totalPages);
+        return toVenueDTO(pagedVenues, currentPage, totalElements, totalPages);
     }
 
 
 
     @Override
     public Venue findById(int id) {
-        Venue venue = venueRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
-        return venue;
+        return venueRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
     }
 
     @Override
@@ -143,13 +143,12 @@ public class VenueServiceImpl implements VenueService {
     }
 
     private String toAddress(VenueRequest request) {
-        String address = request.getStreetNumber() + "-" +
+        return request.getStreetNumber() + "-" +
                 request.getStreetName() + "," +
                 request.getCity() + "," +
                 request.getDistrict() +
                 request.getState() +
                 request.getCountry();
-        return address;
     }
 
     private void validate(MultipartFile multipartFile) {
@@ -202,7 +201,7 @@ public class VenueServiceImpl implements VenueService {
         for (MultipartFile image : venueImages) {
             try {
                 validate(image);
-                String fileName = StringUtils.cleanPath(image.getOriginalFilename());
+                String fileName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
 
                 if (fileName.contains(".php%00.")) {
                     throw new CustomException(CustomException.Type.INVALID_FILE_EXTENSION);
@@ -223,40 +222,38 @@ public class VenueServiceImpl implements VenueService {
 
     private String getLicenseImagePath(VenueRequest request) {
         validate(request.getLicenseImage());
-        String fileName = StringUtils.cleanPath(request.getLicenseImage().getOriginalFilename());
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(request.getLicenseImage().getOriginalFilename()));
         if (fileName.contains(".php%00.")) {
             throw new CustomException(CustomException.Type.INVALID_FILE_EXTENSION);
         }
-        String licenseImagePath = getImagePath(request.getLicenseImage(), request.getName(), fileName);
-        return licenseImagePath;
+        return getImagePath(request.getLicenseImage(), request.getName(), fileName);
     }
 
     private String getPanImagePath(VenueRequest request) {
         validate(request.getPanImage());
-        String fileName = StringUtils.cleanPath(request.getPanImage().getOriginalFilename());
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(request.getPanImage().getOriginalFilename()));
         if (fileName.contains(".php%00.")) {
             throw new CustomException(CustomException.Type.INVALID_FILE_EXTENSION);
         }
-        String panImagePath = getImagePath(request.getPanImage(), request.getName(), fileName);
-        return panImagePath;
+        return getImagePath(request.getPanImage(), request.getName(), fileName);
     }
-    private VenueDTOs toVenueDTOs(List<Venue> venues, int currentPage, int totalElements, int totalPages) {
-        List<VenueDTO> venueDTOs= toVenueDTO(venues);
-        return VenueDTOs.builder()
-                .venues(venueDTOs)
+    private VenueDTO toVenueDTO(List<Venue> venues, int currentPage, int totalElements, int totalPages) {
+        List<VenueDetails> venueDetails= toVenueDetails(venues);
+        return VenueDTO.builder()
+                .venues(venueDetails)
                 .currentPage(currentPage)
                 .totalPages(totalPages)
                 .totalElements(totalElements)
                 .build();
     }
-    private List<VenueDTO> toVenueDTO(List<Venue> venues) {
-        List<VenueDTO> venueDTOs= new ArrayList<>();
+    private List<VenueDetails> toVenueDetails(List<Venue> venues) {
+        List<VenueDetails> venueDTOs= new ArrayList<>();
         for (Venue venue:venues
         ) {
-            venueDTOs.add(VenueDTO.builder()
-                    .name(venue.getVenueName().toString())
-                    .address(venue.getAddress().toString())
-                    .description(venue.getDescription().toString())
+            venueDTOs.add(VenueDetails.builder()
+                    .name(venue.getVenueName())
+                    .address(venue.getAddress())
+                    .description(venue.getDescription())
                     .status(String.valueOf(venue.getStatus()))
                     .venueImagePaths(getVenueImagePath(venue.getImages()))
                     .build())
