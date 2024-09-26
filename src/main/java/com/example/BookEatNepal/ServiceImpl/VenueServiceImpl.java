@@ -26,6 +26,7 @@ import java.util.List;
 
 @Service
 public class VenueServiceImpl implements VenueService {
+    private static String SUCCESS_MESSAGE = "successful";
     @Autowired
     private VenueRepo venueRepo;
     @Autowired
@@ -37,13 +38,17 @@ public class VenueServiceImpl implements VenueService {
         request.setPanImagePath(getPanImagePath(request));
         Venue venue = venueRepo.save(toVenue(request));
         saveVenueImages(request.getVenueImages(), venue);
-        return "successful";
+        return SUCCESS_MESSAGE;
     }
 
     @Override
     public String delete(int id) {
-        return null;
+        Venue venue = venueRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
+        venue.setStatus(VenueStatus.DELETED);
+        venueRepo.save(venue);
+        return SUCCESS_MESSAGE;
     }
+
 
     @Override
     public VenueDTO findAll(String venue, int page, int size) {
@@ -52,11 +57,26 @@ public class VenueServiceImpl implements VenueService {
 
     @Override
     public Venue findById(int id) {
-        return null;
+        Venue venue = venueRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
+        return venue;
     }
 
     @Override
     public String update(VenueRequest request, int id) {
+        Venue venue = venueRepo.findById(id)
+                .orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
+        venue.setVenueName(request.getName());
+        venue.setEmail(request.getEmail());
+        venue.setPrimaryPhoneNumber(request.getPrimaryPhoneNumber());
+        venue.setSecondaryPhoneNumber(request.getSecondaryPhoneNumber());
+        venue.setDescription(request.getDescription());
+        venue.setCountryCode(request.getCountryCode());
+        venue.setRegistrationNumber(request.getRegistrationNumber());
+        venue.setLicenseNumber(request.getLicenseNumber());
+        venue.setPanImagePath(getPanImagePath(request));
+        venue.setLicenseImagePath(getLicenseImagePath(request));
+        venue.setAddress(toAddress(request));
+        venueRepo.save(venue);
         return null;
     }
 

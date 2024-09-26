@@ -18,16 +18,16 @@ public class CustomException extends RuntimeException {
     }
 
     public enum Type {
-        CATEGORY_ALREADY_EXIST("category already exist",500),
+        CATEGORY_ALREADY_EXIST("Category already exists", 500),
         DATE_INVALID("Invalid Date Format", 501),
         TIME_INVALID("Invalid Time Format", 501),
-
-        PHONE_NUMBER_ALREADY_EXISTS("Phone Number already exists",500),
-        EMAIL_ALREADY_EXITS("Email Already Exists", 500),
-        USERNAME_ALREADY_EXIST("Username already Exists", 500),
-        INVALID_FILE_EXTENSION("Image Extension Should be of .png, .jpeg or .jpg",400 ),
-        INVALID_MIME_TYPE("Invalid MIMEType",400),
-        INVALID_FILE_SIZE("Upload file fize shouldn't be more than 3MB",400 );
+        PHONE_NUMBER_ALREADY_EXISTS("Phone Number already exists", 500),
+        EMAIL_ALREADY_EXISTS("Email already exists", 500),
+        USERNAME_ALREADY_EXISTS("Username already exists", 500),
+        INVALID_FILE_EXTENSION("Image extension should be .png, .jpeg, or .jpg", 400),
+        INVALID_MIME_TYPE("Invalid MIME type", 400),
+        INVALID_FILE_SIZE("Upload file size shouldn't be more than 3MB", 400),
+        VENUE_NOT_FOUND("Venue not found", 404);
         private String message;
         private int code;
 
