@@ -3,8 +3,10 @@ package com.example.BookEatNepal.ServiceImpl;
 import com.example.BookEatNepal.DTO.VenueDetails;
 import com.example.BookEatNepal.DTO.VenueDTO;
 import com.example.BookEatNepal.Enums.VenueStatus;
+import com.example.BookEatNepal.Model.AppUser;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Model.VenueImage;
+import com.example.BookEatNepal.Repository.AppUserRepo;
 import com.example.BookEatNepal.Repository.VenueImageRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
 import com.example.BookEatNepal.Request.VenueRequest;
@@ -41,17 +43,20 @@ public class VenueServiceImpl implements VenueService {
     @Autowired
     private VenueImageRepo venueImageRepo;
     @Autowired
+    private AppUserRepo appUserRepo;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Override
     public String save(VenueRequest request) {
         request.setLicenseImagePath(getLicenseImagePath(request));
         request.setPanImagePath(getPanImagePath(request));
-        Venue venue = venueRepo.save(toVenue(request));
+        AppUser owner = getOwner(request.getOwnerId());
+        Venue venue = venueRepo.save(toVenue(request,owner));
         saveVenueImages(request.getVenueImages(), venue);
         return SUCCESS_MESSAGE;
     }
-
     @Override
     public String delete(int id) {
         Venue venue = venueRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
@@ -108,6 +113,7 @@ public class VenueServiceImpl implements VenueService {
     public String update(VenueRequest request, int id) {
         Venue venue = venueRepo.findById(id)
                 .orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
+        venue.setAppUser(getOwner(request.getOwnerId()));
         venue.setVenueName(request.getName());
         venue.setEmail(request.getEmail());
         venue.setPrimaryPhoneNumber(request.getPrimaryPhoneNumber());
@@ -123,10 +129,11 @@ public class VenueServiceImpl implements VenueService {
         return null;
     }
 
-    private Venue toVenue(VenueRequest request) {
+    private Venue toVenue(VenueRequest request, AppUser owner) {
         Venue venue = new Venue();
         venue.setVenueName(request.getName());
         venue.setEmail(request.getEmail());
+        venue.setAppUser(owner);
         venue.setPrimaryPhoneNumber(request.getPrimaryPhoneNumber());
         venue.setSecondaryPhoneNumber(request.getSecondaryPhoneNumber());
         venue.setDescription(request.getDescription());
@@ -270,5 +277,9 @@ public class VenueServiceImpl implements VenueService {
             venueImagePaths.add(image.getImageUrl());
         }
         return venueImagePaths;
+    }
+    private AppUser getOwner(String ownerId) {
+        AppUser owner = appUserRepo.findById(Integer.valueOf(ownerId)).orElseThrow(() -> new CustomException(CustomException.Type.USER_NOT_FOUND));
+        return owner;
     }
 }

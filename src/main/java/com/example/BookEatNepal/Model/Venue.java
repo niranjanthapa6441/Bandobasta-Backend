@@ -19,6 +19,10 @@ public class Venue {
     @Column(name="id",length=10)
     private int id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private AppUser appUser;
+
     @Column(name="venue_name", length = 50, nullable = false)
     private String venueName;
 
@@ -57,6 +61,7 @@ public class Venue {
     @Lob
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private VenueStatus status;
