@@ -67,7 +67,7 @@ public class VenueServiceImpl implements VenueService {
 
 
     @Override
-    public VenueDTO findAll(String venue, String location, int rating, int page, int size) {
+    public VenueDTO findAll(String venue, String location, double rating, int page, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Venue> query = cb.createQuery(Venue.class);
         Root<Venue> venueRoot = query.from(Venue.class);
