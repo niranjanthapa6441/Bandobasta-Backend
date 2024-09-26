@@ -82,7 +82,7 @@ public class VenueServiceImpl implements VenueService {
             predicates.add(cb.like(venueRoot.get("address"), "%" + location + "%"));
         }
 
-        predicates.add(cb.isTrue(venueRoot.get("verified")));
+        predicates.add(cb.isTrue(venueRoot.get("isVerified")));
 
         predicates.add(cb.equal(venueRoot.get("status"), VenueStatus.AVAILABLE));
 
@@ -126,7 +126,7 @@ public class VenueServiceImpl implements VenueService {
         venue.setLicenseImagePath(getLicenseImagePath(request));
         venue.setAddress(toAddress(request));
         venueRepo.save(venue);
-        return null;
+        return SUCCESS_MESSAGE;
     }
 
     private Venue toVenue(VenueRequest request, AppUser owner) {

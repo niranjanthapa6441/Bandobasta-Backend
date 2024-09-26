@@ -58,9 +58,7 @@ public class VenueController {
     public ResponseEntity<Object> findAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String location,
-            @RequestParam(required = false) String meal,
             @RequestParam(defaultValue = RATING) double rating,
-            @RequestParam(required = false) String sortBy,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
