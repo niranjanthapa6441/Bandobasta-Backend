@@ -42,6 +42,7 @@ public class VenueServiceImpl implements VenueService {
     private VenueImageRepo venueImageRepo;
     @Autowired
     private EntityManager entityManager;
+
     @Override
     public String save(VenueRequest request) {
         request.setLicenseImagePath(getLicenseImagePath(request));
@@ -96,7 +97,6 @@ public class VenueServiceImpl implements VenueService {
 
         return toVenueDTO(pagedVenues, currentPage, totalElements, totalPages);
     }
-
 
 
     @Override
@@ -237,8 +237,9 @@ public class VenueServiceImpl implements VenueService {
         }
         return getImagePath(request.getPanImage(), request.getName(), fileName);
     }
+
     private VenueDTO toVenueDTO(List<Venue> venues, int currentPage, int totalElements, int totalPages) {
-        List<VenueDetails> venueDetails= toVenueDetails(venues);
+        List<VenueDetails> venueDetails = toVenueDetails(venues);
         return VenueDTO.builder()
                 .venues(venueDetails)
                 .currentPage(currentPage)
@@ -246,11 +247,12 @@ public class VenueServiceImpl implements VenueService {
                 .totalElements(totalElements)
                 .build();
     }
+
     private List<VenueDetails> toVenueDetails(List<Venue> venues) {
-        List<VenueDetails> venueDTOs= new ArrayList<>();
-        for (Venue venue:venues
+        List<VenueDetails> venueDetails = new ArrayList<>();
+        for (Venue venue : venues
         ) {
-            venueDTOs.add(VenueDetails.builder()
+            venueDetails.add(VenueDetails.builder()
                     .name(venue.getVenueName())
                     .address(venue.getAddress())
                     .description(venue.getDescription())
@@ -259,12 +261,12 @@ public class VenueServiceImpl implements VenueService {
                     .build())
             ;
         }
-        return venueDTOs;
+        return venueDetails;
     }
 
     private List<String> getVenueImagePath(List<VenueImage> images) {
         List<String> venueImagePaths = new ArrayList<>();
-        for (VenueImage image: images){
+        for (VenueImage image : images) {
             venueImagePaths.add(image.getImageUrl());
         }
         return venueImagePaths;
