@@ -1,6 +1,7 @@
 package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.DTO.VenueDTO;
+import com.example.BookEatNepal.DTO.VenueDTOs;
 import com.example.BookEatNepal.Enums.VenueStatus;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Model.VenueImage;
@@ -9,6 +10,12 @@ import com.example.BookEatNepal.Repository.VenueRepo;
 import com.example.BookEatNepal.Request.VenueRequest;
 import com.example.BookEatNepal.Service.VenueService;
 import com.example.BookEatNepal.Util.CustomException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,7 +39,8 @@ public class VenueServiceImpl implements VenueService {
     private VenueRepo venueRepo;
     @Autowired
     private VenueImageRepo venueImageRepo;
-
+    @Autowired
+    private EntityManager entityManager;
     @Override
     public String save(VenueRequest request) {
         request.setLicenseImagePath(getLicenseImagePath(request));
@@ -51,9 +60,43 @@ public class VenueServiceImpl implements VenueService {
 
 
     @Override
-    public VenueDTO findAll(String venue, int page, int size) {
-        return null;
+    public VenueDTOs findAll(String venue, String location,int rating, int page, int size) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Venue> query = cb.createQuery(Venue.class);
+        Root<Venue> venueRoot = query.from(Venue.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (venue != null && !venue.isEmpty()) {
+            predicates.add(cb.like(venueRoot.get("venueName"), "%" + venue + "%"));
+        }
+
+        if (location != null && !location.isEmpty()) {
+            predicates.add(cb.like(venueRoot.get("address"), "%" + location + "%"));
+        }
+
+        predicates.add(cb.isTrue(venueRoot.get("verified")));
+
+        predicates.add(cb.equal(venueRoot.get("status"), VenueStatus.AVAILABLE));
+
+        query.where(predicates.toArray(new Predicate[0]));
+
+        List<Venue> venues = entityManager.createQuery(query).getResultList();
+
+        TypedQuery<Venue> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((page - 1) * size);
+        typedQuery.setMaxResults(size);
+
+        List<Venue> pagedVenues = typedQuery.getResultList();
+
+        int currentPage = page - 1;
+        int totalElements = venues.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        return toVenueDTOs(pagedVenues, currentPage, totalElements, totalPages);
     }
+
+
 
     @Override
     public Venue findById(int id) {
@@ -197,5 +240,36 @@ public class VenueServiceImpl implements VenueService {
         String panImagePath = getImagePath(request.getPanImage(), request.getName(), fileName);
         return panImagePath;
     }
+    private VenueDTOs toVenueDTOs(List<Venue> venues, int currentPage, int totalElements, int totalPages) {
+        List<VenueDTO> venueDTOs= toVenueDTO(venues);
+        return VenueDTOs.builder()
+                .venues(venueDTOs)
+                .currentPage(currentPage)
+                .totalPages(totalPages)
+                .totalElements(totalElements)
+                .build();
+    }
+    private List<VenueDTO> toVenueDTO(List<Venue> venues) {
+        List<VenueDTO> venueDTOs= new ArrayList<>();
+        for (Venue venue:venues
+        ) {
+            venueDTOs.add(VenueDTO.builder()
+                    .name(venue.getVenueName().toString())
+                    .address(venue.getAddress().toString())
+                    .description(venue.getDescription().toString())
+                    .status(String.valueOf(venue.getStatus()))
+                    .venueImagePaths(getVenueImagePath(venue.getImages()))
+                    .build())
+            ;
+        }
+        return venueDTOs;
+    }
 
+    private List<String> getVenueImagePath(List<VenueImage> images) {
+        List<String> venueImagePaths = new ArrayList<>();
+        for (VenueImage image: images){
+            venueImagePaths.add(image.getImageUrl());
+        }
+        return venueImagePaths;
+    }
 }
