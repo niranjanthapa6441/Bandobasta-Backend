@@ -21,11 +21,8 @@ public class VenueRequest {
     private String countryCode;
     private String registrationNumber;
     private String licenseNumber;
-    private MultipartFile licenseImage;
     private String permanentAccountNumber;
-    private MultipartFile panImage;
     private String description;
-    private List<MultipartFile> venueImages;
     private String licenseImagePath;
     private String panImagePath;
 }

@@ -24,18 +24,18 @@ public class VenueController {
     public static final String MESSAGE = "Successful";
     @Autowired
     private VenueService service;
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> save(
             @RequestPart("venue") @Valid VenueRequest request,
-            @RequestPart("images") List<MultipartFile> images,
+            @RequestPart("venueImages") List<MultipartFile> venueImages,
             @RequestPart("licenseImage") MultipartFile licenseImage,
-            @RequestPart("registrationImage") MultipartFile panImage
+            @RequestPart("panImage") MultipartFile panImage
     ) {
-        request.setVenueImages(images);
-        request.setLicenseImage(licenseImage);
-        request.setPanImage(panImage);
-        return RestResponse.ok(service.save(request));
+        return RestResponse.ok(service.save(request, venueImages, licenseImage, panImage));
     }
+
+
     @PostMapping(value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -43,12 +43,11 @@ public class VenueController {
             @PathVariable int id,
             @RequestPart("venue") @Valid VenueRequest request,
             @RequestPart("licenseImage") MultipartFile licenseImage,
-            @RequestPart("registrationImage") MultipartFile panImage
-            ) {
-        request.setLicenseImage(licenseImage);
-        request.setPanImage(panImage);
-        return RestResponse.ok(service.update(request, id));
+            @RequestPart("panImage") MultipartFile panImage
+    ) {
+        return RestResponse.ok(service.update(request, id, licenseImage, panImage));
     }
+
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> delete(@PathVariable int id) {
         return RestResponse.ok(service.delete(id));
@@ -62,7 +61,7 @@ public class VenueController {
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
-    ){
-        return RestResponse.ok(service.findAll(name,location, rating, page,size),"Data Retrieval Successful");
+    ) {
+        return RestResponse.ok(service.findAll(name, location, rating, page, size), "Data Retrieval Successful");
     }
 }

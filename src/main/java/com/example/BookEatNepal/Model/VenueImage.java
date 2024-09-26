@@ -16,7 +16,7 @@ public class VenueImage {
     @Column(name = "image_url", nullable = false, unique = true)
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 }

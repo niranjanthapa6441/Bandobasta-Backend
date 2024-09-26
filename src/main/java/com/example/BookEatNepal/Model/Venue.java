@@ -35,7 +35,7 @@ public class Venue {
     @Column(name="secondary_phone_number", length = 10, nullable=true, unique = true)
     private String secondaryPhoneNumber;
 
-    @Column(name="country_code", length = 3, nullable=false)
+    @Column(name="country_code", length = 5, nullable=false)
     private String countryCode;
 
     @Column(name = "registration_number", nullable = false, length = 15, unique = true)
@@ -58,8 +58,8 @@ public class Venue {
 
     @Column(name = "address", nullable = false)
     private String address;
-    @Lob
-    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
+
+    @Column(name = "description", columnDefinition = "text", nullable = false)
     private String description;
 
     @Enumerated(EnumType.STRING)

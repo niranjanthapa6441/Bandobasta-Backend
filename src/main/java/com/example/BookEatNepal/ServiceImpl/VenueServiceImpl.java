@@ -49,14 +49,15 @@ public class VenueServiceImpl implements VenueService {
     private EntityManager entityManager;
 
     @Override
-    public String save(VenueRequest request) {
-        request.setLicenseImagePath(getLicenseImagePath(request));
-        request.setPanImagePath(getPanImagePath(request));
+    public String save(VenueRequest request, List<MultipartFile> venueImages, MultipartFile licenseImage, MultipartFile panImage) {
+        request.setLicenseImagePath(getImagePath(licenseImage, request));
+        request.setPanImagePath(getImagePath(panImage, request));
         AppUser owner = getOwner(request.getOwnerId());
-        Venue venue = venueRepo.save(toVenue(request,owner));
-        saveVenueImages(request.getVenueImages(), venue);
+        Venue venue = venueRepo.save(toVenue(request, owner));
+        saveVenueImages(venueImages, venue);
         return SUCCESS_MESSAGE;
     }
+
     @Override
     public String delete(int id) {
         Venue venue = venueRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
@@ -75,11 +76,11 @@ public class VenueServiceImpl implements VenueService {
         List<Predicate> predicates = new ArrayList<>();
 
         if (venue != null && !venue.isEmpty()) {
-            predicates.add(cb.like(venueRoot.get("venueName"), "%" + venue + "%"));
+            predicates.add(cb.like(cb.lower(venueRoot.get("venueName")), "%" + venue.toLowerCase() + "%"));
         }
 
         if (location != null && !location.isEmpty()) {
-            predicates.add(cb.like(venueRoot.get("address"), "%" + location + "%"));
+            predicates.add(cb.like(cb.lower(venueRoot.get("address")), "%" + location.toLowerCase() + "%"));
         }
 
         predicates.add(cb.isTrue(venueRoot.get("isVerified")));
@@ -110,7 +111,7 @@ public class VenueServiceImpl implements VenueService {
     }
 
     @Override
-    public String update(VenueRequest request, int id) {
+    public String update(VenueRequest request, int id, MultipartFile licenseImage, MultipartFile panImage) {
         Venue venue = venueRepo.findById(id)
                 .orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
         venue.setAppUser(getOwner(request.getOwnerId()));
@@ -122,8 +123,8 @@ public class VenueServiceImpl implements VenueService {
         venue.setCountryCode(request.getCountryCode());
         venue.setRegistrationNumber(request.getRegistrationNumber());
         venue.setLicenseNumber(request.getLicenseNumber());
-        venue.setPanImagePath(getPanImagePath(request));
-        venue.setLicenseImagePath(getLicenseImagePath(request));
+        venue.setPanImagePath(getImagePath(panImage, request));
+        venue.setLicenseImagePath(getImagePath(licenseImage, request));
         venue.setAddress(toAddress(request));
         venueRepo.save(venue);
         return SUCCESS_MESSAGE;
@@ -140,10 +141,10 @@ public class VenueServiceImpl implements VenueService {
         venue.setCountryCode(request.getCountryCode());
         venue.setRegistrationNumber(request.getRegistrationNumber());
         venue.setLicenseNumber(request.getLicenseNumber());
-        venue.setVerified(false);
+        venue.setVerified(true);
         venue.setPanImagePath(request.getPanImagePath());
         venue.setLicenseImagePath(request.getLicenseImagePath());
-        venue.setStatus(VenueStatus.PENDING_APPROVAL);
+        venue.setStatus(VenueStatus.AVAILABLE);
         venue.setPermanentAccountNumber(request.getPermanentAccountNumber());
         venue.setAddress(toAddress(request));
         return venue;
@@ -153,8 +154,8 @@ public class VenueServiceImpl implements VenueService {
         return request.getStreetNumber() + "-" +
                 request.getStreetName() + "," +
                 request.getCity() + "," +
-                request.getDistrict() +
-                request.getState() +
+                request.getDistrict() + "," +
+                request.getState() + "," +
                 request.getCountry();
     }
 
@@ -227,22 +228,13 @@ public class VenueServiceImpl implements VenueService {
         }
     }
 
-    private String getLicenseImagePath(VenueRequest request) {
-        validate(request.getLicenseImage());
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(request.getLicenseImage().getOriginalFilename()));
+    private String getImagePath(MultipartFile image, VenueRequest request) {
+        validate(image);
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
         if (fileName.contains(".php%00.")) {
             throw new CustomException(CustomException.Type.INVALID_FILE_EXTENSION);
         }
-        return getImagePath(request.getLicenseImage(), request.getName(), fileName);
-    }
-
-    private String getPanImagePath(VenueRequest request) {
-        validate(request.getPanImage());
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(request.getPanImage().getOriginalFilename()));
-        if (fileName.contains(".php%00.")) {
-            throw new CustomException(CustomException.Type.INVALID_FILE_EXTENSION);
-        }
-        return getImagePath(request.getPanImage(), request.getName(), fileName);
+        return getImagePath(image, request.getName(), fileName);
     }
 
     private VenueDTO toVenueDTO(List<Venue> venues, int currentPage, int totalElements, int totalPages) {
@@ -262,24 +254,26 @@ public class VenueServiceImpl implements VenueService {
             venueDetails.add(VenueDetails.builder()
                     .name(venue.getVenueName())
                     .address(venue.getAddress())
-                    .description(venue.getDescription())
+                    .description(venue.getDescription().toString())
                     .status(String.valueOf(venue.getStatus()))
-                    .venueImagePaths(getVenueImagePath(venue.getImages()))
+                    .venueImagePaths(getVenueImagePath(venue.getId()))
                     .build())
             ;
         }
         return venueDetails;
     }
 
-    private List<String> getVenueImagePath(List<VenueImage> images) {
+    private List<String> getVenueImagePath(int id) {
         List<String> venueImagePaths = new ArrayList<>();
-        for (VenueImage image : images) {
+        List<VenueImage> venueImages = venueImageRepo.findByVenueId(id);
+        for (VenueImage image : venueImages
+        ) {
             venueImagePaths.add(image.getImageUrl());
         }
         return venueImagePaths;
     }
+
     private AppUser getOwner(String ownerId) {
-        AppUser owner = appUserRepo.findById(Integer.valueOf(ownerId)).orElseThrow(() -> new CustomException(CustomException.Type.USER_NOT_FOUND));
-        return owner;
+        return appUserRepo.findById(Integer.valueOf(ownerId)).orElseThrow(() -> new CustomException(CustomException.Type.USER_NOT_FOUND));
     }
 }
