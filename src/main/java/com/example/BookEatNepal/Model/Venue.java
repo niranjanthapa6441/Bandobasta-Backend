@@ -41,7 +41,7 @@ public class Venue {
     private String licenseNumber;
 
     @Column(name = "license_image_url", nullable = false, unique = true)
-    private String licenseImageUrl;
+    private String licenseImagePath;
 
     @Column(name="permanent_account_number", nullable = false, unique = true)
     private String permanentAccountNumber;
@@ -50,8 +50,13 @@ public class Venue {
     private boolean isVerified;
 
     @Column(name = "pan_image_url", nullable = false)
-    private String panImageUrl;
+    private String panImagePath;
 
+    @Column(name = "address", nullable = false)
+    private String address;
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
+    private String description;
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private VenueStatus status;
