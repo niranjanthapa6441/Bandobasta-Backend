@@ -2,7 +2,6 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.DTO.*;
 import com.example.BookEatNepal.Enums.HallStatus;
-import com.example.BookEatNepal.Enums.VenueStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Repository.HallImageRepo;
 import com.example.BookEatNepal.Repository.HallRepo;
@@ -186,7 +185,6 @@ public class HallServiceImpl implements HallService {
         return filePath.toString().replace("./", "/").trim();
     }
     private Hall toHall(HallRequest request, Venue venue) {
-        System.out.println("flooorNumber"+ request.getFloorNumber());
         Hall hall = new Hall();
         hall.setDescription(request.getDescription());
         hall.setCapacity(request.getCapacity());
