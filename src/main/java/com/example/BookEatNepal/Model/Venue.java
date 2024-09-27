@@ -19,6 +19,10 @@ public class Venue {
     @Column(name="id",length=10)
     private int id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private AppUser appUser;
+
     @Column(name="venue_name", length = 50, nullable = false)
     private String venueName;
 
@@ -31,7 +35,7 @@ public class Venue {
     @Column(name="secondary_phone_number", length = 10, nullable=true, unique = true)
     private String secondaryPhoneNumber;
 
-    @Column(name="country_code", length = 3, nullable=false)
+    @Column(name="country_code", length = 5, nullable=false)
     private String countryCode;
 
     @Column(name = "registration_number", nullable = false, length = 15, unique = true)
@@ -41,7 +45,7 @@ public class Venue {
     private String licenseNumber;
 
     @Column(name = "license_image_url", nullable = false, unique = true)
-    private String licenseImageUrl;
+    private String licenseImagePath;
 
     @Column(name="permanent_account_number", nullable = false, unique = true)
     private String permanentAccountNumber;
@@ -50,7 +54,13 @@ public class Venue {
     private boolean isVerified;
 
     @Column(name = "pan_image_url", nullable = false)
-    private String panImageUrl;
+    private String panImagePath;
+
+    @Column(name = "address", nullable = false)
+    private String address;
+
+    @Column(name = "description", columnDefinition = "text", nullable = false)
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
@@ -70,6 +80,7 @@ public class Venue {
 
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Menu> menus = new ArrayList<>();
+
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Food> foods = new ArrayList<>();
 }
