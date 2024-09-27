@@ -17,15 +17,20 @@ public class Food {
     @Column(name="id",length=10)
     private int id;
     @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
+
     @Column(name="item", nullable = false, length = 30)
     private String name;
-    @Lob
+
+
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
+
     @Column(name = "price", nullable = false)
     private double price;
+
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 

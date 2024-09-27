@@ -24,9 +24,9 @@ public class Package {
     @Column(name="package_type",length = 20, nullable = false)
     private PackageType packageType;
 
-    @Lob
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
+
     @Column(name = "price", nullable = false)
     private double price;
 

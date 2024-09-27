@@ -5,5 +5,6 @@ public enum HallStatus {
     BOOKED,
     UNDER_MAINTENANCE,
     RESERVED,
-    CLOSED
+    CLOSED,
+    DELETED
 }

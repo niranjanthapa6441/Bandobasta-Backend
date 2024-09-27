@@ -18,9 +18,11 @@ public class HallAvailability {
     )
     @Column(name="id",length=10)
     private int id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hall_id", nullable = false)
     private Hall hall;
+
     @Column(nullable = false, name = "date")
     private LocalDate date;
 
