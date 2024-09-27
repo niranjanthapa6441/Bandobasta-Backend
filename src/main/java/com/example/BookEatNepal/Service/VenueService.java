@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public interface VenueService {
-    String save(VenueRequest venueRequest, List<MultipartFile> venueImages, MultipartFile licenseImage, MultipartFile panImage);
+    String save(VenueRequest request, List<MultipartFile> venueImages, MultipartFile licenseImage, MultipartFile panImage);
 
     String delete(int id);
 

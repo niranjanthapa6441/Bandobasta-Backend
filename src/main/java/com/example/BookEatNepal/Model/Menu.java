@@ -20,9 +20,10 @@ public class Menu {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
-    @Lob
+
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(name="menu_type",length = 20, nullable = false)
     private MenuType menuType;

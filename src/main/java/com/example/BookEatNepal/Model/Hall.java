@@ -21,15 +21,19 @@ public class Hall {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
+
     @Column(name="item", nullable = false, length = 30)
     private String name;
-    @Lob
-    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
+
+    @Column(name = "description", columnDefinition = "text", nullable = false)
     private String description;
+
     @Column(name="floor_number", nullable = false)
     private int floorNumber;
+
     @Column(name = "capacity", nullable = false)
     private int capacity;
+
     @Column(name = "price", nullable = false)
     private double price;
 

@@ -28,6 +28,7 @@ public class CustomException extends RuntimeException {
         INVALID_MIME_TYPE("Invalid MIME type", 400),
         INVALID_FILE_SIZE("Upload file size shouldn't be more than 3MB", 400),
         USER_NOT_FOUND("Owner not found", 404),
+        HALL_NOT_FOUND("Owner not found", 404),
         VENUE_NOT_FOUND("Venue not found", 404);
         private String message;
         private int code;
