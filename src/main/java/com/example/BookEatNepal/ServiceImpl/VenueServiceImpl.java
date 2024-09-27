@@ -1,15 +1,13 @@
 package com.example.BookEatNepal.ServiceImpl;
 
+import com.example.BookEatNepal.DTO.HallDetails;
 import com.example.BookEatNepal.DTO.VenueDetails;
 import com.example.BookEatNepal.DTO.VenueDTO;
 import com.example.BookEatNepal.Enums.VenueStatus;
-import com.example.BookEatNepal.Model.AppUser;
-import com.example.BookEatNepal.Model.Venue;
-import com.example.BookEatNepal.Model.VenueImage;
-import com.example.BookEatNepal.Repository.AppUserRepo;
-import com.example.BookEatNepal.Repository.VenueImageRepo;
-import com.example.BookEatNepal.Repository.VenueRepo;
+import com.example.BookEatNepal.Model.*;
+import com.example.BookEatNepal.Repository.*;
 import com.example.BookEatNepal.Request.VenueRequest;
+import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Service.VenueService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
@@ -44,6 +42,11 @@ public class VenueServiceImpl implements VenueService {
     private VenueImageRepo venueImageRepo;
     @Autowired
     private AppUserRepo appUserRepo;
+
+    @Autowired
+    private HallRepo hallRepo;
+    @Autowired
+    private HallImageRepo hallImageRepo;
 
     @Autowired
     private EntityManager entityManager;
@@ -257,10 +260,35 @@ public class VenueServiceImpl implements VenueService {
                     .description(venue.getDescription().toString())
                     .status(String.valueOf(venue.getStatus()))
                     .venueImagePaths(getVenueImagePath(venue.getId()))
+                    .hallDetails(getHallDetails(venue.getId()))
                     .build())
             ;
         }
         return venueDetails;
+    }
+
+    private List<HallDetails> getHallDetails(int id) {
+        List<Hall> halls= hallRepo.findByVenueId(id);
+        return toHallDetails(halls);
+    }
+
+    private List<HallDetails> toHallDetails(List<Hall> halls) {
+            List<HallDetails> hallDetails = new ArrayList<>();
+            for (Hall hall : halls
+            ) {
+                hallDetails.add(toHallDetail(hall));
+            }
+            return hallDetails;
+        }
+    private HallDetails toHallDetail(Hall hall) {
+        return HallDetails.builder()
+                .name(hall.getName())
+                .capacity(hall.getCapacity())
+                .floorNumber(hall.getFloorNumber())
+                .description(hall.getDescription().toString())
+                .status(String.valueOf(hall.getStatus()))
+                .hallImagePaths(getHallImagePaths(hall.getId()))
+                .build();
     }
 
     private List<String> getVenueImagePath(int id) {
@@ -275,5 +303,14 @@ public class VenueServiceImpl implements VenueService {
 
     private AppUser getOwner(String ownerId) {
         return appUserRepo.findById(Integer.valueOf(ownerId)).orElseThrow(() -> new CustomException(CustomException.Type.USER_NOT_FOUND));
+    }
+    private List<String> getHallImagePaths(int id) {
+        List<String> hallImagePaths = new ArrayList<>();
+        List<HallImage> hallImages = hallImageRepo.findByHallId(id);
+        for (HallImage image : hallImages
+        ) {
+            hallImagePaths.add(image.getImageUrl());
+        }
+        return hallImagePaths;
     }
 }
