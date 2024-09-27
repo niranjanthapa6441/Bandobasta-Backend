@@ -18,8 +18,8 @@ public class Amenity {
     private Venue venue;
     @Column(name="item", nullable = false, length = 30)
     private String name;
-    @Lob
-    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
+
+    @Column(name = "description", columnDefinition = "text", nullable = false)
     private String description;
     @Column(name = "price", nullable = false)
     private double price;
