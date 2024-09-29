@@ -2,14 +2,17 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.DTO.AmenityDTO;
 import com.example.BookEatNepal.DTO.AmenityDetails;
+import com.example.BookEatNepal.DTO.FoodDTO;
+import com.example.BookEatNepal.DTO.FoodDetail;
 import com.example.BookEatNepal.Enums.AmenityStatus;
+import com.example.BookEatNepal.Enums.FoodStatus;
 import com.example.BookEatNepal.Model.Amenity;
+import com.example.BookEatNepal.Model.Food;
 import com.example.BookEatNepal.Model.Venue;
-import com.example.BookEatNepal.Repository.AmenityRepo;
+import com.example.BookEatNepal.Repository.FoodRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
-import com.example.BookEatNepal.Request.AmenityRequest;
-import com.example.BookEatNepal.Request.VenueRequest;
-import com.example.BookEatNepal.Service.AmenityService;
+import com.example.BookEatNepal.Request.FoodRequest;
+import com.example.BookEatNepal.Service.FoodService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -32,10 +35,10 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class AmenityServiceImpl implements AmenityService {
+public class FoodServiceImpl implements FoodService {
     private static final String SUCCESS_MESSAGE = "successful";
     @Autowired
-    private AmenityRepo amenityRepo;
+    private FoodRepo foodRepo;
     @Autowired
     private VenueRepo venueRepo;
 
@@ -43,71 +46,74 @@ public class AmenityServiceImpl implements AmenityService {
     private EntityManager entityManager;
 
     @Override
-    public String save(AmenityRequest request, MultipartFile image) {
+    public String save(FoodRequest request, MultipartFile image) {
         Venue venue = getVenue(request.getVenueId());
         request.setImageUrl(getImagePath(image, venue.getVenueName(), request));
-        amenityRepo.save(toAmenity(request, venue));
+        foodRepo.save(toFood(request, venue));
         return SUCCESS_MESSAGE;
     }
-
     @Override
     public String delete(int id) {
-        Amenity amenity = amenityRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.AMENITY_NOT_FOUND));
-        amenity.setStatus(AmenityStatus.DELETED);
-        amenityRepo.save(amenity);
+        Food food = foodRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
+        food.setStatus(FoodStatus.DELETED);
+        foodRepo.save(food);
         return SUCCESS_MESSAGE;
     }
 
     @Override
-    public AmenityDTO findAll(String venueId, int page, int size) {
+    public FoodDTO findAll(String venueId, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Amenity> query = cb.createQuery(Amenity.class);
-        Root<Amenity> amenityRoot = query.from(Amenity.class);
-        Join<Amenity, Venue> amenityVenueJoin = amenityRoot.join("venue");
+        CriteriaQuery<Food> query = cb.createQuery(Food.class);
+        Root<Food> foodRoot = query.from(Food.class);
+        Join<Food, Venue> foodVenueJoin = foodRoot.join("venue");
 
-        query.select(amenityRoot);
+        query.select(foodRoot);
         List<Predicate> predicates = new ArrayList<>();
 
-        if (id != 0) {
-            predicates.add(cb.equal(amenityVenueJoin.get("id"), id));
+        if (id != 0 ) {
+            predicates.add(cb.equal(foodVenueJoin.get("id"), id));
         }
         query.where(predicates.toArray(new Predicate[0]));
 
-        List<Amenity> amenities = entityManager.createQuery(query).getResultList();
+        List<Food> foods = entityManager.createQuery(query).getResultList();
 
-        TypedQuery<Amenity> typedQuery = entityManager.createQuery(query);
+        TypedQuery<Food> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((page - 1) * size);
         typedQuery.setMaxResults(size);
 
-        List<Amenity> pagedAmenities = typedQuery.getResultList();
+        List<Food> pagedFoods = typedQuery.getResultList();
 
         int currentPage = page - 1;
-        int totalElements = amenities.size();
+        int totalElements = foods.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
-        return toHallDTO(pagedAmenities, currentPage, totalElements, totalPages);
+        return toFoodDTO(pagedFoods, currentPage, totalElements, totalPages);
     }
 
     @Override
-    public AmenityDetails findById(int id) {
-        Amenity amenity = amenityRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.AMENITY_NOT_FOUND));
-        return toAmenityDetail(amenity);
+    public FoodDetail findById(int id) {
+        Food food = foodRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
+        return toFoodDetail(food);
     }
 
     @Override
-    public String update(AmenityRequest request, int id, MultipartFile image) {
-        Venue venue = getVenue(request.getVenueId());
-        Amenity amenity = amenityRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.AMENITY_NOT_FOUND));
-        amenity.setVenue(venue);
-        amenity.setStatus(AmenityStatus.valueOf(request.getStatus()));
-        amenity.setPrice(request.getPrice());
-        amenity.setName(request.getName());
-        amenity.setDescription(request.getDescription());
-        amenity.setImageUrl(getImagePath(image, venue.getVenueName(), request));
+    public String update(FoodRequest request, int id, MultipartFile image) {
+        Venue venue= getVenue(request.getVenueId());
+        Food food = foodRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
+        food.setVenue(venue);
+        food.setStatus(FoodStatus.valueOf(request.getStatus()));
+        food.setPrice(request.getPrice());
+        food.setName(request.getName());
+        food.setDescription(request.getDescription());
+        food.setImageUrl(getImagePath(image,venue.getVenueName() ,request));
         return SUCCESS_MESSAGE;
     }
 
-    private String getImagePath(MultipartFile image, String venueName, AmenityRequest request) {
+    private Venue getVenue(String venueId) {
+        return venueRepo.findById(Integer.valueOf(venueId)).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
+    }
+
+    private String getImagePath(MultipartFile image, String venueName, FoodRequest request) {
         validate(image);
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
         if (fileName.contains(".php%00.")) {
@@ -117,7 +123,7 @@ public class AmenityServiceImpl implements AmenityService {
     }
 
     private String getImagePath(MultipartFile multipartFile, String venueName, String fileName) {
-        String uploadDirectory = "./images/venues/" + venueName.replaceAll("\\s", "") + "/amenities";
+        String uploadDirectory = "./images/venues/" + venueName.replaceAll("\\s", "") + "/foods";
         Path path = Paths.get(uploadDirectory);
         Path filePath = path.resolve(fileName);
         if (!Files.exists(path)) {
@@ -162,49 +168,43 @@ public class AmenityServiceImpl implements AmenityService {
 
     }
 
-    private Amenity toAmenity(AmenityRequest request, Venue venue) {
-        Amenity amenity = new Amenity();
-        amenity.setDescription(request.getDescription());
-        amenity.setPrice(request.getPrice());
-        amenity.setName(request.getName());
-        amenity.setVenue(venue);
-        amenity.setStatus(AmenityStatus.valueOf(request.getStatus()));
-        amenity.setImageUrl(request.getImageUrl());
-        return amenity;
+    private Food toFood(FoodRequest request, Venue venue) {
+        Food food = new Food();
+        food.setDescription(request.getDescription());
+        food.setPrice(request.getPrice());
+        food.setName(request.getName());
+        food.setVenue(venue);
+        food.setStatus(FoodStatus.valueOf(request.getStatus()));
+        food.setImageUrl(request.getImageUrl());
+        return food;
     }
 
-    private Venue getVenue(String venueId) {
-        return venueRepo.findById(Integer.valueOf(venueId)).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
-    }
-
-    private List<AmenityDetails> toAmenityDetails(List<Amenity> amenities) {
-        List<AmenityDetails> amenityDetails = new ArrayList<>();
-        for (Amenity amenity : amenities
-        ) {
-            amenityDetails.add(toAmenityDetail(amenity));
-        }
-        return amenityDetails;
-    }
-
-    private AmenityDetails toAmenityDetail(Amenity amenity) {
-        return AmenityDetails.builder()
-                .name(amenity.getName())
-                .venueId(String.valueOf(amenity.getVenue().getId()))
-                .description(amenity.getDescription())
-                .id(String.valueOf(amenity.getId()))
-                .status(String.valueOf(amenity.getStatus()))
-                .imageUrl(amenity.getImageUrl())
-                .price(amenity.getPrice())
-                .build();
-    }
-
-    private AmenityDTO toHallDTO(List<Amenity> amenities, int currentPage, int totalElements, int totalPages) {
-        List<AmenityDetails> amenityDetails = toAmenityDetails(amenities);
-        return AmenityDTO.builder()
-                .amenityDetails(amenityDetails)
+    private FoodDTO toFoodDTO(List<Food> foods, int currentPage, int totalElements, int totalPages) {
+        List<FoodDetail> foodDetails = toFoodDetails(foods);
+        return FoodDTO.builder()
+                .foodDetails(foodDetails)
                 .currentPage(currentPage)
                 .totalPages(totalPages)
                 .totalElements(totalElements)
+                .build();
+    }
+    private List<FoodDetail> toFoodDetails(List<Food> foods) {
+        List<FoodDetail> foodDetails = new ArrayList<>();
+        for (Food food : foods
+        ) {
+            foodDetails.add(toFoodDetail(food));
+        }
+        return foodDetails;
+    }
+    private FoodDetail toFoodDetail(Food food) {
+        return FoodDetail.builder()
+                .name(food.getName())
+                .venueId(String.valueOf(food.getVenue().getId()))
+                .description(food.getDescription())
+                .id(String.valueOf(food.getId()))
+                .status(String.valueOf(food.getStatus()))
+                .imageUrl(food.getImageUrl())
+                .price(food.getPrice())
                 .build();
     }
 }
