@@ -232,6 +232,7 @@ public class HallServiceImpl implements HallService {
     private HallDetails toHallDetail(Hall hall) {
         return HallDetails.builder()
                 .name(hall.getName())
+                .id(hall.getId())
                 .venueId(String.valueOf(hall.getVenue().getId()))
                 .capacity(hall.getCapacity())
                 .floorNumber(hall.getFloorNumber())

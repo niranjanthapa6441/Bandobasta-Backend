@@ -1,22 +1,19 @@
 package com.example.BookEatNepal.DTO;
 
-import com.example.BookEatNepal.Enums.HallStatus;
+import com.example.BookEatNepal.Enums.FoodStatus;
 import com.example.BookEatNepal.Model.Venue;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Builder
-public class HallDetails {
+public class FoodDetail {
+    private String id;
     private String venueId;
-    private int id;
     private String name;
     private String description;
-    private int floorNumber;
-    private int capacity;
+    private double price;
+    private String imageUrl;
     private String status;
-    private List<String> hallImagePaths;
 }
