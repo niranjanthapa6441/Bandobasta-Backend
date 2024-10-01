@@ -8,7 +8,6 @@ import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Repository.AmenityRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
 import com.example.BookEatNepal.Request.AmenityRequest;
-import com.example.BookEatNepal.Request.VenueRequest;
 import com.example.BookEatNepal.Service.AmenityService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;

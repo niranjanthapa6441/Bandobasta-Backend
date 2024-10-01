@@ -7,7 +7,6 @@ import com.example.BookEatNepal.Enums.VenueStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Repository.*;
 import com.example.BookEatNepal.Request.VenueRequest;
-import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Service.VenueService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;

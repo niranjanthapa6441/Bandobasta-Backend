@@ -28,9 +28,6 @@ public class Food {
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
 
-    @Column(name = "price", nullable = false)
-    private double price;
-
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 

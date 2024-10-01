@@ -1,12 +1,9 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.AmenityDTO;
-import com.example.BookEatNepal.DTO.AmenityDetails;
+
 import com.example.BookEatNepal.DTO.FoodDTO;
 import com.example.BookEatNepal.DTO.FoodDetail;
-import com.example.BookEatNepal.Enums.AmenityStatus;
 import com.example.BookEatNepal.Enums.FoodStatus;
-import com.example.BookEatNepal.Model.Amenity;
 import com.example.BookEatNepal.Model.Food;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Repository.FoodRepo;
@@ -102,7 +99,6 @@ public class FoodServiceImpl implements FoodService {
         Food food = foodRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
         food.setVenue(venue);
         food.setStatus(FoodStatus.valueOf(request.getStatus()));
-        food.setPrice(request.getPrice());
         food.setName(request.getName());
         food.setDescription(request.getDescription());
         food.setImageUrl(getImagePath(image,venue.getVenueName() ,request));
@@ -171,7 +167,6 @@ public class FoodServiceImpl implements FoodService {
     private Food toFood(FoodRequest request, Venue venue) {
         Food food = new Food();
         food.setDescription(request.getDescription());
-        food.setPrice(request.getPrice());
         food.setName(request.getName());
         food.setVenue(venue);
         food.setStatus(FoodStatus.valueOf(request.getStatus()));
@@ -204,7 +199,6 @@ public class FoodServiceImpl implements FoodService {
                 .id(String.valueOf(food.getId()))
                 .status(String.valueOf(food.getStatus()))
                 .imageUrl(food.getImageUrl())
-                .price(food.getPrice())
                 .build();
     }
 }
