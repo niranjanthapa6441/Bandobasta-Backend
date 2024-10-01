@@ -1,9 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Request.VenueRequest;
 import com.example.BookEatNepal.Service.VenueService;
-import com.example.BookEatNepal.Util.CustomException;
 import com.example.BookEatNepal.Util.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -57,11 +55,14 @@ public class VenueController {
     public ResponseEntity<Object> findAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String location,
+            @RequestParam(required = false) int maxCapacity,
+            @RequestParam(required = false) int minCapacity,
+            @RequestParam(required = false) String venueType,
             @RequestParam(defaultValue = RATING) double rating,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.findAll(name, location, rating, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.findAll(name, location,maxCapacity,minCapacity, venueType, rating, page, size), "Data Retrieval Successful");
     }
 }

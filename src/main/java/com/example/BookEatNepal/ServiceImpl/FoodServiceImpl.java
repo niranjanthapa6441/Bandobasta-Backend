@@ -3,6 +3,7 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.DTO.FoodDTO;
 import com.example.BookEatNepal.DTO.FoodDetail;
+import com.example.BookEatNepal.Enums.FoodCategory;
 import com.example.BookEatNepal.Enums.FoodStatus;
 import com.example.BookEatNepal.Model.Food;
 import com.example.BookEatNepal.Model.Venue;
@@ -44,9 +45,9 @@ public class FoodServiceImpl implements FoodService {
 
     @Override
     public String save(FoodRequest request, MultipartFile image) {
-        Venue venue = getVenue(request.getVenueId());
-        request.setImageUrl(getImagePath(image, venue.getVenueName(), request));
-        foodRepo.save(toFood(request, venue));
+        Venue venue = findVenueById(request.getVenueId());
+        request.setImageUrl(generateImagePath(image, venue.getVenueName(), request));
+        foodRepo.save(converToFood(request, venue));
         return SUCCESS_MESSAGE;
     }
     @Override
@@ -84,41 +85,42 @@ public class FoodServiceImpl implements FoodService {
         int currentPage = page - 1;
         int totalElements = foods.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
-        return toFoodDTO(pagedFoods, currentPage, totalElements, totalPages);
+        return convertToFoodDTO(pagedFoods, currentPage, totalElements, totalPages);
     }
 
     @Override
     public FoodDetail findById(int id) {
         Food food = foodRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
-        return toFoodDetail(food);
+        return convertToFoodDetail(food);
     }
 
     @Override
     public String update(FoodRequest request, int id, MultipartFile image) {
-        Venue venue= getVenue(request.getVenueId());
+        Venue venue= findVenueById(request.getVenueId());
         Food food = foodRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
         food.setVenue(venue);
         food.setStatus(FoodStatus.valueOf(request.getStatus()));
         food.setName(request.getName());
         food.setDescription(request.getDescription());
-        food.setImageUrl(getImagePath(image,venue.getVenueName() ,request));
+        food.setImageUrl(generateImagePath(image,venue.getVenueName() ,request));
+        food.setCategory(FoodCategory.valueOf(request.getFoodCategory()));
         return SUCCESS_MESSAGE;
     }
 
-    private Venue getVenue(String venueId) {
+    private Venue findVenueById(String venueId) {
         return venueRepo.findById(Integer.valueOf(venueId)).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
     }
 
-    private String getImagePath(MultipartFile image, String venueName, FoodRequest request) {
-        validate(image);
+    private String generateImagePath(MultipartFile image, String venueName, FoodRequest request) {
+        validateImage(image);
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
         if (fileName.contains(".php%00.")) {
             throw new CustomException(CustomException.Type.INVALID_FILE_EXTENSION);
         }
-        return getImagePath(image, venueName, fileName);
+        return generateImagePath(image, venueName, fileName);
     }
 
-    private String getImagePath(MultipartFile multipartFile, String venueName, String fileName) {
+    private String generateImagePath(MultipartFile multipartFile, String venueName, String fileName) {
         String uploadDirectory = "./images/venues/" + venueName.replaceAll("\\s", "") + "/foods";
         Path path = Paths.get(uploadDirectory);
         Path filePath = path.resolve(fileName);
@@ -137,7 +139,7 @@ public class FoodServiceImpl implements FoodService {
         return filePath.toString().replace("./", "/").trim();
     }
 
-    private void validate(MultipartFile multipartFile) {
+    private void validateImage(MultipartFile multipartFile) {
         if (multipartFile.getSize() > 3000000)
             throw new CustomException(CustomException.Type.INVALID_FILE_SIZE);
         String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
@@ -164,18 +166,19 @@ public class FoodServiceImpl implements FoodService {
 
     }
 
-    private Food toFood(FoodRequest request, Venue venue) {
+    private Food converToFood(FoodRequest request, Venue venue) {
         Food food = new Food();
         food.setDescription(request.getDescription());
         food.setName(request.getName());
         food.setVenue(venue);
         food.setStatus(FoodStatus.valueOf(request.getStatus()));
         food.setImageUrl(request.getImageUrl());
+        food.setCategory(FoodCategory.valueOf(request.getFoodCategory()));
         return food;
     }
 
-    private FoodDTO toFoodDTO(List<Food> foods, int currentPage, int totalElements, int totalPages) {
-        List<FoodDetail> foodDetails = toFoodDetails(foods);
+    private FoodDTO convertToFoodDTO(List<Food> foods, int currentPage, int totalElements, int totalPages) {
+        List<FoodDetail> foodDetails = convertToFoodDetails(foods);
         return FoodDTO.builder()
                 .foodDetails(foodDetails)
                 .currentPage(currentPage)
@@ -183,15 +186,15 @@ public class FoodServiceImpl implements FoodService {
                 .totalElements(totalElements)
                 .build();
     }
-    private List<FoodDetail> toFoodDetails(List<Food> foods) {
+    private List<FoodDetail> convertToFoodDetails(List<Food> foods) {
         List<FoodDetail> foodDetails = new ArrayList<>();
         for (Food food : foods
         ) {
-            foodDetails.add(toFoodDetail(food));
+            foodDetails.add(convertToFoodDetail(food));
         }
         return foodDetails;
     }
-    private FoodDetail toFoodDetail(Food food) {
+    private FoodDetail convertToFoodDetail(Food food) {
         return FoodDetail.builder()
                 .name(food.getName())
                 .venueId(String.valueOf(food.getVenue().getId()))
@@ -199,6 +202,7 @@ public class FoodServiceImpl implements FoodService {
                 .id(String.valueOf(food.getId()))
                 .status(String.valueOf(food.getStatus()))
                 .imageUrl(food.getImageUrl())
+                .foodCategory(String.valueOf(food.getCategory()))
                 .build();
     }
 }

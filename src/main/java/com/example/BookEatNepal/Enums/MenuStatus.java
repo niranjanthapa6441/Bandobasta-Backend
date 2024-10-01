@@ -5,5 +5,6 @@ public enum MenuStatus {
     OUT_OF_STOCK,
     SEASONAL,
     DISCONTINUED,
-    UNAVAILABLE
+    UNAVAILABLE,
+    DELETED
 }

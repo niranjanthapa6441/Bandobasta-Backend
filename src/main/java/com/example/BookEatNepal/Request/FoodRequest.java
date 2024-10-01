@@ -9,4 +9,5 @@ public class FoodRequest {
     private String description;
     private String imageUrl;
     private String status;
+    private String foodCategory;
 }

@@ -1,5 +1,6 @@
 package com.example.BookEatNepal.Model;
 
+import com.example.BookEatNepal.Enums.FoodCategory;
 import com.example.BookEatNepal.Enums.FoodStatus;
 import com.example.BookEatNepal.Enums.PackageType;
 import jakarta.persistence.*;
@@ -34,4 +35,8 @@ public class Food {
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)
     private FoodStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="category",length = 20, nullable = false)
+    private FoodCategory category;
 }

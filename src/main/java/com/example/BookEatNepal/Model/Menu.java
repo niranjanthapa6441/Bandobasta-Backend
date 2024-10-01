@@ -28,6 +28,9 @@ public class Menu {
     @Column(name="menu_type",length = 20, nullable = false)
     private MenuType menuType;
 
+    @Column(name = "price", nullable = false)
+    private double price;
+
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)
     private MenuStatus status;
