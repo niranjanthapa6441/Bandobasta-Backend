@@ -3,6 +3,7 @@ package com.example.BookEatNepal.ServiceImpl;
 import com.example.BookEatNepal.DTO.FoodDetail;
 import com.example.BookEatNepal.DTO.MenuDTO;
 import com.example.BookEatNepal.DTO.MenuDetail;
+import com.example.BookEatNepal.Enums.FoodCategory;
 import com.example.BookEatNepal.Enums.MenuStatus;
 import com.example.BookEatNepal.Enums.MenuType;
 import com.example.BookEatNepal.Model.Food;
@@ -16,6 +17,9 @@ import com.example.BookEatNepal.Repository.VenueRepo;
 import com.example.BookEatNepal.Request.MenuRequest;
 import com.example.BookEatNepal.Service.MenuService;
 import com.example.BookEatNepal.Util.CustomException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +41,9 @@ public class MenuServiceImpl implements MenuService {
 
     @Autowired
     private FoodMenuRepo foodMenuRepo;
+    @Autowired
+    EntityManager entityManager;
+
 
     @Override
     public String save(MenuRequest request) {
@@ -55,8 +62,62 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public MenuDTO findAll(String venueId, int page, int size) {
-        return null;
+    public MenuDTO findAll(String venueId, String foodName, String menuType, String foodCategory, int page, int size) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<FoodMenu> query = cb.createQuery(FoodMenu.class);
+        Root<FoodMenu> foodMenuRoot = query.from(FoodMenu.class);
+        Join<FoodMenu, Food> foodJoin = foodMenuRoot.join("food");
+        Join<FoodMenu, Menu> menuJoin = foodMenuRoot.join("menu");
+        Join<Menu, Venue> menuVenueJoin = menuJoin.join("venue");
+
+        query.select(foodMenuRoot);
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (venueId != null && !venueId.isEmpty()) {
+            try {
+                int id = Integer.parseInt(venueId);
+                predicates.add(cb.equal(menuVenueJoin.get("id"), id));
+            } catch (NumberFormatException e) {
+                throw new CustomException(CustomException.Type.INVALID_VENUE_ID);
+            }
+        }
+
+        if (foodName != null && !foodName.isEmpty()) {
+            predicates.add(cb.like(cb.lower(foodJoin.get("name")), "%" + foodName.toLowerCase() + "%"));
+        }
+
+        if (menuType != null && !menuType.isEmpty()) {
+            try {
+                MenuType enumMenuType = MenuType.valueOf(menuType.toUpperCase());
+                predicates.add(cb.equal(menuJoin.get("menuType"), enumMenuType));
+            } catch (IllegalArgumentException e) {
+                throw new CustomException(CustomException.Type.INVALID_MENU_TYPE);
+            }
+        }
+
+        if (foodCategory != null && !foodCategory.isEmpty()) {
+            try {
+                FoodCategory enumFoodCategory = FoodCategory.valueOf(foodCategory.toUpperCase());
+                predicates.add(cb.equal(foodJoin.get("category"), enumFoodCategory));
+            } catch (IllegalArgumentException e) {
+                throw new CustomException(CustomException.Type.INVALID_FOOD_CATEGORY);
+            }
+        }
+
+        query.where(predicates.toArray(new Predicate[0]));
+
+        List<FoodMenu> foods = entityManager.createQuery(query).getResultList();
+
+        TypedQuery<FoodMenu> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((page - 1) * size);
+        typedQuery.setMaxResults(size);
+
+        List<FoodMenu> pagedFoods = typedQuery.getResultList();
+
+        int totalElements = foods.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        return convertToMenuDTO(pagedFoods, page, totalElements, totalPages);
     }
 
     @Override
@@ -74,7 +135,24 @@ public class MenuServiceImpl implements MenuService {
         menu.setStatus(MenuStatus.valueOf(request.getStatus()));
         return SUCCESS_MESSAGE;
     }
+    private MenuDTO convertToMenuDTO(List<FoodMenu> foods, int currentPage, int totalElements, int totalPages) {
+        List<MenuDetail> foodDetails = convertToMenuDetails(foods);
+        return MenuDTO.builder()
+                .menuDetails(foodDetails)
+                .currentPage(currentPage)
+                .totalPages(totalPages)
+                .totalElements(totalElements)
+                .build();
+    }
 
+    private List<MenuDetail> convertToMenuDetails(List<FoodMenu> foods) {
+        List<MenuDetail> menuDetails = new ArrayList<>();
+        for (FoodMenu foodMenu: foods
+        ) {
+            menuDetails.add(toMenuDetail(foodMenu.getMenu()));
+        }
+        return menuDetails;
+    }
     private void linkFoodToMenu(List<String> foodIds, Menu menu) {
         for (String foodId : foodIds) {
             Food food = findFoodById(Integer.parseInt(foodId));

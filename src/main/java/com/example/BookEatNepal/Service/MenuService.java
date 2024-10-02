@@ -11,8 +11,7 @@ public interface MenuService {
 
     String delete(int id);
 
-
-    MenuDTO findAll(String venueId, int page, int size);
+    MenuDTO findAll(String venueId, String foodName, String menuType, String foodCategory, int page, int size);
 
     MenuDetail findById(int id);
 
