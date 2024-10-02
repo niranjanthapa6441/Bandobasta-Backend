@@ -13,5 +13,5 @@ public class VenueDetails {
     private String description;
     private String status;
     private List<String> venueImagePaths;
-    private List<HallDetails> hallDetails;
+    private List<HallDetail> hallDetails;
 }

@@ -7,8 +7,8 @@ import java.util.List;
 
 @Data
 @Builder
-public class HallDTO {
-    private List<HallDetail> hallDetails;
+public class PackageDTO {
+    private List<PackageDetail> packages;
     private int currentPage;
     private int totalElements;
     private int totalPages;

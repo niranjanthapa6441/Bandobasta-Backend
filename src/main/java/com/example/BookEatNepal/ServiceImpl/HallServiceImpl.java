@@ -92,7 +92,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallDetails findById(int id) {
+    public HallDetail findById(int id) {
         Hall hall=hallRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
         return toHallDetail(hall);
     }
@@ -201,7 +201,7 @@ public class HallServiceImpl implements HallService {
     }
 
     private HallDTO toHallDTO(List<Hall> halls, int currentPage, int totalElements, int totalPages) {
-        List<HallDetails> hallDetails = toHallDetails(halls);
+        List<HallDetail> hallDetails = toHallDetails(halls);
         return HallDTO.builder()
                 .hallDetails(hallDetails)
                 .currentPage(currentPage)
@@ -210,8 +210,8 @@ public class HallServiceImpl implements HallService {
                 .build();
     }
 
-    private List<HallDetails> toHallDetails(List<Hall> halls) {
-        List<HallDetails> hallDetails = new ArrayList<>();
+    private List<HallDetail> toHallDetails(List<Hall> halls) {
+        List<HallDetail> hallDetails = new ArrayList<>();
         for (Hall hall : halls
         ) {
             hallDetails.add(toHallDetail(hall));
@@ -229,8 +229,8 @@ public class HallServiceImpl implements HallService {
         return hallImagePaths;
     }
 
-    private HallDetails toHallDetail(Hall hall) {
-        return HallDetails.builder()
+    private HallDetail toHallDetail(Hall hall) {
+        return HallDetail.builder()
                 .name(hall.getName())
                 .id(hall.getId())
                 .venueId(String.valueOf(hall.getVenue().getId()))

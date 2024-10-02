@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.DTO.AmenityDTO;
-import com.example.BookEatNepal.DTO.AmenityDetails;
+import com.example.BookEatNepal.DTO.AmenityDetail;
 import com.example.BookEatNepal.Enums.AmenityStatus;
 import com.example.BookEatNepal.Model.Amenity;
 import com.example.BookEatNepal.Model.Venue;
@@ -88,7 +88,7 @@ public class AmenityServiceImpl implements AmenityService {
     }
 
     @Override
-    public AmenityDetails findById(int id) {
+    public AmenityDetail findById(int id) {
         Amenity amenity = amenityRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.AMENITY_NOT_FOUND));
         return toAmenityDetail(amenity);
     }
@@ -176,8 +176,8 @@ public class AmenityServiceImpl implements AmenityService {
         return venueRepo.findById(Integer.valueOf(venueId)).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
     }
 
-    private List<AmenityDetails> toAmenityDetails(List<Amenity> amenities) {
-        List<AmenityDetails> amenityDetails = new ArrayList<>();
+    private List<AmenityDetail> toAmenityDetails(List<Amenity> amenities) {
+        List<AmenityDetail> amenityDetails = new ArrayList<>();
         for (Amenity amenity : amenities
         ) {
             amenityDetails.add(toAmenityDetail(amenity));
@@ -185,8 +185,8 @@ public class AmenityServiceImpl implements AmenityService {
         return amenityDetails;
     }
 
-    private AmenityDetails toAmenityDetail(Amenity amenity) {
-        return AmenityDetails.builder()
+    private AmenityDetail toAmenityDetail(Amenity amenity) {
+        return AmenityDetail.builder()
                 .name(amenity.getName())
                 .venueId(String.valueOf(amenity.getVenue().getId()))
                 .description(amenity.getDescription())
@@ -198,7 +198,7 @@ public class AmenityServiceImpl implements AmenityService {
     }
 
     private AmenityDTO toHallDTO(List<Amenity> amenities, int currentPage, int totalElements, int totalPages) {
-        List<AmenityDetails> amenityDetails = toAmenityDetails(amenities);
+        List<AmenityDetail> amenityDetails = toAmenityDetails(amenities);
         return AmenityDTO.builder()
                 .amenityDetails(amenityDetails)
                 .currentPage(currentPage)
