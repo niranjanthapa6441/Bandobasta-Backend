@@ -19,6 +19,8 @@ public class VenueController {
     public static final String SIZE = "5";
     public static final String PAGE = "1";
     public static final String RATING = "0.0";
+    public static final String MAX_CAPACITY = "0";
+    public static final String MIN_CAPACITY = "1000";
     public static final String MESSAGE = "Successful";
     @Autowired
     private VenueService service;
@@ -55,8 +57,8 @@ public class VenueController {
     public ResponseEntity<Object> findAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String location,
-            @RequestParam(required = false) int maxCapacity,
-            @RequestParam(required = false) int minCapacity,
+            @RequestParam(defaultValue = MAX_CAPACITY) int maxCapacity,
+            @RequestParam(defaultValue = MIN_CAPACITY) int minCapacity,
             @RequestParam(required = false) String venueType,
             @RequestParam(defaultValue = RATING) double rating,
             @RequestParam(defaultValue = PAGE) int page,

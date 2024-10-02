@@ -44,10 +44,11 @@ public class MenuController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
             @RequestParam(required = true) String venueId,
+            @RequestParam(required = false) String menuType,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.findAll(venueId, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.findMenuByVenue(venueId,menuType, page, size), "Data Retrieval Successful");
     }
 }

@@ -37,6 +37,6 @@ public class Food {
     private FoodStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="category",length = 20, nullable = false)
+    @Column(name="category",length = 40, nullable = false)
     private FoodCategory category;
 }

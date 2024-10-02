@@ -16,11 +16,11 @@ public class FoodMenu {
     @Column(name="id",length=10)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "food_id", nullable = false)
     private Food food;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;
 }

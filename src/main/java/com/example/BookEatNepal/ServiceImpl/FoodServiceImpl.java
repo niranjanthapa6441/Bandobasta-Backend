@@ -47,7 +47,7 @@ public class FoodServiceImpl implements FoodService {
     public String save(FoodRequest request, MultipartFile image) {
         Venue venue = findVenueById(request.getVenueId());
         request.setImageUrl(generateImagePath(image, venue.getVenueName(), request));
-        foodRepo.save(converToFood(request, venue));
+        foodRepo.save(converToFood(request,venue));
         return SUCCESS_MESSAGE;
     }
     @Override

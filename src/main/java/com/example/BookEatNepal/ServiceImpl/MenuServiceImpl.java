@@ -62,15 +62,13 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public MenuDTO findAll(String venueId, String foodName, String menuType, String foodCategory, int page, int size) {
+    public MenuDTO findMenuByVenue(String venueId, String menuType, int page, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<FoodMenu> query = cb.createQuery(FoodMenu.class);
-        Root<FoodMenu> foodMenuRoot = query.from(FoodMenu.class);
-        Join<FoodMenu, Food> foodJoin = foodMenuRoot.join("food");
-        Join<FoodMenu, Menu> menuJoin = foodMenuRoot.join("menu");
-        Join<Menu, Venue> menuVenueJoin = menuJoin.join("venue");
+        CriteriaQuery<Menu> query = cb.createQuery(Menu.class);
+        Root<Menu> menuRoot = query.from(Menu.class);
+        Join<Menu, Venue> menuVenueJoin = menuRoot.join("venue");
 
-        query.select(foodMenuRoot);
+        query.select(menuRoot);
         List<Predicate> predicates = new ArrayList<>();
 
         if (venueId != null && !venueId.isEmpty()) {
@@ -82,42 +80,29 @@ public class MenuServiceImpl implements MenuService {
             }
         }
 
-        if (foodName != null && !foodName.isEmpty()) {
-            predicates.add(cb.like(cb.lower(foodJoin.get("name")), "%" + foodName.toLowerCase() + "%"));
-        }
-
         if (menuType != null && !menuType.isEmpty()) {
             try {
                 MenuType enumMenuType = MenuType.valueOf(menuType.toUpperCase());
-                predicates.add(cb.equal(menuJoin.get("menuType"), enumMenuType));
+                predicates.add(cb.equal(menuRoot.get("menuType"), enumMenuType));
             } catch (IllegalArgumentException e) {
                 throw new CustomException(CustomException.Type.INVALID_MENU_TYPE);
             }
         }
 
-        if (foodCategory != null && !foodCategory.isEmpty()) {
-            try {
-                FoodCategory enumFoodCategory = FoodCategory.valueOf(foodCategory.toUpperCase());
-                predicates.add(cb.equal(foodJoin.get("category"), enumFoodCategory));
-            } catch (IllegalArgumentException e) {
-                throw new CustomException(CustomException.Type.INVALID_FOOD_CATEGORY);
-            }
-        }
-
         query.where(predicates.toArray(new Predicate[0]));
 
-        List<FoodMenu> foods = entityManager.createQuery(query).getResultList();
+        List<Menu> menus = entityManager.createQuery(query).getResultList();
 
-        TypedQuery<FoodMenu> typedQuery = entityManager.createQuery(query);
+        TypedQuery<Menu> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((page - 1) * size);
         typedQuery.setMaxResults(size);
 
-        List<FoodMenu> pagedFoods = typedQuery.getResultList();
+        List<Menu> pagedMenus = typedQuery.getResultList();
 
-        int totalElements = foods.size();
+        int totalElements = menus.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
 
-        return convertToMenuDTO(pagedFoods, page, totalElements, totalPages);
+        return convertToMenuDTO(pagedMenus, page, totalElements, totalPages);
     }
 
     @Override
@@ -125,6 +110,7 @@ public class MenuServiceImpl implements MenuService {
         Menu menu = getMenuById(id);
         return toMenuDetail(menu);
     }
+
     @Override
     public String update(MenuRequest request, int id) {
         Menu menu = menuRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.MENU_NOT_FOUND));
@@ -135,8 +121,9 @@ public class MenuServiceImpl implements MenuService {
         menu.setStatus(MenuStatus.valueOf(request.getStatus()));
         return SUCCESS_MESSAGE;
     }
-    private MenuDTO convertToMenuDTO(List<FoodMenu> foods, int currentPage, int totalElements, int totalPages) {
-        List<MenuDetail> foodDetails = convertToMenuDetails(foods);
+
+    private MenuDTO convertToMenuDTO(List<Menu> menus, int currentPage, int totalElements, int totalPages) {
+        List<MenuDetail> foodDetails = convertToMenuDetails(menus);
         return MenuDTO.builder()
                 .menuDetails(foodDetails)
                 .currentPage(currentPage)
@@ -145,14 +132,15 @@ public class MenuServiceImpl implements MenuService {
                 .build();
     }
 
-    private List<MenuDetail> convertToMenuDetails(List<FoodMenu> foods) {
+    private List<MenuDetail> convertToMenuDetails(List<Menu> menus) {
         List<MenuDetail> menuDetails = new ArrayList<>();
-        for (FoodMenu foodMenu: foods
+        for (Menu menu : menus
         ) {
-            menuDetails.add(toMenuDetail(foodMenu.getMenu()));
+            menuDetails.add(toMenuDetail(menu));
         }
         return menuDetails;
     }
+
     private void linkFoodToMenu(List<String> foodIds, Menu menu) {
         for (String foodId : foodIds) {
             Food food = findFoodById(Integer.parseInt(foodId));
