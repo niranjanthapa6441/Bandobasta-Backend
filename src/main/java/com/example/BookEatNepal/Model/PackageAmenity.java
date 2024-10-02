@@ -13,11 +13,11 @@ public class PackageAmenity {
             strategy = GenerationType.IDENTITY )
     @Column(name="id",length=10)
     private int id;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "package_id", nullable = false)
     private Package aPackage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "amenity_id", nullable = false)
     private Amenity amenity;
 

@@ -20,7 +20,7 @@ public class Package {
     @Column(name = "name", columnDefinition = "TEXT", nullable = false)
     private String name ;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
