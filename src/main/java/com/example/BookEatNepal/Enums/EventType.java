@@ -6,5 +6,6 @@ public enum EventType {
     PASNI,
     SHRADHA,
     MEETING,
-    CONFERENCE
+    CONFERENCE,
+    NONE
 }

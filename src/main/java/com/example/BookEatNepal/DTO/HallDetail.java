@@ -1,8 +1,5 @@
 package com.example.BookEatNepal.DTO;
 
-import com.example.BookEatNepal.Enums.HallStatus;
-import com.example.BookEatNepal.Model.Venue;
-import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class HallDetails {
+public class HallDetail {
     private String venueId;
     private int id;
     private String name;

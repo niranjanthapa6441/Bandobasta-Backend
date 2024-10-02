@@ -1,5 +1,6 @@
 package com.example.BookEatNepal.Model;
 
+import com.example.BookEatNepal.Enums.EventType;
 import com.example.BookEatNepal.Enums.PackageStatus;
 import com.example.BookEatNepal.Enums.PackageType;
 import com.example.BookEatNepal.Enums.VenueStatus;
@@ -16,6 +17,9 @@ public class Package {
     @Column(name="id",length=10)
     private int id;
 
+    @Column(name = "name", columnDefinition = "TEXT", nullable = false)
+    private String name ;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
@@ -23,6 +27,10 @@ public class Package {
     @Enumerated(EnumType.STRING)
     @Column(name="package_type",length = 20, nullable = false)
     private PackageType packageType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="event_type",length = 30, nullable = false)
+    private EventType eventType;
 
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;

@@ -2,12 +2,10 @@ package com.example.BookEatNepal.Service;
 
 
 import com.example.BookEatNepal.DTO.AmenityDTO;
-import com.example.BookEatNepal.DTO.AmenityDetails;
+import com.example.BookEatNepal.DTO.AmenityDetail;
 import com.example.BookEatNepal.Request.AmenityRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Service
 public interface AmenityService {
@@ -16,7 +14,7 @@ public interface AmenityService {
 
     AmenityDTO findAll(String venueId, int page, int size);
 
-    AmenityDetails findById(int id);
+    AmenityDetail findById(int id);
 
     String update(AmenityRequest request, int id, MultipartFile image);
 }

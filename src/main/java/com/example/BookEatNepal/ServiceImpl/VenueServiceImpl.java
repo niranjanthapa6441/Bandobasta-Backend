@@ -1,6 +1,6 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.HallDetails;
+import com.example.BookEatNepal.DTO.HallDetail;
 import com.example.BookEatNepal.DTO.VenueDetails;
 import com.example.BookEatNepal.DTO.VenueDTO;
 import com.example.BookEatNepal.Enums.VenueStatus;
@@ -266,21 +266,21 @@ public class VenueServiceImpl implements VenueService {
         return venueDetails;
     }
 
-    private List<HallDetails> getHallDetails(int id) {
+    private List<HallDetail> getHallDetails(int id) {
         List<Hall> halls= hallRepo.findByVenueId(id);
         return toHallDetails(halls);
     }
 
-    private List<HallDetails> toHallDetails(List<Hall> halls) {
-            List<HallDetails> hallDetails = new ArrayList<>();
+    private List<HallDetail> toHallDetails(List<Hall> halls) {
+            List<HallDetail> hallDetails = new ArrayList<>();
             for (Hall hall : halls
             ) {
                 hallDetails.add(toHallDetail(hall));
             }
             return hallDetails;
         }
-    private HallDetails toHallDetail(Hall hall) {
-        return HallDetails.builder()
+    private HallDetail toHallDetail(Hall hall) {
+        return HallDetail.builder()
                 .name(hall.getName())
                 .capacity(hall.getCapacity())
                 .floorNumber(hall.getFloorNumber())
