@@ -196,6 +196,7 @@ public class MenuServiceImpl implements MenuService {
                     description(foodMenu.getFood().getDescription()).
                     imageUrl(foodMenu.getFood().getImageUrl()).
                     id(String.valueOf(foodMenu.getFood().getId())).
+                    status(String.valueOf(foodMenu.getFood().getStatus())).
                     venueId(String.valueOf(foodMenu.getFood().getVenue().getId())).
                     build());
         }
