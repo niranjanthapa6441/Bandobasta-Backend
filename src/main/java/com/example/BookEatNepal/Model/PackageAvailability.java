@@ -23,6 +23,7 @@ public class PackageAvailability {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id", nullable = false)
     private Package aPackage;
+
     @Column(nullable = false, name = "date")
     private LocalDate date;
 

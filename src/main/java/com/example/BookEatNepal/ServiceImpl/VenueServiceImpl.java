@@ -7,7 +7,6 @@ import com.example.BookEatNepal.Enums.VenueStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Repository.*;
 import com.example.BookEatNepal.Request.VenueRequest;
-import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Service.VenueService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
@@ -71,7 +70,7 @@ public class VenueServiceImpl implements VenueService {
 
 
     @Override
-    public VenueDTO findAll(String venue, String location, double rating, int page, int size) {
+    public VenueDTO findAll(String venue, String location,int maxCapacity,int minCapacity,String venueType,double rating, int page, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Venue> query = cb.createQuery(Venue.class);
         Root<Venue> venueRoot = query.from(Venue.class);

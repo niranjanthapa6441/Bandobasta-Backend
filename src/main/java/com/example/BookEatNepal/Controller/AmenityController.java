@@ -2,6 +2,7 @@ package com.example.BookEatNepal.Controller;
 
 
 import com.example.BookEatNepal.Request.AmenityRequest;
+import com.example.BookEatNepal.Request.FoodRequest;
 import com.example.BookEatNepal.Service.AmenityService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;
@@ -27,9 +28,10 @@ public class AmenityController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> save(
             @RequestPart("amenity") @Valid AmenityRequest request,
-            @RequestPart("amenityImage") MultipartFile image
+            @RequestPart("amenityImage") MultipartFile amenityImage
     ) {
-        return RestResponse.ok(service.save(request, image));
+//        return RestResponse.ok("SDf");
+        return RestResponse.ok(service.save(request, amenityImage));
     }
 
     @PostMapping(value = "/{id}",
