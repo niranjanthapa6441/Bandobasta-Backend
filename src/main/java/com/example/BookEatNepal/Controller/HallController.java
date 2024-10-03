@@ -1,5 +1,6 @@
 package com.example.BookEatNepal.Controller;
 
+import com.example.BookEatNepal.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Request.HallRequest;
 import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Util.RestResponse;
@@ -29,7 +30,12 @@ public class HallController {
     ) {
         return RestResponse.ok(service.save(request, hallImages));
     }
-
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> saveAvailability(
+            @RequestBody List<HallAvailabilityRequest> requests
+            ) {
+        return RestResponse.ok(service.saveHallAvailability(requests));
+    }
 
     @PostMapping(value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,

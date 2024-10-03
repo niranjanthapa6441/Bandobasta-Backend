@@ -3,11 +3,14 @@ package com.example.BookEatNepal.ServiceImpl;
 import com.example.BookEatNepal.DTO.*;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
+import com.example.BookEatNepal.Repository.HallAvailabilityRepo;
 import com.example.BookEatNepal.Repository.HallImageRepo;
 import com.example.BookEatNepal.Repository.HallRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
+import com.example.BookEatNepal.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Request.HallRequest;
 import com.example.BookEatNepal.Service.HallService;
+import com.example.BookEatNepal.Util.Formatter;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -25,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +45,9 @@ public class HallServiceImpl implements HallService {
 
     @Autowired
     private HallImageRepo hallImageRepo;
+
+    @Autowired
+    private HallAvailabilityRepo hallAvailabilityRepo;
 
     @Autowired
     private EntityManager entityManager;
@@ -72,7 +79,7 @@ public class HallServiceImpl implements HallService {
         query.select(hallRoot);
         List<Predicate> predicates = new ArrayList<>();
 
-        if (id != 0 ) {
+        if (id != 0) {
             predicates.add(cb.equal(hallVenueJoin.get("id"), id));
         }
         query.where(predicates.toArray(new Predicate[0]));
@@ -93,7 +100,7 @@ public class HallServiceImpl implements HallService {
 
     @Override
     public HallDetail findById(int id) {
-        Hall hall=hallRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
+        Hall hall = hallRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
         return toHallDetail(hall);
     }
 
@@ -113,8 +120,99 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallAvailabilityDTO checkAvailability(int hallId, LocalDate date) {
-        return null;
+    public String saveHallAvailability(List<HallAvailabilityRequest> requests) {
+        for (HallAvailabilityRequest request: requests
+             ) {
+            Hall hall = hallRepo.findById(Integer.parseInt(request.getHallId()))
+                    .orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
+            hallAvailabilityRepo.save(convertToHallAvailability(request,hall));
+        }
+        return SUCCESS_MESSAGE;
+    }
+
+    @Override
+    public HallAvailabilityDTO checkAvailability(String hallId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size) {
+        int id = Integer.parseInt(hallId);
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
+        Root<HallAvailability> hallAvailabilityRoot = query.from(HallAvailability.class);
+        Join<HallAvailability, Hall> hallAvailabilityJoin = hallAvailabilityRoot.join("hall");
+
+        query.select(hallAvailabilityRoot);
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (id != 0) {
+            predicates.add(cb.equal(hallAvailabilityJoin.get("id"), id));
+        }
+
+        if (date != null) {
+            predicates.add(cb.equal(hallAvailabilityRoot.get("date"), date));
+        }
+
+        if (startTime != null && endTime != null) {
+            Predicate noOverlap = cb.or(
+                    cb.lessThanOrEqualTo(hallAvailabilityRoot.get("endTime"), Formatter.getTimeFromString(startTime)),
+                    cb.greaterThanOrEqualTo(hallAvailabilityRoot.get("startTime"), Formatter.getTimeFromString(endTime))
+            );
+            predicates.add(noOverlap);
+        }
+
+        predicates.add(cb.equal(hallAvailabilityRoot.get("status"), HallStatus.AVAILABLE));
+        List<HallAvailability> hallAvailabilities = entityManager.createQuery(query).getResultList();
+
+        TypedQuery<HallAvailability> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((page - 1) * size);
+        typedQuery.setMaxResults(size);
+
+        List<HallAvailability> pagedHallAvailabilities = typedQuery.getResultList();
+
+        int currentPage = page - 1;
+        int totalElements = hallAvailabilities.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        return toHallAvailabilityDTO(pagedHallAvailabilities, currentPage, totalElements, totalPages);
+    }
+
+    private HallAvailabilityDTO toHallAvailabilityDTO(List<HallAvailability> pagedHallAvailabilities, int currentPage, int totalElements, int totalPages) {
+        List<HallAvailabilityDetail> hallAvailabilityDetails = toHallAvailabilityDetails(pagedHallAvailabilities);
+        return HallAvailabilityDTO.builder()
+                .hallAvailabilityDetails(hallAvailabilityDetails)
+                .currentPage(currentPage)
+                .totalPages(totalPages)
+                .totalElements(totalElements)
+                .build();
+    }
+
+    private List<HallAvailabilityDetail> toHallAvailabilityDetails(List<HallAvailability> hallAvailabilities) {
+        List<HallAvailabilityDetail> hallAvailabilityDetails = new ArrayList<>();
+        for (HallAvailability hallAvailability: hallAvailabilities
+             ) {
+            hallAvailabilityDetails.add(toHallAvailabilityDetail(hallAvailability));
+        }
+        return hallAvailabilityDetails;
+    }
+
+    private HallAvailabilityDetail toHallAvailabilityDetail(HallAvailability hallAvailability) {
+        return HallAvailabilityDetail.builder()
+                .hallName(hallAvailability.getHall().getName())
+                .hallId(String.valueOf(hallAvailability.getHall().getId()))
+                .description(String.valueOf(hallAvailability.getHall().getDescription()))
+                .capacity(hallAvailability.getHall().getCapacity())
+                .status(String.valueOf(hallAvailability.getStatus()))
+                .date(Formatter.convertDateToStr(hallAvailability.getDate(),"yyyy-MM-dd"))
+                .endTime(Formatter.getStringFromTime(hallAvailability.getEndTime()))
+                .startTime(Formatter.getStringFromTime(hallAvailability.getStartTime()))
+                .build();
+    }
+
+
+    private HallAvailability convertToHallAvailability(HallAvailabilityRequest request, Hall hall){
+        HallAvailability hallAvailability= new HallAvailability();
+        hallAvailability.setHall(hall);
+        hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
+        hallAvailability.setDate(Formatter.convertStrToDate(request.getDate(),"yyyy-MM-dd"));
+        hallAvailability.setStartTime(Formatter.getTimeFromString(request.getStartTime()));
+        hallAvailability.setEndTime(Formatter.getTimeFromString(request.getEndTime()));
+        return hallAvailability;
     }
 
     private void saveHallImages(List<MultipartFile> hallImages, Hall hall, String venueName) {
@@ -129,7 +227,7 @@ public class HallServiceImpl implements HallService {
 
                 HallImage hallImage = new HallImage();
                 hallImage.setHall(hall);
-                hallImage.setImageUrl(getImagePath(image,venueName ,hall.getName(), fileName));
+                hallImage.setImageUrl(getImagePath(image, venueName, hall.getName(), fileName));
 
                 hallImageRepo.save(hallImage);
             } catch (CustomException e) {
@@ -166,6 +264,7 @@ public class HallServiceImpl implements HallService {
         return (mimeType.equals("image/png") || mimeType.equals("image/jpg") || mimeType.equals("image/jpeg"));
 
     }
+
     private String getImagePath(MultipartFile multipartFile, String venueName, String hallName, String fileName) {
         String uploadDirectory = "./images/venues/" + venueName.replaceAll("\\s", "") + "/" + hallName.replaceAll("\\s", "");
         Path path = Paths.get(uploadDirectory);
@@ -184,6 +283,7 @@ public class HallServiceImpl implements HallService {
         }
         return filePath.toString().replace("./", "/").trim();
     }
+
     private Hall toHall(HallRequest request, Venue venue) {
         Hall hall = new Hall();
         hall.setDescription(request.getDescription());

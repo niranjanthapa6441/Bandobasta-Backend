@@ -3,6 +3,7 @@ package com.example.BookEatNepal.Service;
 import com.example.BookEatNepal.DTO.HallAvailabilityDTO;
 import com.example.BookEatNepal.DTO.HallDTO;
 import com.example.BookEatNepal.DTO.HallDetail;
+import com.example.BookEatNepal.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Request.HallRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,5 +24,7 @@ public interface HallService {
 
     String update(HallRequest request, int id, List<MultipartFile> hallImages);
 
-    HallAvailabilityDTO checkAvailability(int hallId, LocalDate date);
+    String saveHallAvailability(List<HallAvailabilityRequest> requests);
+
+    HallAvailabilityDTO checkAvailability(String hallId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size);
 }

@@ -5,8 +5,8 @@ import com.example.BookEatNepal.Enums.HallStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Time;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
 @Entity
@@ -19,7 +19,7 @@ public class HallAvailability {
     @Column(name="id",length=10)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "hall_id", nullable = false)
     private Hall hall;
 
@@ -27,10 +27,10 @@ public class HallAvailability {
     private LocalDate date;
 
     @Column(nullable = false,name = "start_time")
-    private LocalTime startTime;
+    private Time startTime;
 
     @Column(nullable = false,name = "end_time")
-    private LocalTime endTime;
+    private Time endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)

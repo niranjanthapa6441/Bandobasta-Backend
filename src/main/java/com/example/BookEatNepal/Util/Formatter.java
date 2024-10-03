@@ -41,4 +41,14 @@ public class Formatter {
             throw new CustomException(CustomException.Type.TIME_INVALID);
         }
     }
+    public static String getStringFromTime(Time time) {
+        DateFormat formatter = new SimpleDateFormat("HH:mm");
+
+        try {
+            return formatter.format(time);
+        } catch (Exception e) {
+            throw new CustomException(CustomException.Type.TIME_INVALID);
+        }
+    }
+
 }
