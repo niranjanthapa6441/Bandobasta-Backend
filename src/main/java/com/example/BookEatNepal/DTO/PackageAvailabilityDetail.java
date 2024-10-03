@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class PackageAvailabilityDetail {
+    private String id;
     private String packageId;
     private String packageName;
     private String description;

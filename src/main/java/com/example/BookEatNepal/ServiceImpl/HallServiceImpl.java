@@ -199,6 +199,7 @@ public class HallServiceImpl implements HallService {
 
     private HallAvailabilityDetail toHallAvailabilityDetail(HallAvailability hallAvailability) {
         return HallAvailabilityDetail.builder()
+                .id(String.valueOf(hallAvailability.getId()))
                 .hallName(hallAvailability.getHall().getName())
                 .hallId(String.valueOf(hallAvailability.getHall().getId()))
                 .description(String.valueOf(hallAvailability.getHall().getDescription()))

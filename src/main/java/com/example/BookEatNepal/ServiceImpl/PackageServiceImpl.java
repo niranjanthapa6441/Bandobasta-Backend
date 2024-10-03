@@ -230,6 +230,7 @@ public class PackageServiceImpl implements PackageService {
 
     private PackageAvailabilityDetail toPackageAvailabilityDetail(PackageAvailability packageAvailability) {
         return PackageAvailabilityDetail.builder()
+                .id(String.valueOf(packageAvailability.getId()))
                 .packageName(packageAvailability.getAPackage().getName())
                 .packageId(String.valueOf(packageAvailability.getAPackage().getId()))
                 .description(String.valueOf(packageAvailability.getAPackage().getDescription()))
