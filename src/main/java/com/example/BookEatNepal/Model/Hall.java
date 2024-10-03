@@ -43,8 +43,10 @@ public class Hall {
 
     @OneToMany(mappedBy = "hall", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HallImage> images = new ArrayList<>();
+
     @OneToMany(mappedBy = "hall", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HallAmenity> amenities = new ArrayList<>();
+
     @OneToMany(mappedBy = "hall", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HallMenu> menus = new ArrayList<>();
 }

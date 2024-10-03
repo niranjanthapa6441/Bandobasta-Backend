@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 @Builder
-public class HallAvailabilityDetail {
+public class PackageAvailabilityDetail {
     private String id;
-    private String hallId;
-    private String hallName;
+    private String packageId;
+    private String packageName;
     private String description;
     private String date;
     private String startTime;

@@ -30,7 +30,7 @@ public class CustomException extends RuntimeException {
         USER_NOT_FOUND("Owner not found", 404),
         AMENITY_NOT_FOUND("Owner not found", 404),
 
-        HALL_NOT_FOUND("Owner not found", 404),
+        HALL_NOT_FOUND("Hall not found", 404),
         VENUE_NOT_FOUND("Venue not found", 404),
         FOOD_NOT_FOUND("Food not found", 404 ),
         MENU_NOT_FOUND("Menu not found", 404 ),

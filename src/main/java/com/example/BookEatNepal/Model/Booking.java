@@ -23,16 +23,17 @@ public class Booking {
     @JoinColumn(name = "user_id",nullable = false)
     private AppUser user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "custom_package_id", nullable = true)
     private CustomPackage customPackage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "package_id", nullable = true)
-    private Package aPackage;
-    @ManyToOne(fetch = FetchType.LAZY)
+    private PackageAvailability packageAvailability;
+
+    @ManyToOne
     @JoinColumn(name = "hall_id", nullable = true)
-    private Hall hall;
+    private HallAvailability hallAvailability;
 
     @Column(nullable = false, name = "date")
     private LocalDate date;

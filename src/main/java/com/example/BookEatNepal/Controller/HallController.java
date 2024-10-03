@@ -1,5 +1,6 @@
 package com.example.BookEatNepal.Controller;
 
+import com.example.BookEatNepal.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Request.HallRequest;
 import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Util.RestResponse;
@@ -29,8 +30,25 @@ public class HallController {
     ) {
         return RestResponse.ok(service.save(request, hallImages));
     }
+    @PostMapping(value = "/availability",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> saveAvailability(
+            @RequestBody List<HallAvailabilityRequest> requests
+            ) {
+        return RestResponse.ok(service.saveHallAvailability(requests));
+    }
+    @GetMapping(value = "/availability",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> checkAvailability(
+            @RequestParam(required = true) String venueId,
+            @RequestParam(required = true) String date,
+            @RequestParam(required = true) String startTime,
+            @RequestParam(required = true) String endTime,
+            @RequestParam(required = true) int numberOfGuests,
+            @RequestParam(defaultValue = PAGE) int page,
+            @RequestParam(defaultValue = SIZE) int size
 
-
+    ) {
+        return RestResponse.ok(service.checkAvailability(venueId, date, startTime, endTime, numberOfGuests, page, size), "Data Retrieval Successful");
+    }
     @PostMapping(value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

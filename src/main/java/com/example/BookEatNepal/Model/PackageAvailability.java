@@ -6,6 +6,7 @@ import com.example.BookEatNepal.Enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -20,7 +21,7 @@ public class PackageAvailability {
     @Column(name="id",length=10)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "package_id", nullable = false)
     private Package aPackage;
 
@@ -28,10 +29,10 @@ public class PackageAvailability {
     private LocalDate date;
 
     @Column(nullable = false,name = "start_time")
-    private LocalTime startTime;
+    private Time startTime;
 
     @Column(nullable = false,name = "end_time")
-    private LocalTime endTime;
+    private Time endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)
