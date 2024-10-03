@@ -131,18 +131,19 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallAvailabilityDTO checkAvailability(String hallId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size) {
-        int id = Integer.parseInt(hallId);
+    public HallAvailabilityDTO checkAvailability(String venueId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size) {
+        int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
         Root<HallAvailability> hallAvailabilityRoot = query.from(HallAvailability.class);
         Join<HallAvailability, Hall> hallAvailabilityJoin = hallAvailabilityRoot.join("hall");
+        Join<Hall, Venue> hallVenueJoin = hallAvailabilityJoin.join("venue");
 
         query.select(hallAvailabilityRoot);
         List<Predicate> predicates = new ArrayList<>();
 
         if (id != 0) {
-            predicates.add(cb.equal(hallAvailabilityJoin.get("id"), id));
+            predicates.add(cb.equal(hallVenueJoin.get("id"), id));
         }
 
         if (date != null) {
@@ -157,7 +158,12 @@ public class HallServiceImpl implements HallService {
             predicates.add(noOverlap);
         }
 
+        if (numberOfGuests > 0) {
+            predicates.add(cb.greaterThanOrEqualTo(hallAvailabilityJoin.get("capacity"), numberOfGuests));
+        }
+
         predicates.add(cb.equal(hallAvailabilityRoot.get("status"), HallStatus.AVAILABLE));
+
         List<HallAvailability> hallAvailabilities = entityManager.createQuery(query).getResultList();
 
         TypedQuery<HallAvailability> typedQuery = entityManager.createQuery(query);

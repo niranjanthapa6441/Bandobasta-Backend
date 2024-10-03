@@ -2,21 +2,24 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.DTO.*;
 import com.example.BookEatNepal.Enums.EventType;
-import com.example.BookEatNepal.Enums.MenuType;
+import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Enums.PackageStatus;
 import com.example.BookEatNepal.Enums.PackageType;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Model.Package;
 import com.example.BookEatNepal.Repository.*;
+import com.example.BookEatNepal.Request.PackageAvailabilityRequest;
 import com.example.BookEatNepal.Request.PackageRequest;
 import com.example.BookEatNepal.Service.PackageService;
 import com.example.BookEatNepal.Util.CustomException;
+import com.example.BookEatNepal.Util.Formatter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +47,9 @@ public class PackageServiceImpl implements PackageService {
     private HallImageRepo hallImageRepo;
     @Autowired
     private FoodMenuRepo foodMenuRepo;
+
+    @Autowired
+    private PackageAvailabilityRepo packageAvailabilityRepo;
     @Autowired
     private EntityManager entityManager;
 
@@ -136,6 +142,103 @@ public class PackageServiceImpl implements PackageService {
         aPackage.setVenue(findVenueById(String.valueOf(id)));
         aPackage.setEventType(EventType.valueOf(request.getEventType()));
         return SUCCESS_MESSAGE;
+    }
+
+    @Override
+    public String savePackageAvailability(List<PackageAvailabilityRequest> requests) {
+        for (PackageAvailabilityRequest request : requests
+        ) {
+            Package aPackage = packageRepo.findById(Integer.parseInt(request.getPackageId()))
+                    .orElseThrow(() -> new CustomException(CustomException.Type.PACKAGE_NOT_FOUND));
+            packageAvailabilityRepo.save(convertToPackageAvailability(request, aPackage));
+        }
+        return SUCCESS_MESSAGE;
+    }
+
+    @Override
+    public PackageAvailabilityDTO checkAvailability(String venueId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size) {
+        int id = Integer.parseInt(venueId);
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<PackageAvailability> query = cb.createQuery(PackageAvailability.class);
+        Root<PackageAvailability> packageAvailabilityRoot = query.from(PackageAvailability.class);
+
+        Join<PackageAvailability, Package> packageAvailabilityPackageJoin = packageAvailabilityRoot.join("aPackage");
+        Join<Package, Venue> packageVenueJoin = packageAvailabilityPackageJoin.join("venue");
+        Join<Package, PackageHall> packagePackageHallJoin = packageAvailabilityPackageJoin.join("aPackage");
+        Join<PackageHall, Hall> packageHallJoin = packagePackageHallJoin.join("hall");
+
+        query.select(packageAvailabilityRoot);
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (id != 0) {
+            predicates.add(cb.equal(packageVenueJoin.get("id"), id));
+        }
+
+        if (date != null) {
+            predicates.add(cb.equal(packageAvailabilityRoot.get("date"), date));
+        }
+
+        if (startTime != null && endTime != null) {
+            Predicate noOverlap = cb.or(
+                    cb.lessThanOrEqualTo(packageAvailabilityRoot.get("endTime"), Formatter.getTimeFromString(startTime)),
+                    cb.greaterThanOrEqualTo(packageAvailabilityRoot.get("startTime"), Formatter.getTimeFromString(endTime))
+            );
+            predicates.add(noOverlap);
+        }
+
+        predicates.add(cb.equal(packageAvailabilityRoot.get("status"), PackageStatus.AVAILABLE));
+
+        if (numberOfGuests > 0) {
+            predicates.add(cb.greaterThanOrEqualTo(packageHallJoin.get("capacity"), numberOfGuests));
+        }
+
+        query.where(predicates.toArray(new Predicate[0]));
+
+        List<PackageAvailability> packageAvailabilities = entityManager.createQuery(query).getResultList();
+
+        TypedQuery<PackageAvailability> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((page - 1) * size);
+        typedQuery.setMaxResults(size);
+
+        List<PackageAvailability> pagedPackageAvailabilities = typedQuery.getResultList();
+
+        int currentPage = page - 1;
+        int totalElements = packageAvailabilities.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        return toPackageAvailabilityDTO(pagedPackageAvailabilities, currentPage, totalElements, totalPages);
+    }
+
+
+    private PackageAvailabilityDTO toPackageAvailabilityDTO(List<PackageAvailability> packageAvailabilities, int currentPage, int totalElements, int totalPages) {
+        List<PackageAvailabilityDetail> packageAvailabilityDetails = toPackageAvailabilityDetails(packageAvailabilities);
+        return PackageAvailabilityDTO.builder()
+                .packageAvailabilityDetails(packageAvailabilityDetails)
+                .currentPage(currentPage)
+                .totalPages(totalPages)
+                .totalElements(totalElements)
+                .build();
+    }
+
+    private List<PackageAvailabilityDetail> toPackageAvailabilityDetails(List<PackageAvailability> packageAvailabilities) {
+        List<PackageAvailabilityDetail> packageAvailabilityDetails = new ArrayList<>();
+        for (PackageAvailability packageAvailability : packageAvailabilities
+        ) {
+            packageAvailabilityDetails.add(toPackageAvailabilityDetail(packageAvailability));
+        }
+        return packageAvailabilityDetails;
+    }
+
+    private PackageAvailabilityDetail toPackageAvailabilityDetail(PackageAvailability packageAvailability) {
+        return PackageAvailabilityDetail.builder()
+                .packageName(packageAvailability.getAPackage().getName())
+                .packageId(String.valueOf(packageAvailability.getAPackage().getId()))
+                .description(String.valueOf(packageAvailability.getAPackage().getDescription()))
+                .capacity(findHallByPackage(packageAvailability.getAPackage()).getId())
+                .status(String.valueOf(packageAvailability.getStatus()))
+                .date(Formatter.convertDateToStr(packageAvailability.getDate(), "yyyy-MM-dd"))
+                .endTime(Formatter.getStringFromTime(packageAvailability.getEndTime()))
+                .startTime(Formatter.getStringFromTime(packageAvailability.getStartTime()))
+                .build();
     }
 
     private void savePackageMenu(Package aPackage, Menu menu) {
@@ -329,5 +432,15 @@ public class PackageServiceImpl implements PackageService {
                     build());
         }
         return foodDetails;
+    }
+
+    private PackageAvailability convertToPackageAvailability(PackageAvailabilityRequest request, Package aPackage) {
+        PackageAvailability packageAvailability = new PackageAvailability();
+        packageAvailability.setAPackage(aPackage);
+        packageAvailability.setStatus(PackageStatus.valueOf(request.getStatus()));
+        packageAvailability.setDate(Formatter.convertStrToDate(request.getDate(), "yyyy-MM-dd"));
+        packageAvailability.setStartTime(Formatter.getTimeFromString(request.getStartTime()));
+        packageAvailability.setEndTime(Formatter.getTimeFromString(request.getEndTime()));
+        return packageAvailability;
     }
 }

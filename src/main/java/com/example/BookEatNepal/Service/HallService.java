@@ -26,5 +26,5 @@ public interface HallService {
 
     String saveHallAvailability(List<HallAvailabilityRequest> requests);
 
-    HallAvailabilityDTO checkAvailability(String hallId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size);
+    HallAvailabilityDTO checkAvailability(String venueId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size);
 }
