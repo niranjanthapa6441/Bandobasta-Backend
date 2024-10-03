@@ -131,7 +131,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallAvailabilityDTO checkAvailability(String venueId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size) {
+    public HallAvailabilityDTO checkAvailability(String venueId, String date, String startTime, String endTime, int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
@@ -147,15 +147,15 @@ public class HallServiceImpl implements HallService {
         }
 
         if (date != null) {
-            predicates.add(cb.equal(hallAvailabilityRoot.get("date"), date));
+            predicates.add(cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(date,"yyyy-MM-dd")));
         }
 
         if (startTime != null && endTime != null) {
-            Predicate noOverlap = cb.or(
-                    cb.lessThanOrEqualTo(hallAvailabilityRoot.get("endTime"), Formatter.getTimeFromString(startTime)),
-                    cb.greaterThanOrEqualTo(hallAvailabilityRoot.get("startTime"), Formatter.getTimeFromString(endTime))
+            Predicate overlap = cb.and(
+                    cb.lessThanOrEqualTo(hallAvailabilityRoot.get("startTime"), Formatter.getTimeFromString(endTime)),
+                    cb.greaterThanOrEqualTo(hallAvailabilityRoot.get("endTime"), Formatter.getTimeFromString(startTime))
             );
-            predicates.add(noOverlap);
+            predicates.add(overlap);
         }
 
         if (numberOfGuests > 0) {
@@ -163,6 +163,7 @@ public class HallServiceImpl implements HallService {
         }
 
         predicates.add(cb.equal(hallAvailabilityRoot.get("status"), HallStatus.AVAILABLE));
+        query.where(predicates.toArray(new Predicate[0]));
 
         List<HallAvailability> hallAvailabilities = entityManager.createQuery(query).getResultList();
 

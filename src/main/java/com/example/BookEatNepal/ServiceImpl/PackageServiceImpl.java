@@ -2,7 +2,6 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.DTO.*;
 import com.example.BookEatNepal.Enums.EventType;
-import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Enums.PackageStatus;
 import com.example.BookEatNepal.Enums.PackageType;
 import com.example.BookEatNepal.Model.*;
@@ -19,7 +18,6 @@ import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +32,6 @@ public class PackageServiceImpl implements PackageService {
     private PackageRepo packageRepo;
     @Autowired
     private PackageAmenityRepo packageAmenityRepo;
-    @Autowired
-    private PackageHallRepo packageHallRepo;
-    @Autowired
-    private PackageMenuRepo packageMenuRepo;
     @Autowired
     private MenuRepo menuRepo;
     @Autowired
@@ -59,10 +53,8 @@ public class PackageServiceImpl implements PackageService {
         Hall hall = findHallById(request.getHallId());
         Menu menu = findMenuById(request.getMenuId());
         List<Amenity> amenities = findAmenitiesById(request.getAmenityIds());
-        Package aPackage = packageRepo.save(convertToPackage(request, venue));
+        Package aPackage = packageRepo.save(convertToPackage(request, venue, hall, menu));
         savePackageAmenities(aPackage, amenities);
-        savePackageHall(aPackage, hall);
-        savePackageMenu(aPackage, menu);
         return SUCCESS_MESSAGE;
     }
 
@@ -156,16 +148,15 @@ public class PackageServiceImpl implements PackageService {
     }
 
     @Override
-    public PackageAvailabilityDTO checkAvailability(String venueId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size) {
+    public PackageAvailabilityDTO checkAvailability(String venueId, String date, String startTime, String endTime, int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PackageAvailability> query = cb.createQuery(PackageAvailability.class);
-        Root<PackageAvailability> packageAvailabilityRoot = query.from(PackageAvailability.class);
 
+        Root<PackageAvailability> packageAvailabilityRoot = query.from(PackageAvailability.class);
         Join<PackageAvailability, Package> packageAvailabilityPackageJoin = packageAvailabilityRoot.join("aPackage");
         Join<Package, Venue> packageVenueJoin = packageAvailabilityPackageJoin.join("venue");
-        Join<Package, PackageHall> packagePackageHallJoin = packageAvailabilityPackageJoin.join("aPackage");
-        Join<PackageHall, Hall> packageHallJoin = packagePackageHallJoin.join("hall");
+        Join<Package, Hall> packageHallJoin = packageAvailabilityPackageJoin.join("hall", JoinType.INNER);
 
         query.select(packageAvailabilityRoot);
         List<Predicate> predicates = new ArrayList<>();
@@ -175,15 +166,15 @@ public class PackageServiceImpl implements PackageService {
         }
 
         if (date != null) {
-            predicates.add(cb.equal(packageAvailabilityRoot.get("date"), date));
+            predicates.add(cb.equal(packageAvailabilityRoot.get("date"),Formatter.convertStrToDate(date, "yyyy-MM-dd") ));
         }
 
         if (startTime != null && endTime != null) {
-            Predicate noOverlap = cb.or(
-                    cb.lessThanOrEqualTo(packageAvailabilityRoot.get("endTime"), Formatter.getTimeFromString(startTime)),
-                    cb.greaterThanOrEqualTo(packageAvailabilityRoot.get("startTime"), Formatter.getTimeFromString(endTime))
+            Predicate overlap = cb.and(
+                    cb.lessThanOrEqualTo(packageAvailabilityRoot.get("startTime"), Formatter.getTimeFromString(endTime)),
+                    cb.greaterThanOrEqualTo(packageAvailabilityRoot.get("endTime"), Formatter.getTimeFromString(startTime))
             );
-            predicates.add(noOverlap);
+            predicates.add(overlap);
         }
 
         predicates.add(cb.equal(packageAvailabilityRoot.get("status"), PackageStatus.AVAILABLE));
@@ -234,7 +225,7 @@ public class PackageServiceImpl implements PackageService {
                 .packageName(packageAvailability.getAPackage().getName())
                 .packageId(String.valueOf(packageAvailability.getAPackage().getId()))
                 .description(String.valueOf(packageAvailability.getAPackage().getDescription()))
-                .capacity(findHallByPackage(packageAvailability.getAPackage()).getId())
+                .capacity(packageAvailability.getAPackage().getHall().getCapacity())
                 .status(String.valueOf(packageAvailability.getStatus()))
                 .date(Formatter.convertDateToStr(packageAvailability.getDate(), "yyyy-MM-dd"))
                 .endTime(Formatter.getStringFromTime(packageAvailability.getEndTime()))
@@ -242,27 +233,6 @@ public class PackageServiceImpl implements PackageService {
                 .build();
     }
 
-    private void savePackageMenu(Package aPackage, Menu menu) {
-        packageMenuRepo.save(convertToPackageMenu(aPackage, menu));
-    }
-
-    private PackageMenu convertToPackageMenu(Package aPackage, Menu menu) {
-        PackageMenu packageMenu = new PackageMenu();
-        packageMenu.setAPackage(aPackage);
-        packageMenu.setMenu(menu);
-        return packageMenu;
-    }
-
-    private void savePackageHall(Package aPackage, Hall hall) {
-        packageHallRepo.save(convertToPackageHall(aPackage, hall));
-    }
-
-    private PackageHall convertToPackageHall(Package aPackage, Hall hall) {
-        PackageHall packageHall = new PackageHall();
-        packageHall.setAPackage(aPackage);
-        packageHall.setHall(hall);
-        return packageHall;
-    }
 
     private void savePackageAmenities(Package aPackage, List<Amenity> amenities) {
         for (Amenity amenity : amenities
@@ -278,7 +248,7 @@ public class PackageServiceImpl implements PackageService {
         return packageAmenity;
     }
 
-    private Package convertToPackage(PackageRequest request, Venue venue) {
+    private Package convertToPackage(PackageRequest request, Venue venue, Hall hall, Menu menu) {
         Package aPackage = new Package();
         aPackage.setName(request.getName());
         aPackage.setDescription(request.getDescription());
@@ -287,6 +257,8 @@ public class PackageServiceImpl implements PackageService {
         aPackage.setStatus(PackageStatus.valueOf(request.getStatus()));
         aPackage.setVenue(venue);
         aPackage.setEventType(EventType.valueOf(request.getEventType()));
+        aPackage.setMenu(menu);
+        aPackage.setHall(hall);
         return aPackage;
     }
 
@@ -344,8 +316,8 @@ public class PackageServiceImpl implements PackageService {
                 .description(aPackage.getDescription())
                 .price(aPackage.getPrice())
                 .status(String.valueOf(aPackage.getStatus()))
-                .menuDetail(findMenuByPackage(aPackage))
-                .hallDetail(findHallByPackage(aPackage))
+                .menuDetail(toMenuDetail(aPackage.getMenu()))
+                .hallDetail(toHallDetail(aPackage.getHall()))
                 .amenities(findAmenitiesByPackage(aPackage))
                 .build();
     }
@@ -372,11 +344,6 @@ public class PackageServiceImpl implements PackageService {
                 .build();
     }
 
-    private HallDetail findHallByPackage(Package aPackage) {
-        PackageHall packageHall = packageHallRepo.findByaPackage(aPackage);
-        return toHallDetail(packageHall.getHall());
-    }
-
     private HallDetail toHallDetail(Hall hall) {
         return HallDetail.builder()
                 .name(hall.getName())
@@ -398,11 +365,6 @@ public class PackageServiceImpl implements PackageService {
             hallImagePaths.add(image.getImageUrl());
         }
         return hallImagePaths;
-    }
-
-    private MenuDetail findMenuByPackage(Package aPackage) {
-        PackageMenu packageMenu = packageMenuRepo.findByaPackage(aPackage);
-        return toMenuDetail(packageMenu.getMenu());
     }
 
     private MenuDetail toMenuDetail(Menu menu) {

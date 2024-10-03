@@ -38,6 +38,15 @@ public class Package {
     @Column(name = "price", nullable = false)
     private double price;
 
+    @ManyToOne
+    @JoinColumn(name = "menu_id", nullable = false)
+    private Menu menu;
+
+    @ManyToOne
+    @JoinColumn(name = "hall_id", nullable = false)
+    private Hall hall;
+
+
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)
     private PackageStatus status;

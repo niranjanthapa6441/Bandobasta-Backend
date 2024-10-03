@@ -24,6 +24,6 @@ public interface PackageService {
     String update(PackageRequest request, int id);
     String savePackageAvailability(List<PackageAvailabilityRequest> requests);
 
-    PackageAvailabilityDTO checkAvailability(String packageId, LocalDate date, String startTime, String endTime, int numberOfGuests, int page, int size);
+    PackageAvailabilityDTO checkAvailability(String venueId, String date, String startTime, String endTime, int numberOfGuests, int page, int size);
 
 }
