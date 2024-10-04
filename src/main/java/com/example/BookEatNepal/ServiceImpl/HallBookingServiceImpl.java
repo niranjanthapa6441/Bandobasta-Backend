@@ -103,7 +103,36 @@ public class HallBookingServiceImpl implements HallBookingService {
 
     @Override
     public BookingDTO findBookingByVenue(String venueId, String bookingDate, String hallId, int page, int size) {
-        return null;
+        int id = Integer.parseInt(venueId);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<HallBooking> query = cb.createQuery(HallBooking.class);
+
+        Root<HallBooking> bookingRoot = query.from(HallBooking.class);
+        Join<HallBooking, HallAvailability> hallBookingHallAvailabilityJoin = bookingRoot.join("hallAvailability");
+        Join<HallAvailability, Hall> hallAvailabilityHallJoin = hallBookingHallAvailabilityJoin.join("hall");
+        Join<Hall, Venue> hallVenueJoin = hallAvailabilityHallJoin.join("venue");
+
+        query.select(bookingRoot);
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (id != 0 ) {
+            predicates.add(cb.equal(hallVenueJoin.get("id"), id));
+        }
+        query.where(predicates.toArray(new Predicate[0]));
+
+        List<HallBooking> bookings = entityManager.createQuery(query).getResultList();
+
+        TypedQuery<HallBooking> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((page - 1) * size);
+        typedQuery.setMaxResults(size);
+
+        List<HallBooking> pagedBookings = typedQuery.getResultList();
+
+        int currentPage = page - 1;
+        int totalElements = bookings.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        return toBookingDTO(pagedBookings, currentPage, totalElements, totalPages);
     }
 
     @Override
