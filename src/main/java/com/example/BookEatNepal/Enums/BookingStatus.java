@@ -1,9 +1,10 @@
 package com.example.BookEatNepal.Enums;
 
 public enum BookingStatus {
-    CONFIRMED,
+    BOOKED,
     PENDING,
     CANCELED,
     COMPLETED,
-    IN_PROGRESS
+    IN_PROGRESS,
+    DELETED
 }
