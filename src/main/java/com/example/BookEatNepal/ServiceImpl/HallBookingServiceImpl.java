@@ -6,7 +6,7 @@ import com.example.BookEatNepal.Enums.EventType;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Repository.*;
-import com.example.BookEatNepal.Request.BookingRequest;
+import com.example.BookEatNepal.Request.HallBookingRequest;
 import com.example.BookEatNepal.Service.HallBookingService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.example.BookEatNepal.Util.Formatter;
@@ -48,7 +48,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     private EntityManager entityManager;
 
     @Override
-    public String save(BookingRequest request) {
+    public String save(HallBookingRequest request) {
         HallAvailability hallAvailability = getHallAvailability(request.getHallAvailabilityId());
 
         Menu menu = getMenu(request.getMenuId());
@@ -72,7 +72,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     @Override
-    public BookingDTO findBookingByUser(String userId, String bookingDate, int page, int size) {
+    public HallBookingDTO findBookingByUser(String userId, String bookingDate, int page, int size) {
         int id = Integer.parseInt(userId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallBooking> query = cb.createQuery(HallBooking.class);
@@ -102,7 +102,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     @Override
-    public BookingDTO findBookingByVenue(String venueId, String bookingDate, String hallId, int page, int size) {
+    public HallBookingDTO findBookingByVenue(String venueId, String bookingDate, String hallId, int page, int size) {
         int id = Integer.parseInt(venueId);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -136,7 +136,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     @Override
-    public String update(BookingRequest request, int id) {
+    public String update(HallBookingRequest request, int id) {
         return SUCCESS_MESSAGE;
     }
 
@@ -152,13 +152,13 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     @Override
-    public BookingDetail findById(int id) {
+    public HallBookingDetail findById(int id) {
         HallBooking hallBooking = getHallBooking(id);
         return convertToBookingDetail(hallBooking);
     }
 
-    private BookingDetail convertToBookingDetail(HallBooking hallBooking) {
-        return BookingDetail.builder()
+    private HallBookingDetail convertToBookingDetail(HallBooking hallBooking) {
+        return HallBookingDetail.builder()
                 .id(hallBooking.getId())
                 .hallDetail(toHallDetail(getHall(hallBooking.getHallAvailability().getHall().getId())))
                 .menuDetail(toMenuDetail(hallBooking.getMenu()))
@@ -224,7 +224,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .orElseThrow(() -> new CustomException(CustomException.Type.HALL_AVAILABILITY_NOT_FOUND));
     }
 
-    private HallBooking toBooking(BookingRequest request, Menu menu, HallAvailability hallAvailability, AppUser user) {
+    private HallBooking toBooking(HallBookingRequest request, Menu menu, HallAvailability hallAvailability, AppUser user) {
         HallBooking hallBooking = new HallBooking();
         hallBooking.setHallAvailability(hallAvailability);
         hallBooking.setMenu(menu);
@@ -239,7 +239,7 @@ public class HallBookingServiceImpl implements HallBookingService {
 
     private HallBooking getHallBooking(int id) {
         return hallBookingRepo.findById(id)
-                .orElseThrow(() -> new CustomException(CustomException.Type.HALL_BOOKING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(CustomException.Type.BOOKING_NOT_FOUND));
     }
 
     private MenuDetail toMenuDetail(Menu menu) {
@@ -271,9 +271,9 @@ public class HallBookingServiceImpl implements HallBookingService {
         }
         return foodDetails;
     }
-    private BookingDTO toBookingDTO(List<HallBooking> bookings, int currentPage, int totalElements, int totalPages) {
-        List<BookingDetail> bookingDetails = getBookingDetails(bookings);
-        return  BookingDTO.builder()
+    private HallBookingDTO toBookingDTO(List<HallBooking> bookings, int currentPage, int totalElements, int totalPages) {
+        List<HallBookingDetail> bookingDetails = getBookingDetails(bookings);
+        return  HallBookingDTO.builder()
                 .bookings(bookingDetails)
                 .currentPage(currentPage)
                 .totalElements(totalElements)
@@ -281,8 +281,8 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .build();
     }
 
-    private List<BookingDetail> getBookingDetails(List<HallBooking> bookings) {
-        List<BookingDetail> bookingDetails = new ArrayList<>();
+    private List<HallBookingDetail> getBookingDetails(List<HallBooking> bookings) {
+        List<HallBookingDetail> bookingDetails = new ArrayList<>();
         for (HallBooking hallBooking: bookings
         ) {
             bookingDetails.add(convertToBookingDetail(hallBooking));

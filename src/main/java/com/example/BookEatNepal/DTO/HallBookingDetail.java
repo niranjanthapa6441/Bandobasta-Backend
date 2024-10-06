@@ -1,11 +1,5 @@
 package com.example.BookEatNepal.DTO;
 
-import com.example.BookEatNepal.Enums.BookingStatus;
-import com.example.BookEatNepal.Enums.EventType;
-import com.example.BookEatNepal.Model.AppUser;
-import com.example.BookEatNepal.Model.HallAvailability;
-import com.example.BookEatNepal.Model.Menu;
-import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,7 +7,7 @@ import java.time.LocalTime;
 
 @Data
 @Builder
-public class BookingDetail {
+public class HallBookingDetail {
     private int id;
     private String userId;
     private String hallAvailabilityId;

@@ -4,7 +4,7 @@ import lombok.Data;
 
 
 @Data
-public class BookingRequest {
+public class HallBookingRequest {
     private String userId;
     private String hallAvailabilityId;
     private String packageId;
