@@ -11,10 +11,7 @@ import com.example.BookEatNepal.Service.VenueService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +28,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -41,7 +39,8 @@ public class VenueServiceImpl implements VenueService {
     private VenueImageRepo venueImageRepo;
     @Autowired
     private AppUserRepo appUserRepo;
-
+    @Autowired
+    private MenuRepo menuRepo;
     @Autowired
     private HallRepo hallRepo;
     @Autowired
@@ -70,10 +69,12 @@ public class VenueServiceImpl implements VenueService {
 
 
     @Override
-    public VenueDTO findAll(String venue, String location,int maxCapacity,int minCapacity,String venueType,double rating, int page, int size) {
+    public VenueDTO findAll(String venue, String location, int minCapacity, int maxCapacity,
+                            double minPrice, double maxPrice, String venueType, double rating,
+                            int page, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Venue> query = cb.createQuery(Venue.class);
-        Root<Venue> venueRoot = query.from(Venue.class);
+        CriteriaQuery<Venue> cq = cb.createQuery(Venue.class);
+        Root<Venue> venueRoot = cq.from(Venue.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
@@ -85,23 +86,47 @@ public class VenueServiceImpl implements VenueService {
             predicates.add(cb.like(cb.lower(venueRoot.get("address")), "%" + location.toLowerCase() + "%"));
         }
 
-        predicates.add(cb.isTrue(venueRoot.get("isVerified")));
+        if (minPrice >= 0 && maxPrice > minPrice) {
+            Subquery<Long> menuPriceSubquery = cq.subquery(Long.class);
+            Root<Menu> menu = menuPriceSubquery.from(Menu.class);
+            menuPriceSubquery.select(menu.get("id"))
+                    .where(cb.equal(menu.get("venue").get("id"), venueRoot.get("id")),
+                            cb.between(menu.get("price"), minPrice, maxPrice));
+            predicates.add(cb.exists(menuPriceSubquery));
+        }
 
-        predicates.add(cb.equal(venueRoot.get("status"), VenueStatus.AVAILABLE));
+        if (minCapacity > 0 && maxCapacity > minCapacity) {
+            Subquery<Long> hallCapacitySubQuery = cq.subquery(Long.class);
+            Root<Hall> hallRoot = hallCapacitySubQuery.from(Hall.class);
+            hallCapacitySubQuery.select(hallRoot.get("id"))
+                    .where(cb.equal(hallRoot.get("venue").get("id"), venueRoot.get("id")),
+                            cb.between(hallRoot.get("capacity"), minCapacity, maxCapacity));
+            predicates.add(cb.exists(hallCapacitySubQuery));
+        }
 
-        query.where(predicates.toArray(new Predicate[0]));
+        if (venueType != null && !venueType.isEmpty()) {
+            predicates.add(cb.equal(venueRoot.get("status"), venueType));
+        }
+        if (rating > 0) {
+            predicates.add(cb.greaterThanOrEqualTo(venueRoot.get("rating"), rating));
+        }
 
-        List<Venue> venues = entityManager.createQuery(query).getResultList();
+        // Combine predicates into a single predicate
+        if (!predicates.isEmpty()) {
+            cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        }
+        List<Venue> venues = entityManager.createQuery(cq).getResultList();
 
-        TypedQuery<Venue> typedQuery = entityManager.createQuery(query);
+        // Execute the query with pagination
+        TypedQuery<Venue> typedQuery = entityManager.createQuery(cq);
         typedQuery.setFirstResult((page - 1) * size);
         typedQuery.setMaxResults(size);
 
         List<Venue> pagedVenues = typedQuery.getResultList();
 
-        int currentPage = page - 1;
         int totalElements = venues.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
+        int currentPage = page;
 
         return toVenueDTO(pagedVenues, currentPage, totalElements, totalPages);
     }
@@ -258,13 +283,25 @@ public class VenueServiceImpl implements VenueService {
                     .address(venue.getAddress())
                     .description(venue.getDescription().toString())
                     .status(String.valueOf(venue.getStatus()))
+                    .startingPrice(getMinMenuPrice(venue))
                     .venueImagePaths(getVenueImagePath(venue.getId()))
-                    .hallDetails(getHallDetails(venue.getId()))
                     .build())
             ;
         }
         return venueDetails;
     }
+
+    private String getMinMenuPrice(Venue venue) {
+        List<Menu> menus = menuRepo.findByVenue(venue);
+
+        Double minMenuPrice = menus.stream()
+                .map(Menu::getPrice)
+                .min(Double::compareTo)
+                .orElse(0.0);
+
+        return String.valueOf(minMenuPrice);
+    }
+
 
     private List<HallDetail> getHallDetails(int id) {
         List<Hall> halls= hallRepo.findByVenueId(id);

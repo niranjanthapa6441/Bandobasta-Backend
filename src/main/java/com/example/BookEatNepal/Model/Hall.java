@@ -22,7 +22,7 @@ public class Hall {
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @Column(name="item", nullable = false, length = 30)
+    @Column(name="name", nullable = false, length = 30)
     private String name;
 
     @Column(name = "description", columnDefinition = "text", nullable = false)

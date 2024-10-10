@@ -20,7 +20,9 @@ public class VenueController {
     public static final String PAGE = "1";
     public static final String RATING = "0.0";
     public static final String MAX_CAPACITY = "0";
-    public static final String MIN_CAPACITY = "1000";
+    public static final String MIN_CAPACITY = "0";
+    public static final String MAX_PRICE = "0";
+    public static final String MIN_PRICE = "0";
     public static final String MESSAGE = "Successful";
     @Autowired
     private VenueService service;
@@ -59,12 +61,14 @@ public class VenueController {
             @RequestParam(required = false) String location,
             @RequestParam(defaultValue = MAX_CAPACITY) int maxCapacity,
             @RequestParam(defaultValue = MIN_CAPACITY) int minCapacity,
+            @RequestParam(defaultValue = MIN_PRICE) double minPrice,
+            @RequestParam(defaultValue = MAX_PRICE) double maxPrice,
             @RequestParam(required = false) String venueType,
             @RequestParam(defaultValue = RATING) double rating,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.findAll(name, location,maxCapacity,minCapacity, venueType, rating, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.findAll(name, location,minCapacity,maxCapacity,minPrice,maxPrice,venueType, rating, page, size), "Data Retrieval Successful");
     }
 }
