@@ -111,13 +111,11 @@ public class VenueServiceImpl implements VenueService {
             predicates.add(cb.greaterThanOrEqualTo(venueRoot.get("rating"), rating));
         }
 
-        // Combine predicates into a single predicate
         if (!predicates.isEmpty()) {
             cq.where(cb.and(predicates.toArray(new Predicate[0])));
         }
         List<Venue> venues = entityManager.createQuery(cq).getResultList();
 
-        // Execute the query with pagination
         TypedQuery<Venue> typedQuery = entityManager.createQuery(cq);
         typedQuery.setFirstResult((page - 1) * size);
         typedQuery.setMaxResults(size);

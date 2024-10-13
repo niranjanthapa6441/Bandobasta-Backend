@@ -72,7 +72,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     @Override
-    public HallBookingDTO findBookingByUser(String userId, String bookingDate, int page, int size) {
+    public HallBookingDTO findBookingByUser(String userId, String startDate, String endDate, String bookingStatus, String sortBy, int page, int size) {
         int id = Integer.parseInt(userId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallBooking> query = cb.createQuery(HallBooking.class);
@@ -167,6 +167,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .confirmedDate(Formatter.convertDateToStr(hallBooking.getConfirmedDate(), "yyyy-MM-dd"))
                 .requestedTime(hallBooking.getRequestedTime())
                 .confirmedTime(hallBooking.getConfirmedTime())
+                .bookedForDate(Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"))
                 .price(hallBooking.getPrice())
                 .status(String.valueOf(hallBooking.getStatus()))
                 .eventType(String.valueOf(hallBooking.getEventType()))

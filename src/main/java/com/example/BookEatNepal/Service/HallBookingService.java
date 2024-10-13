@@ -11,7 +11,7 @@ public interface HallBookingService {
     String save(HallBookingRequest request);
     String delete(int id);
 
-    HallBookingDTO findBookingByUser(String userId, String bookingDate, int page, int size);
+    HallBookingDTO findBookingByUser(String userId, String startDate,String endDate,String bookingStatus,String orderBy, int page, int size);
     HallBookingDTO findBookingByVenue(String venueId, String bookingDate, String hallId, int page, int size);
 
     HallBookingDetail findById(int id);

@@ -10,7 +10,7 @@ import java.time.LocalTime;
 public class HallBookingDetail {
     private int id;
     private String userId;
-    private String hallAvailabilityId;
+    private String bookedForDate;
     private HallDetail hallDetail;
     private MenuDetail menuDetail;
     private String requestedDate;
