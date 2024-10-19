@@ -15,7 +15,7 @@ public interface VenueService {
     String delete(int id);
 
 
-    VenueDTO findAll(String name, String location,int minCapacity, int maxCapacity,double minPrice, double maxPrice,String venueType, double rating, int page, int size);
+    VenueDTO findAll(String venueName, String location,int minCapacity, int maxCapacity,double minPrice, double maxPrice,String venueType, double rating, int page, int size);
 
     Venue findById(int id);
 

@@ -1,6 +1,5 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Request.PackageAvailabilityRequest;
 import com.example.BookEatNepal.Request.PackageRequest;
 import com.example.BookEatNepal.Service.PackageService;

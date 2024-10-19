@@ -10,6 +10,5 @@ public class HallBookingRequest {
     private double price;
     private String status;
     private String menuId;
-    private String bookedForDate;
     private String eventType;
 }

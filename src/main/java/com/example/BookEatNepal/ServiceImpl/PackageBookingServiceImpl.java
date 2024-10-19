@@ -229,14 +229,14 @@ public class PackageBookingServiceImpl implements PackageBookingService {
                 .amenities(findAmenitiesByPackage(aPackage))
                 .build();
     }
-    private List<AmenityDetail> findAmenitiesByPackage(Package aPackage) {
+    private List<String> findAmenitiesByPackage(Package aPackage) {
         List<PackageAmenity> packageAmenities = packageAmenityRepo.findByaPackage(aPackage);
-        List<AmenityDetail> amenityDetails = new ArrayList<>();
+        List<String> amenities = new ArrayList<>();
         for (PackageAmenity packageAmenity : packageAmenities
         ) {
-            amenityDetails.add(toAmenityDetail(packageAmenity.getAmenity()));
+            amenities.add(packageAmenity.getAmenity().getName());
         }
-        return amenityDetails;
+        return amenities;
     }
 
     private AmenityDetail toAmenityDetail(Amenity amenity) {

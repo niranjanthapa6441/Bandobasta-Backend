@@ -15,7 +15,7 @@ public class PackageDetail {
     private String eventType;
     private String description;
     private double price;
-    List<AmenityDetail> amenities;
+    List<String> amenities;
     private HallDetail hallDetail;
     private MenuDetail menuDetail;
     private String status;

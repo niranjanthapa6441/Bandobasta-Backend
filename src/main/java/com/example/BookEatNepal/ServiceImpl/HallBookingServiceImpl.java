@@ -232,7 +232,7 @@ public class HallBookingServiceImpl implements HallBookingService {
         hallBooking.setRequestedDate(LocalDate.now());
         hallBooking.setRequestedTime(LocalTime.now());
         hallBooking.setStatus(BookingStatus.PENDING);
-        hallBooking.setBookedForDate(Formatter.convertStrToDate(request.getBookedForDate(),"yyyy-MM-dd"));
+        hallBooking.setBookedForDate(hallAvailability.getDate());
         hallBooking.setEventType(EventType.valueOf(request.getEventType()));
         hallBooking.setUser(user);
         return hallBooking;

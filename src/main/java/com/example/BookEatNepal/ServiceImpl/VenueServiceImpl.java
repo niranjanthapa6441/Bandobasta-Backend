@@ -28,7 +28,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -39,6 +38,9 @@ public class VenueServiceImpl implements VenueService {
     private VenueImageRepo venueImageRepo;
     @Autowired
     private AppUserRepo appUserRepo;
+
+    @Autowired
+    private AmenityRepo amenityRepo;
     @Autowired
     private MenuRepo menuRepo;
     @Autowired
@@ -69,7 +71,7 @@ public class VenueServiceImpl implements VenueService {
 
 
     @Override
-    public VenueDTO findAll(String venue, String location, int minCapacity, int maxCapacity,
+    public VenueDTO findAll(String venueName, String location, int minCapacity, int maxCapacity,
                             double minPrice, double maxPrice, String venueType, double rating,
                             int page, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -78,8 +80,8 @@ public class VenueServiceImpl implements VenueService {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        if (venue != null && !venue.isEmpty()) {
-            predicates.add(cb.like(cb.lower(venueRoot.get("venueName")), "%" + venue.toLowerCase() + "%"));
+        if (venueName != null && !venueName.isEmpty()) {
+            predicates.add(cb.like(cb.lower(venueRoot.get("venueName")), "%" + venueName.toLowerCase() + "%"));
         }
 
         if (location != null && !location.isEmpty()) {
@@ -277,16 +279,28 @@ public class VenueServiceImpl implements VenueService {
         for (Venue venue : venues
         ) {
             venueDetails.add(VenueDetails.builder()
-                    .name(venue.getVenueName())
-                    .address(venue.getAddress())
-                    .description(venue.getDescription().toString())
-                    .status(String.valueOf(venue.getStatus()))
-                    .startingPrice(getMinMenuPrice(venue))
-                    .venueImagePaths(getVenueImagePath(venue.getId()))
-                    .build())
-            ;
+                        .id(String.valueOf(venue.getId()))
+                        .name(venue.getVenueName())
+                        .address(venue.getAddress())
+                        .description(venue.getDescription().toString())
+                        .status(String.valueOf(venue.getStatus()))
+                        .startingPrice(getMinMenuPrice(venue))
+                        .maxCapacity(getMaxCapacity(venue))
+                        .amenities(getAmenitiesByVenue(venue))
+                        .venueImagePaths(getVenueImagePath(venue.getId()))
+                        .build());
         }
         return venueDetails;
+    }
+
+    private List<String> getAmenitiesByVenue(Venue venue) {
+        List<String> amenities = new ArrayList<>();
+        List<Amenity> findAmenities = amenityRepo.findByVenue(venue);
+        for (Amenity amenity: findAmenities
+                ) {
+            amenities.add(amenity.getName());
+        }
+        return  amenities;
     }
 
     private String getMinMenuPrice(Venue venue) {
@@ -299,6 +313,18 @@ public class VenueServiceImpl implements VenueService {
 
         return String.valueOf(minMenuPrice);
     }
+    private String getMaxCapacity(Venue venue) {
+        List<Hall> halls = hallRepo.findByVenue(venue);
+
+
+        Integer maxHallCapacity = halls.stream()
+                .map(Hall::getCapacity)
+                .max(Integer::compareTo)
+                .orElse(0);
+
+        return String.valueOf(maxHallCapacity); // Return as String
+    }
+
 
 
     private List<HallDetail> getHallDetails(int id) {

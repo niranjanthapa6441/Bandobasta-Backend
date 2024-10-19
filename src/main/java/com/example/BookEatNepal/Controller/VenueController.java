@@ -57,7 +57,7 @@ public class VenueController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
-            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String venueName,
             @RequestParam(required = false) String location,
             @RequestParam(defaultValue = MAX_CAPACITY) int maxCapacity,
             @RequestParam(defaultValue = MIN_CAPACITY) int minCapacity,
@@ -69,6 +69,6 @@ public class VenueController {
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.findAll(name, location,minCapacity,maxCapacity,minPrice,maxPrice,venueType, rating, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.findAll(venueName, location,minCapacity,maxCapacity,minPrice,maxPrice,venueType, rating, page, size), "Data Retrieval Successful");
     }
 }
