@@ -9,6 +9,7 @@ import java.time.LocalTime;
 @Builder
 public class HallBookingDetail {
     private int id;
+    private String venueName;
     private String userId;
     private String bookedForDate;
     private HallDetail hallDetail;

@@ -160,6 +160,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     private HallBookingDetail convertToBookingDetail(HallBooking hallBooking) {
         return HallBookingDetail.builder()
                 .id(hallBooking.getId())
+                .venueName(hallBooking.getHallAvailability().getHall().getVenue().getVenueName())
                 .hallDetail(toHallDetail(getHall(hallBooking.getHallAvailability().getHall().getId())))
                 .menuDetail(toMenuDetail(hallBooking.getMenu()))
                 .userId(String.valueOf(hallBooking.getUser().getId()))
