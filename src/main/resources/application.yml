@@ -35,6 +35,6 @@ server:
   port: 8080
 bandobasta:
   app:
-    jwtSecret: pZx5SLg0Yz1G-wFq8w3M5TYYrTAh_TA30gGplK35DPU
+    jwtSecret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
     jwtExpirationMs: 86400000
     jwtCookieName: bandobasta

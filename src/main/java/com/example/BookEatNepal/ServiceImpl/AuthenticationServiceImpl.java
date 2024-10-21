@@ -57,37 +57,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public String save(SignUpRequest request) {
         checkValidation(request);
-        AppUser user = toCustomer(request);
-        AppUser saveCustomer = repo.save(user);
+        AppUser user = toUser(request);
+        AppUser saveUser = repo.save(user);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken = new ConfirmationToken(
                 token,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMinutes(15),
-                saveCustomer
+                saveUser
         );
         confirmationTokenService.saveConfirmationToken(confirmationToken);
         return token;
     }
     @Override
     public int enableAppUser(String email) {
-        Optional<AppUser> findCustomer=repo.findByEmail(email);
-        AppUser updateCustomer=new AppUser();
-        if (findCustomer.isPresent()){
-            AppUser appUser= findCustomer.get();
-            updateCustomer.setId(appUser.getId());
-            updateCustomer.setFirstName(appUser.getFirstName());
-            updateCustomer.setEmail(appUser.getEmail());
-            updateCustomer.setLastName(appUser.getLastName());
-            updateCustomer.setMiddleName(appUser.getMiddleName());
-            updateCustomer.setPhoneNumber(appUser.getPhoneNumber());
-            updateCustomer.setUsername(appUser.getUsername());
-            updateCustomer.setPassword(appUser.getPassword());
-            updateCustomer.setEnabled(true);
-            updateCustomer.setLocked(true);
-            updateCustomer.setRole(appUser.getRole());
-            updateCustomer.setStatus("Registered");
-            repo.save(updateCustomer);
+        Optional<AppUser> findUser=repo.findByEmail(email);
+        AppUser updateUser=new AppUser();
+        if (findUser.isPresent()){
+            AppUser appUser= findUser.get();
+            updateUser.setId(appUser.getId());
+            updateUser.setFirstName(appUser.getFirstName());
+            updateUser.setEmail(appUser.getEmail());
+            updateUser.setLastName(appUser.getLastName());
+            updateUser.setMiddleName(appUser.getMiddleName());
+            updateUser.setPhoneNumber(appUser.getPhoneNumber());
+            updateUser.setUsername(appUser.getUsername());
+            updateUser.setPassword(appUser.getPassword());
+            updateUser.setEnabled(true);
+            updateUser.setLocked(true);
+            updateUser.setRole(appUser.getRole());
+            updateUser.setStatus("Registered");
+            repo.save(updateUser);
         }
         return 1;
     }
@@ -104,7 +104,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
@@ -118,78 +117,78 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
     @Override
     public String update(int id, UpdateProfileRequest request) {
-        Optional<AppUser> findCustomer = repo.findById(id);
-        checkUpdateValidation(request,findCustomer.get());
-        if (findCustomer.isPresent()) {
-            AppUser updateCustomer = toUpdateCustomer(request,findCustomer.get());
-            AppUser updatedCustomer = repo.save(updateCustomer);
+        Optional<AppUser> findUser = repo.findById(id);
+        checkUpdateValidation(request,findUser.get());
+        if (findUser.isPresent()) {
+            AppUser updateUser = toupdateUser(request,findUser.get());
+            AppUser updatedUser = repo.save(updateUser);
             return "User Updated Successfully";
         } else
-            throw new NullPointerException("The customer does not exist");
+            throw new NullPointerException("The User does not exist");
     }
 
     @Override
     public String delete(int id) {
-        Optional<AppUser> findCustomer = repo.findById(id);
-        if (findCustomer.isPresent()) {
-            AppUser deleteCustomer = findCustomer.get();
-            deleteCustomer.setStatus("terminated");
-            AppUser deletedCustomer = repo.save(deleteCustomer);
+        Optional<AppUser> findUser = repo.findById(id);
+        if (findUser.isPresent()) {
+            AppUser deleteUser = findUser.get();
+            deleteUser.setStatus("terminated");
+            AppUser deletedUser = repo.save(deleteUser);
             return "user deleted";
         } else
-            throw new NullPointerException("The Customer Doesn't Exist");
+            throw new NullPointerException("The User Doesn't Exist");
     }
 
     @Override
     public UserDTO findById(int id) {
-        Optional<AppUser> findCustomer = repo.findById(id);
-        if (findCustomer.isPresent()) {
-            AppUser customer = findCustomer.get();
-            return toCustomerDTO(customer);
+        Optional<AppUser> findUser = repo.findById(id);
+        if (findUser.isPresent()) {
+            AppUser user = findUser.get();
+            return toUserDTO(user);
         } else
-            throw new NullPointerException("The Customer Doesn't Exist");
+            throw new NullPointerException("The User Doesn't Exist");
     }
     @Override
     public Iterable<AppUser> findAll() {
         return repo.findAll();
     }
-    private UserDTO toCustomerDTO(AppUser customer) {
+    private UserDTO toUserDTO(AppUser user) {
         return UserDTO.builder().
-                id(customer.getId()).
-                email(customer.getEmail()).
-                firstName(customer.getFirstName()).
-                lastName(customer.getLastName()).
-                middleName(customer.getMiddleName()).
-                phoneNumber(customer.getPhoneNumber()).
+                id(user.getId()).
+                email(user.getEmail()).
+                firstName(user.getFirstName()).
+                lastName(user.getLastName()).
+                middleName(user.getMiddleName()).
+                phoneNumber(user.getPhoneNumber()).
                 build();
     }
 
-    private AppUser toCustomer(SignUpRequest request) {
-        AppUser customer=new AppUser();
-        customer.setFirstName(request.getFirstName());
-        customer.setEmail(request.getEmail());
-        customer.setLastName(request.getLastName());
-        customer.setMiddleName(request.getMiddleName());
-        customer.setPhoneNumber(request.getPhoneNumber());
-        customer.setUsername(request.getUsername());
-        customer.setPassword(encoder.encode(request.getPassword()));
-        customer.setRole(getRole(request.getRole()));
-        customer.setStatus("Registered");
-        return customer;
+    private AppUser toUser(SignUpRequest request) {
+        AppUser user=new AppUser();
+        user.setFirstName(request.getFirstName());
+        user.setEmail(request.getEmail());
+        user.setLastName(request.getLastName());
+        user.setMiddleName(request.getMiddleName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setUsername(request.getUsername());
+        user.setPassword(encoder.encode(request.getPassword()));
+        user.setRole(getRole(request.getRole()));
+        user.setStatus("Registered");
+        return user;
     }
-    private AppUser toUpdateCustomer(UpdateProfileRequest request,AppUser customer) {
-        AppUser updateCustomer=new AppUser();
-        updateCustomer.setId(customer.getId());
-        updateCustomer.setFirstName(request.getFirstName());
-        updateCustomer.setEmail(request.getEmail());
-        updateCustomer.setLastName(request.getLastName());
-        updateCustomer.setMiddleName(request.getMiddleName());
-        updateCustomer.setPhoneNumber(request.getPhoneNumber());
-        updateCustomer.setUsername(customer.getUsername());
-        updateCustomer.setPassword(customer.getPassword());
-        updateCustomer.setRole(customer.getRole());
-        updateCustomer.setStatus("Registered");
-        return updateCustomer;
+    private AppUser toupdateUser(UpdateProfileRequest request,AppUser user) {
+        AppUser updateUser=new AppUser();
+        updateUser.setId(user.getId());
+        updateUser.setFirstName(request.getFirstName());
+        updateUser.setEmail(request.getEmail());
+        updateUser.setLastName(request.getLastName());
+        updateUser.setMiddleName(request.getMiddleName());
+        updateUser.setPhoneNumber(request.getPhoneNumber());
+        updateUser.setUsername(user.getUsername());
+        updateUser.setPassword(user.getPassword());
+        updateUser.setRole(user.getRole());
+        updateUser.setStatus("Registered");
+        return updateUser;
     }
 
 
@@ -208,33 +207,33 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         checkUpdatePhoneNumber(request,user);
     }
     private void checkUpdateEmail(UpdateProfileRequest request,AppUser user) {
-        Optional<AppUser> customer=repo.findByEmail(request.getEmail());
-        if (customer.isPresent()){
-            if (customer.get().getId() == user.getId())
+        Optional<AppUser> User=repo.findByEmail(request.getEmail());
+        if (User.isPresent()){
+            if (User.get().getId() == user.getId())
                 throw new CustomException(CustomException.Type.EMAIL_ALREADY_EXISTS);
         }
 
     }
     private void checkUpdatePhoneNumber(UpdateProfileRequest request,AppUser user) {
-        Optional<AppUser> customer=repo.findByPhoneNumber(request.getPhoneNumber());
-        if (customer.isPresent()){
-            if (customer.get().getId()== user.getId())
+        Optional<AppUser> User=repo.findByPhoneNumber(request.getPhoneNumber());
+        if (User.isPresent()){
+            if (User.get().getId()== user.getId())
                 throw new CustomException(CustomException.Type.PHONE_NUMBER_ALREADY_EXISTS);
         }
     }
     private void checkEmail(SignUpRequest request) {
-        Optional<AppUser> customer=repo.findByEmail(request.getEmail());
-        if (customer.isPresent())
+        Optional<AppUser> User=repo.findByEmail(request.getEmail());
+        if (User.isPresent())
             throw new CustomException(CustomException.Type.EMAIL_ALREADY_EXISTS);
     }
     private void checkUsername(SignUpRequest request) {
-        Optional<AppUser> customer=repo.findByUsername(request.getUsername());
-        if (customer.isPresent())
+        Optional<AppUser> User=repo.findByUsername(request.getUsername());
+        if (User.isPresent())
             throw new CustomException(CustomException.Type.USERNAME_ALREADY_EXISTS);
     }
     private void checkPhoneNumber(SignUpRequest request) {
-        Optional<AppUser> customer=repo.findByPhoneNumber(request.getPhoneNumber());
-        if (customer.isPresent())
+        Optional<AppUser> User=repo.findByPhoneNumber(request.getPhoneNumber());
+        if (User.isPresent())
             throw new CustomException(CustomException.Type.PHONE_NUMBER_ALREADY_EXISTS);
     }
 }

@@ -23,8 +23,8 @@ public class RegistrationService {
         if (!isValidEmail){
             throw new IllegalStateException("invalid email");
         }
-     String token=authenticationService.save(registrationRequest);
-        String link="http://localhost:8080/book_eat_nepal/api/v1/customer/register/confirm?token="+token;
+     String token = authenticationService.save(registrationRequest);
+        String link="http://localhost:8080/book_eat_nepal/api/v1/user/authenticate/register/confirm?token="+token;
         sender.send(registrationRequest.getEmail(),buildEmail(
                 registrationRequest.getFirstName(),
                 link));

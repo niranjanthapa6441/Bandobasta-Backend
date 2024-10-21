@@ -55,7 +55,7 @@ public class VenueController {
         return RestResponse.ok(service.delete(id));
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/findAll",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
             @RequestParam(required = false) String venueName,
             @RequestParam(required = false) String location,

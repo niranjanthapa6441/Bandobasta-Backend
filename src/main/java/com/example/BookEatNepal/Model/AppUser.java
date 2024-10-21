@@ -35,7 +35,7 @@ public class AppUser {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "date_of_birth", nullable = false)
+    @Column(name = "date_of_birth", nullable = true)
     private LocalDate dateOfBirth;
 
     @Column(name = "status", nullable = false)

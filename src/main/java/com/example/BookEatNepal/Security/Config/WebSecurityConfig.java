@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 // (securedEnabled = true,
 // jsr250Enabled = true,
-// prePostEnabled = true) // by default
+//prePostEnabled = true) // by default
 public class WebSecurityConfig  {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
@@ -61,11 +61,17 @@ public class WebSecurityConfig  {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/booking/hall/**").permitAll()
-                        .requestMatchers("/api/test/**").permitAll()
+                        .requestMatchers("/package/findAll").permitAll()
+                        .requestMatchers("/hall/findAll").permitAll()
+                        .requestMatchers("/menu/findAll").permitAll()
+                        .requestMatchers("/venue/findAll").permitAll()
+                        .requestMatchers("/images/venues/**").permitAll()
+                        .requestMatchers("/user/authenticate/register").permitAll()
+                        .requestMatchers("/user/authenticate/login").permitAll()
+                        .requestMatchers("/user/authenticate/register/confirm").permitAll()
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Only users with 'ADMIN' role can access '/api/admin/**'
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")  // 'USER' and 'ADMIN' roles can access '/api/user/**'
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 
                         .anyRequest().authenticated()
                 );
