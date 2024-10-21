@@ -1,6 +1,5 @@
 package com.example.BookEatNepal.Registration;
 
-import com.example.BookEatNepal.Registration.RegistrationToken.ConfirmationToken;
 import com.example.BookEatNepal.Repository.ConfirmTokenRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

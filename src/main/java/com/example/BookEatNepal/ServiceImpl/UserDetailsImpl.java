@@ -38,7 +38,7 @@ public class UserDetailsImpl implements UserDetails {
         // Extract the role of the user and convert it to GrantedAuthority
         GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getName().name());
 
-        return new UserDetailsImpl(
+        UserDetailsImpl userDetails = new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -46,6 +46,7 @@ public class UserDetailsImpl implements UserDetails {
                 List.of(authority),  // Wrapping single authority in a list
                 user
         );
+        return userDetails;
     }
 
     @Override

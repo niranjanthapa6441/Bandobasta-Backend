@@ -1,4 +1,4 @@
-package com.example.BookEatNepal.Registration.RegistrationToken;
+package com.example.BookEatNepal.Registration;
 
 public enum Status {
     REGISTERED,

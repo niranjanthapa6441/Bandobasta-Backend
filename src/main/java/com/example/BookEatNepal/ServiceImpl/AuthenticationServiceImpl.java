@@ -7,7 +7,7 @@ import com.example.BookEatNepal.Model.AppUser;
 import com.example.BookEatNepal.Model.Role;
 import com.example.BookEatNepal.Registration.ConfirmationTokenService;
 import com.example.BookEatNepal.Registration.MessageResponse;
-import com.example.BookEatNepal.Registration.RegistrationToken.ConfirmationToken;
+import com.example.BookEatNepal.Registration.ConfirmationToken;
 import com.example.BookEatNepal.Repository.AppUserRepo;
 import com.example.BookEatNepal.Repository.RoleRepo;
 import com.example.BookEatNepal.Request.LoginRequest;

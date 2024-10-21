@@ -1,4 +1,4 @@
-package com.example.BookEatNepal.Registration.RegistrationToken;
+package com.example.BookEatNepal.Registration;
 import com.example.BookEatNepal.Model.AppUser;
 import jakarta.persistence.*;
 import lombok.Getter;

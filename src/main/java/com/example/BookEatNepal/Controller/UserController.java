@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
 import com.example.BookEatNepal.Registration.RegistrationService;
-import com.example.BookEatNepal.Registration.RegistrationToken.Status;
+import com.example.BookEatNepal.Registration.Status;
 import com.example.BookEatNepal.Request.LoginRequest;
 import com.example.BookEatNepal.Request.SignUpRequest;
 import com.example.BookEatNepal.Request.UpdateProfileRequest;
