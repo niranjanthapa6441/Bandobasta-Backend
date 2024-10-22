@@ -13,7 +13,7 @@ import com.example.BookEatNepal.Repository.RoleRepo;
 import com.example.BookEatNepal.Request.LoginRequest;
 import com.example.BookEatNepal.Request.SignUpRequest;
 import com.example.BookEatNepal.Request.UpdateProfileRequest;
-import com.example.BookEatNepal.Security.JWT.JWTUtils;
+import com.example.BookEatNepal.Security.JWT.JwtUtils;
 import com.example.BookEatNepal.Service.AuthenticationService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.google.common.net.HttpHeaders;
@@ -48,7 +48,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     AuthenticationManager authenticationManager;
 
     @Autowired
-    JWTUtils jwtUtils;
+    JwtUtils jwtUtils;
 
     public AuthenticationServiceImpl(ConfirmationTokenService confirmationTokenService) {
         this.confirmationTokenService = confirmationTokenService;

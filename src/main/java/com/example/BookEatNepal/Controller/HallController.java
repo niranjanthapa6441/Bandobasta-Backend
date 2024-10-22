@@ -31,7 +31,7 @@ public class HallController {
     ) {
         return RestResponse.ok(service.save(request, hallImages));
     }
-    @PostMapping(value = "/availability",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/availability/save",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> saveAvailability(
             @RequestBody List<HallAvailabilityRequest> requests
             ) {

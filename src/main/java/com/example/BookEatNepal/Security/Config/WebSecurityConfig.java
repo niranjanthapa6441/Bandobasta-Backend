@@ -68,9 +68,10 @@ public class WebSecurityConfig  {
                         .requestMatchers("/images/venues/**").permitAll()
                         .requestMatchers("/user/authenticate/register").permitAll()
                         .requestMatchers("/user/authenticate/login").permitAll()
+                        .requestMatchers("/user/logOut").permitAll()
                         .requestMatchers("/user/authenticate/register/confirm").permitAll()
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/hall/availability/save").hasRole("ADMIN")
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 
                         .anyRequest().authenticated()

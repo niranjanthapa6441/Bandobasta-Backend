@@ -23,7 +23,6 @@ public class RegistrationService {
      String token=authenticationService.save(registrationRequest);
         return token;
     }
-    @Transactional
     public Status confirmToken(String token) {
         ConfirmationToken confirmationToken = confirmationTokenService
                 .getToken(token)
@@ -43,6 +42,6 @@ public class RegistrationService {
         confirmationTokenService.setConfirmedAt(token);
         authenticationService.enableAppUser(
                 confirmationToken.getUser().getEmail());
-        return Status.SUCCESS;
+        return Status.REGISTERED;
     }
 }

@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
 import com.example.BookEatNepal.Registration.RegistrationService;
-import com.example.BookEatNepal.Registration.Status;
+
 import com.example.BookEatNepal.Request.LoginRequest;
 import com.example.BookEatNepal.Request.SignUpRequest;
 import com.example.BookEatNepal.Request.UpdateProfileRequest;
@@ -34,8 +34,8 @@ public class UserController {
         return RestResponse.ok(registrationService.register(request));
     }
     @GetMapping(path = "/authenticate/register/confirm")
-    public Status confirm(@RequestParam("token") String token) {
-        return registrationService.confirmToken(token);
+    public ResponseEntity<Object> confirm(@RequestParam("token") String token) {
+        return RestResponse.ok(registrationService.confirmToken(token));
     }
     @PostMapping(value = "/authenticate/login",produces = MediaType.APPLICATION_JSON_VALUE,consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest request){
