@@ -1,10 +1,10 @@
 package com.example.BookEatNepal.Service;
 
-import com.example.BookEatNepal.DTO.HallAvailabilityDTO;
-import com.example.BookEatNepal.DTO.HallDTO;
-import com.example.BookEatNepal.DTO.HallDetail;
-import com.example.BookEatNepal.Request.HallAvailabilityRequest;
-import com.example.BookEatNepal.Request.HallRequest;
+import com.example.BookEatNepal.Payload.DTO.HallAvailabilityDTO;
+import com.example.BookEatNepal.Payload.DTO.HallDTO;
+import com.example.BookEatNepal.Payload.DTO.HallDetail;
+import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.HallRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

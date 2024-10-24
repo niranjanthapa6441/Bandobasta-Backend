@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
 
-import com.example.BookEatNepal.Request.AmenityRequest;
+import com.example.BookEatNepal.Payload.Request.AmenityRequest;
 import com.example.BookEatNepal.Service.AmenityService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;

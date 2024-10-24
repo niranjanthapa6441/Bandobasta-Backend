@@ -1,13 +1,13 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.AmenityDTO;
-import com.example.BookEatNepal.DTO.AmenityDetail;
+import com.example.BookEatNepal.Payload.DTO.AmenityDTO;
+import com.example.BookEatNepal.Payload.DTO.AmenityDetail;
 import com.example.BookEatNepal.Enums.AmenityStatus;
 import com.example.BookEatNepal.Model.Amenity;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Repository.AmenityRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
-import com.example.BookEatNepal.Request.AmenityRequest;
+import com.example.BookEatNepal.Payload.Request.AmenityRequest;
 import com.example.BookEatNepal.Service.AmenityService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;

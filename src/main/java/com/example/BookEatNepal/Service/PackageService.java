@@ -1,11 +1,11 @@
 package com.example.BookEatNepal.Service;
 
-import com.example.BookEatNepal.DTO.PackageAvailabilityDTO;
-import com.example.BookEatNepal.DTO.PackageDTO;
-import com.example.BookEatNepal.DTO.PackageDetail;
-import com.example.BookEatNepal.Request.HallAvailabilityRequest;
-import com.example.BookEatNepal.Request.PackageAvailabilityRequest;
-import com.example.BookEatNepal.Request.PackageRequest;
+import com.example.BookEatNepal.Payload.DTO.PackageAvailabilityDTO;
+import com.example.BookEatNepal.Payload.DTO.PackageDTO;
+import com.example.BookEatNepal.Payload.DTO.PackageDetail;
+import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.PackageAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.PackageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

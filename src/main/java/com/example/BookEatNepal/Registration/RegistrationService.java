@@ -1,6 +1,6 @@
 package com.example.BookEatNepal.Registration;
 
-import com.example.BookEatNepal.Request.SignUpRequest;
+import com.example.BookEatNepal.Payload.Request.SignUpRequest;
 import com.example.BookEatNepal.Service.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

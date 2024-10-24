@@ -71,8 +71,8 @@ public class WebSecurityConfig  {
                         .requestMatchers("/user/logOut").permitAll()
                         .requestMatchers("/user/authenticate/register/confirm").permitAll()
 
-                        .requestMatchers("/hall/availability/save").hasRole("ADMIN")
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+//                        .requestMatchers("/hall/availability/save").hasRole("ADMIN")
+//                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 
                         .anyRequest().authenticated()
                 );

@@ -1,6 +1,6 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Request.HallBookingRequest;
+import com.example.BookEatNepal.Payload.Request.HallBookingRequest;
 import com.example.BookEatNepal.Service.HallBookingService;
 import com.example.BookEatNepal.Util.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;

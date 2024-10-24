@@ -1,14 +1,17 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.*;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
+import com.example.BookEatNepal.Payload.DTO.HallAvailabilityDTO;
+import com.example.BookEatNepal.Payload.DTO.HallAvailabilityDetail;
+import com.example.BookEatNepal.Payload.DTO.HallDTO;
+import com.example.BookEatNepal.Payload.DTO.HallDetail;
 import com.example.BookEatNepal.Repository.HallAvailabilityRepo;
 import com.example.BookEatNepal.Repository.HallImageRepo;
 import com.example.BookEatNepal.Repository.HallRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
-import com.example.BookEatNepal.Request.HallAvailabilityRequest;
-import com.example.BookEatNepal.Request.HallRequest;
+import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.HallRequest;
 import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Util.Formatter;
 import com.example.BookEatNepal.Util.CustomException;

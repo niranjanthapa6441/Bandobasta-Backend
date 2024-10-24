@@ -1,9 +1,9 @@
 package com.example.BookEatNepal.Service;
 
 
-import com.example.BookEatNepal.DTO.PackageBookingDTO;
-import com.example.BookEatNepal.DTO.PackageBookingDetail;
-import com.example.BookEatNepal.Request.PackageBookingRequest;
+import com.example.BookEatNepal.Payload.DTO.PackageBookingDTO;
+import com.example.BookEatNepal.Payload.DTO.PackageBookingDetail;
+import com.example.BookEatNepal.Payload.Request.PackageBookingRequest;
 import org.springframework.stereotype.Service;
 
 @Service

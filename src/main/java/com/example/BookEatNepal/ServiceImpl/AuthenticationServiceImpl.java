@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.LoginDTO;
-import com.example.BookEatNepal.DTO.UserDTO;
+import com.example.BookEatNepal.Payload.DTO.LoginDTO;
+import com.example.BookEatNepal.Payload.DTO.UserDTO;
 import com.example.BookEatNepal.Enums.ERole;
 import com.example.BookEatNepal.Model.AppUser;
 import com.example.BookEatNepal.Model.Role;
@@ -10,9 +10,9 @@ import com.example.BookEatNepal.Registration.MessageResponse;
 import com.example.BookEatNepal.Registration.ConfirmationToken;
 import com.example.BookEatNepal.Repository.AppUserRepo;
 import com.example.BookEatNepal.Repository.RoleRepo;
-import com.example.BookEatNepal.Request.LoginRequest;
-import com.example.BookEatNepal.Request.SignUpRequest;
-import com.example.BookEatNepal.Request.UpdateProfileRequest;
+import com.example.BookEatNepal.Payload.Request.LoginRequest;
+import com.example.BookEatNepal.Payload.Request.SignUpRequest;
+import com.example.BookEatNepal.Payload.Request.UpdateProfileRequest;
 import com.example.BookEatNepal.Security.JWT.JwtUtils;
 import com.example.BookEatNepal.Service.AuthenticationService;
 import com.example.BookEatNepal.Util.CustomException;
@@ -120,7 +120,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Optional<AppUser> findUser = repo.findById(id);
         checkUpdateValidation(request,findUser.get());
         if (findUser.isPresent()) {
-            AppUser updateUser = toupdateUser(request,findUser.get());
+            AppUser updateUser = toUpdateUser(request,findUser.get());
             AppUser updatedUser = repo.save(updateUser);
             return "User Updated Successfully";
         } else
@@ -173,10 +173,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setUsername(request.getUsername());
         user.setPassword(encoder.encode(request.getPassword()));
         user.setRole(getRole(request.getRole()));
+        user.setEnabled(true);
+        user .setLocked(true);
         user.setStatus("Registered");
         return user;
     }
-    private AppUser toupdateUser(UpdateProfileRequest request,AppUser user) {
+    private AppUser toUpdateUser(UpdateProfileRequest request,AppUser user) {
         AppUser updateUser=new AppUser();
         updateUser.setId(user.getId());
         updateUser.setFirstName(request.getFirstName());
@@ -188,6 +190,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         updateUser.setPassword(user.getPassword());
         updateUser.setRole(user.getRole());
         updateUser.setStatus("Registered");
+        updateUser.setEnabled(true);
+        updateUser.setLocked(true);
         return updateUser;
     }
 

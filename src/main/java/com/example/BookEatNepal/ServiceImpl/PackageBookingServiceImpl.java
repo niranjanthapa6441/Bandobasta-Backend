@@ -1,13 +1,13 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.*;
 import com.example.BookEatNepal.Enums.BookingStatus;
 import com.example.BookEatNepal.Enums.EventType;
 import com.example.BookEatNepal.Enums.PackageStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Model.Package;
+import com.example.BookEatNepal.Payload.DTO.*;
 import com.example.BookEatNepal.Repository.*;
-import com.example.BookEatNepal.Request.PackageBookingRequest;
+import com.example.BookEatNepal.Payload.Request.PackageBookingRequest;
 import com.example.BookEatNepal.Service.PackageBookingService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.example.BookEatNepal.Util.Formatter;

@@ -1,12 +1,12 @@
 package com.example.BookEatNepal.Service;
 
-import com.example.BookEatNepal.DTO.LoginDTO;
-import com.example.BookEatNepal.DTO.UserDTO;
+import com.example.BookEatNepal.Payload.DTO.LoginDTO;
+import com.example.BookEatNepal.Payload.DTO.UserDTO;
 import com.example.BookEatNepal.Model.AppUser;
 import com.example.BookEatNepal.Registration.MessageResponse;
-import com.example.BookEatNepal.Request.LoginRequest;
-import com.example.BookEatNepal.Request.SignUpRequest;
-import com.example.BookEatNepal.Request.UpdateProfileRequest;
+import com.example.BookEatNepal.Payload.Request.LoginRequest;
+import com.example.BookEatNepal.Payload.Request.SignUpRequest;
+import com.example.BookEatNepal.Payload.Request.UpdateProfileRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 

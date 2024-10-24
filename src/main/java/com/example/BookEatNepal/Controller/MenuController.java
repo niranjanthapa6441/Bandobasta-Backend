@@ -1,6 +1,6 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Request.MenuRequest;
+import com.example.BookEatNepal.Payload.Request.MenuRequest;
 import com.example.BookEatNepal.Service.MenuService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;

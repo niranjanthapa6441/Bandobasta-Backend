@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Request.PackageAvailabilityRequest;
-import com.example.BookEatNepal.Request.PackageRequest;
+import com.example.BookEatNepal.Payload.Request.PackageAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.PackageRequest;
 import com.example.BookEatNepal.Service.PackageService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;

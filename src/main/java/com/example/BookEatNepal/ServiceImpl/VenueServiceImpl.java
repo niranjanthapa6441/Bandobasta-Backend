@@ -1,12 +1,12 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.HallDetail;
-import com.example.BookEatNepal.DTO.VenueDetails;
-import com.example.BookEatNepal.DTO.VenueDTO;
+import com.example.BookEatNepal.Payload.DTO.HallDetail;
+import com.example.BookEatNepal.Payload.DTO.VenueDetails;
+import com.example.BookEatNepal.Payload.DTO.VenueDTO;
 import com.example.BookEatNepal.Enums.VenueStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Repository.*;
-import com.example.BookEatNepal.Request.VenueRequest;
+import com.example.BookEatNepal.Payload.Request.VenueRequest;
 import com.example.BookEatNepal.Service.VenueService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;

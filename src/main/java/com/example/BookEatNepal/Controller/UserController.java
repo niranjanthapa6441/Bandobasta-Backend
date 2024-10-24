@@ -2,9 +2,9 @@ package com.example.BookEatNepal.Controller;
 
 import com.example.BookEatNepal.Registration.RegistrationService;
 
-import com.example.BookEatNepal.Request.LoginRequest;
-import com.example.BookEatNepal.Request.SignUpRequest;
-import com.example.BookEatNepal.Request.UpdateProfileRequest;
+import com.example.BookEatNepal.Payload.Request.LoginRequest;
+import com.example.BookEatNepal.Payload.Request.SignUpRequest;
+import com.example.BookEatNepal.Payload.Request.UpdateProfileRequest;
 import com.example.BookEatNepal.Service.AuthenticationService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;
@@ -43,7 +43,7 @@ public class UserController {
     }
     @PutMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE,consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> update(@PathVariable String id, @Valid @RequestBody UpdateProfileRequest request){
-
+        System.out.println("Im here");
         return RestResponse.ok(service.update(Integer.valueOf(id),request));
     }
     @DeleteMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE,consumes = MediaType.APPLICATION_JSON_VALUE)
