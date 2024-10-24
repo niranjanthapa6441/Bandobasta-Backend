@@ -1,7 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Request.HallAvailabilityRequest;
-import com.example.BookEatNepal.Request.HallRequest;
+import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.HallRequest;
 import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;
@@ -19,6 +19,7 @@ import java.util.List;
 public class HallController {
     public static final String SIZE = "5";
     public static final String PAGE = "1";
+    public static final String NUMBER_OF_GUESTS = "5";
 
     @Autowired
     private HallService service;
@@ -30,7 +31,7 @@ public class HallController {
     ) {
         return RestResponse.ok(service.save(request, hallImages));
     }
-    @PostMapping(value = "/availability",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/availability/save",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> saveAvailability(
             @RequestBody List<HallAvailabilityRequest> requests
             ) {
@@ -40,9 +41,9 @@ public class HallController {
     public ResponseEntity<Object> checkAvailability(
             @RequestParam(required = true) String venueId,
             @RequestParam(required = true) String date,
-            @RequestParam(required = true) String startTime,
-            @RequestParam(required = true) String endTime,
-            @RequestParam(required = true) int numberOfGuests,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(defaultValue = NUMBER_OF_GUESTS) int numberOfGuests,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
@@ -65,7 +66,7 @@ public class HallController {
         return RestResponse.ok(service.delete(id));
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/findAll",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
             @RequestParam(required = true) String venueId,
             @RequestParam(defaultValue = PAGE) int page,

@@ -1,9 +1,9 @@
 package com.example.BookEatNepal.Service;
 
 
-import com.example.BookEatNepal.DTO.AmenityDTO;
-import com.example.BookEatNepal.DTO.AmenityDetail;
-import com.example.BookEatNepal.Request.AmenityRequest;
+import com.example.BookEatNepal.Payload.DTO.AmenityDTO;
+import com.example.BookEatNepal.Payload.DTO.AmenityDetail;
+import com.example.BookEatNepal.Payload.Request.AmenityRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

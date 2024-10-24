@@ -1,14 +1,14 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.*;
 import com.example.BookEatNepal.Enums.EventType;
 import com.example.BookEatNepal.Enums.PackageStatus;
 import com.example.BookEatNepal.Enums.PackageType;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Model.Package;
+import com.example.BookEatNepal.Payload.DTO.*;
 import com.example.BookEatNepal.Repository.*;
-import com.example.BookEatNepal.Request.PackageAvailabilityRequest;
-import com.example.BookEatNepal.Request.PackageRequest;
+import com.example.BookEatNepal.Payload.Request.PackageAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.PackageRequest;
 import com.example.BookEatNepal.Service.PackageService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.example.BookEatNepal.Util.Formatter;
@@ -322,14 +322,14 @@ public class PackageServiceImpl implements PackageService {
                 .build();
     }
 
-    private List<AmenityDetail> findAmenitiesByPackage(Package aPackage) {
+    private List<String> findAmenitiesByPackage(Package aPackage) {
         List<PackageAmenity> packageAmenities = packageAmenityRepo.findByaPackage(aPackage);
-        List<AmenityDetail> amenityDetails = new ArrayList<>();
+        List<String> amenities = new ArrayList<>();
         for (PackageAmenity packageAmenity : packageAmenities
         ) {
-            amenityDetails.add(toAmenityDetail(packageAmenity.getAmenity()));
+            amenities.add(packageAmenity.getAmenity().getName());
         }
-        return amenityDetails;
+        return amenities;
     }
 
     private AmenityDetail toAmenityDetail(Amenity amenity) {

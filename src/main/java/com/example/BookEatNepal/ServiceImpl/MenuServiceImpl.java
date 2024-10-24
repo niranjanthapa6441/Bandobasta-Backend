@@ -1,20 +1,19 @@
 package com.example.BookEatNepal.ServiceImpl;
 
-import com.example.BookEatNepal.DTO.FoodDetail;
-import com.example.BookEatNepal.DTO.MenuDTO;
-import com.example.BookEatNepal.DTO.MenuDetail;
-import com.example.BookEatNepal.Enums.FoodCategory;
 import com.example.BookEatNepal.Enums.MenuStatus;
 import com.example.BookEatNepal.Enums.MenuType;
 import com.example.BookEatNepal.Model.Food;
 import com.example.BookEatNepal.Model.FoodMenu;
 import com.example.BookEatNepal.Model.Menu;
 import com.example.BookEatNepal.Model.Venue;
+import com.example.BookEatNepal.Payload.DTO.FoodDetail;
+import com.example.BookEatNepal.Payload.DTO.MenuDTO;
+import com.example.BookEatNepal.Payload.DTO.MenuDetail;
 import com.example.BookEatNepal.Repository.FoodMenuRepo;
 import com.example.BookEatNepal.Repository.FoodRepo;
 import com.example.BookEatNepal.Repository.MenuRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
-import com.example.BookEatNepal.Request.MenuRequest;
+import com.example.BookEatNepal.Payload.Request.MenuRequest;
 import com.example.BookEatNepal.Service.MenuService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;

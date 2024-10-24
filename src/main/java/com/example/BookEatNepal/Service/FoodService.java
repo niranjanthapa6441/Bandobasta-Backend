@@ -1,9 +1,9 @@
 package com.example.BookEatNepal.Service;
 
 
-import com.example.BookEatNepal.DTO.FoodDTO;
-import com.example.BookEatNepal.DTO.FoodDetail;
-import com.example.BookEatNepal.Request.FoodRequest;
+import com.example.BookEatNepal.Payload.DTO.FoodDTO;
+import com.example.BookEatNepal.Payload.DTO.FoodDetail;
+import com.example.BookEatNepal.Payload.Request.FoodRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

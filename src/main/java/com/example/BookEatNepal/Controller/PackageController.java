@@ -1,8 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Request.HallAvailabilityRequest;
-import com.example.BookEatNepal.Request.PackageAvailabilityRequest;
-import com.example.BookEatNepal.Request.PackageRequest;
+import com.example.BookEatNepal.Payload.Request.PackageAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.PackageRequest;
 import com.example.BookEatNepal.Service.PackageService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;
@@ -45,9 +44,9 @@ public class PackageController {
         return RestResponse.ok(service.delete(id));
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value ="/findAll",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
-            @RequestParam(required = true) String venueId,
+            @RequestParam(required = false) String venueId,
             @RequestParam(required = false) String packageType,
             @RequestParam(required = false) String eventType,
             @RequestParam(defaultValue = PAGE) int page,

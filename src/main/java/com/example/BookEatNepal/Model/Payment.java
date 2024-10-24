@@ -1,6 +1,5 @@
 package com.example.BookEatNepal.Model;
 
-import com.example.BookEatNepal.Enums.BookingStatus;
 import com.example.BookEatNepal.Enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,7 +20,7 @@ public class Payment {
 
     @OneToOne
     @JoinColumn(name = "booking_id")
-    private Booking booking;
+    private HallBooking booking;
 
     @Column(name = "payment_date")
     private LocalDate paymentDate;

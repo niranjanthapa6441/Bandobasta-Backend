@@ -22,7 +22,7 @@ public class Hall {
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @Column(name="item", nullable = false, length = 30)
+    @Column(name="name", nullable = false, length = 30)
     private String name;
 
     @Column(name = "description", columnDefinition = "text", nullable = false)
@@ -46,7 +46,4 @@ public class Hall {
 
     @OneToMany(mappedBy = "hall", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HallAmenity> amenities = new ArrayList<>();
-
-    @OneToMany(mappedBy = "hall", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HallMenu> menus = new ArrayList<>();
 }

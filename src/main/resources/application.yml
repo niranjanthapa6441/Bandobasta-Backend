@@ -20,3 +20,8 @@ server:
   servlet:
     context-path: /book-eat-nepal/api/v1
   port: 8080
+bandobasta:
+  app:
+    jwtSecret: ======================Bandbobasta=Spring===========================
+    jwtExpirationMs: 86400000
+    jwtCookieName: bandobasta

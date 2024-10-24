@@ -38,7 +38,10 @@ public class CustomException extends RuntimeException {
         INVALID_FOOD_CATEGORY("Invalid Food Category", 400 ),
         INVALID_VENUE_ID("Invalid Venue id", 400 ),
         PACKAGE_NOT_FOUND("Package not Found", 400 ),
-        INVALID_EVENT_TYPE("Invalid event type", 400 );
+        INVALID_EVENT_TYPE("Invalid event type", 400 ),
+        HALL_AVAILABILITY_NOT_FOUND("Hall availability not found",400 ),
+        BOOKING_NOT_FOUND("Booking not found", 400 ),
+        PACKAGE_AVAILABILITY_NOT_FOUND("Package availability not found",400 );
         private String message;
         private int code;
 
