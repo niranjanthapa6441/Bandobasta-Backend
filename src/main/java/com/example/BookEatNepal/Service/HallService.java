@@ -13,6 +13,7 @@ import java.util.List;
 
 @Service
 public interface HallService {
+
     String save(HallRequest request, List<MultipartFile> hallImages);
 
     String delete(int id);

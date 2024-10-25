@@ -24,7 +24,7 @@ public class HallController {
     @Autowired
     private HallService service;
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/save", produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> save(
             @RequestPart("hall") @Valid HallRequest request,
             @RequestPart("hallImages") List<MultipartFile> hallImages
