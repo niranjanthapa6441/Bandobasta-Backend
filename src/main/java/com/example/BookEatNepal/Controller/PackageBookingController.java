@@ -1,6 +1,6 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Payload.Request.PackageBookingRequest;
+import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Service.PackageBookingService;
 import com.example.BookEatNepal.Util.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,29 +18,29 @@ public class PackageBookingController {
     @Autowired
     private PackageBookingService packageBookingService;
 
-    @PostMapping(value="/packageBooking",produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value="/package",produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> save(
-            @RequestBody PackageBookingRequest request
+            @RequestBody BookingRequest request
     ) {
         return RestResponse.ok(packageBookingService.save(request));
     }
 
-    @PostMapping(value = "/packageBooking/{id}",
+    @PostMapping(value = "/package/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> update(
             @PathVariable int id,
-            @RequestBody PackageBookingRequest request
+            @RequestBody BookingRequest request
     ) {
         return RestResponse.ok(packageBookingService.update(request, id));
     }
 
-    @DeleteMapping(value = "/packageBooking/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/package/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> delete(@PathVariable int id) {
         return RestResponse.ok(packageBookingService.delete(id));
     }
 
-    @GetMapping(value = "/packageBooking/venue",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/package/venue",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAllBookingByVenue(
             @RequestParam(required = true) String venueId,
             @RequestParam(required = false) String hallId,
@@ -51,7 +51,7 @@ public class PackageBookingController {
     ) {
         return RestResponse.ok(packageBookingService.findBookingByVenue(venueId,bookingDate, hallId ,page, size), "Data Retrieval Successful");
     }
-    @GetMapping(value="/packageBooking/user",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/package/user",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAllBookingByUser(
             @RequestParam(required = true) String userId,
             @RequestParam(required = false) String bookingDate,
@@ -61,7 +61,7 @@ public class PackageBookingController {
     ) {
         return RestResponse.ok(packageBookingService.findBookingByUser(userId,bookingDate ,page, size), "Data Retrieval Successful");
     }
-    @PostMapping(value = "/packageBooking/confirm/{id}",
+    @PostMapping(value = "/package/confirm/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> confirmHallBooking(

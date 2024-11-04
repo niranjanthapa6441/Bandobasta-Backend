@@ -6,7 +6,7 @@ import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Payload.DTO.*;
 import com.example.BookEatNepal.Repository.*;
-import com.example.BookEatNepal.Payload.Request.HallBookingRequest;
+import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Service.HallBookingService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.example.BookEatNepal.Util.Formatter;
@@ -48,18 +48,21 @@ public class HallBookingServiceImpl implements HallBookingService {
     private EntityManager entityManager;
 
     @Override
-    public String save(HallBookingRequest request) {
-        HallAvailability hallAvailability = getHallAvailability(request.getHallAvailabilityId());
+    public String save(BookingRequest request) {
+        HallAvailability hallAvailability = getHallAvailability(request.getId());
 
         Menu menu = getMenu(request.getMenuId());
 
         AppUser user = getUser(request.getUserId());
 
-        hallBookingRepo.save(toBooking(request, menu, hallAvailability, user));
+        if (hallAvailability.getStatus().equals(HallStatus.AVAILABLE)){
+            hallBookingRepo.save(toBooking(request, menu, hallAvailability, user));
 
-        updateHallAvailabilityStatus(request.getHallAvailabilityId(), HallStatus.PENDING);
+            updateHallAvailabilityStatus(request.getId(), HallStatus.PENDING);
 
-        return SUCCESS_MESSAGE;
+            return SUCCESS_MESSAGE;
+        }
+        else throw  new CustomException(CustomException.Type.BOOKING_HAS_ALREADY_BEEN_MADE);
     }
 
     @Override
@@ -136,7 +139,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     @Override
-    public String update(HallBookingRequest request, int id) {
+    public String update(BookingRequest request, int id) {
         return SUCCESS_MESSAGE;
     }
 
@@ -226,10 +229,11 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .orElseThrow(() -> new CustomException(CustomException.Type.HALL_AVAILABILITY_NOT_FOUND));
     }
 
-    private HallBooking toBooking(HallBookingRequest request, Menu menu, HallAvailability hallAvailability, AppUser user) {
+    private HallBooking toBooking(BookingRequest request, Menu menu, HallAvailability hallAvailability, AppUser user) {
         HallBooking hallBooking = new HallBooking();
         hallBooking.setHallAvailability(hallAvailability);
         hallBooking.setMenu(menu);
+        hallBooking.setNumberOfGuests(request.getNumberOfGuests());
         hallBooking.setRequestedDate(LocalDate.now());
         hallBooking.setRequestedTime(LocalTime.now());
         hallBooking.setStatus(BookingStatus.PENDING);

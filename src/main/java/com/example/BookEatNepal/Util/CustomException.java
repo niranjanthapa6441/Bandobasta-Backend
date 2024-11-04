@@ -41,7 +41,8 @@ public class CustomException extends RuntimeException {
         INVALID_EVENT_TYPE("Invalid event type", 400 ),
         HALL_AVAILABILITY_NOT_FOUND("Hall availability not found",400 ),
         BOOKING_NOT_FOUND("Booking not found", 400 ),
-        PACKAGE_AVAILABILITY_NOT_FOUND("Package availability not found",400 );
+        PACKAGE_AVAILABILITY_NOT_FOUND("Package availability not found",400 ),
+        BOOKING_HAS_ALREADY_BEEN_MADE("Time Unavailable for the booking",500 );
         private String message;
         private int code;
 

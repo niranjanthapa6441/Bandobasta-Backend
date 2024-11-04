@@ -30,18 +30,24 @@ public class PackageBooking {
     @Column(name = "requested_date",nullable = false)
     private LocalDate requestedDate;
 
-    @Column(nullable = false, name = "confirmed_date")
+    @Column(nullable = true, name = "confirmed_date")
     private LocalDate confirmedDate;
+
+    @Column(name = "number_of_guests", nullable = true)
+    private int numberOfGuests;
 
     @Column(nullable = false,name = "requested_time")
     private LocalTime requestedTime;
 
-    @Column(nullable = false,name = "confirmed_time")
+    @Column(nullable = true,name = "confirmed_time")
     private LocalTime confirmedTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)
     private BookingStatus status;
+
+    @Column(nullable = true, name = "booked_for_date")
+    private LocalDate bookedForDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name="event_type",length = 30, nullable = false)
