@@ -4,9 +4,10 @@ import lombok.Data;
 
 
 @Data
-public class HallBookingRequest {
+public class BookingRequest {
     private String userId;
-    private String hallAvailabilityId;
+    private String id;
     private String menuId;
     private String eventType;
+    private int numberOfGuests;
 }

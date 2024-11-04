@@ -49,6 +49,9 @@ public class HallBooking {
     @Column(name = "price", nullable = true)
     private double price;
 
+    @Column(name = "number_of_guests", nullable = true)
+    private int numberOfGuests;
+
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)
     private BookingStatus status;

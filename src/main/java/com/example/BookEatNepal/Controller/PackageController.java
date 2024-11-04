@@ -67,9 +67,9 @@ public class PackageController {
     public ResponseEntity<Object> checkAvailability(
             @RequestParam(required = true) String venueId,
             @RequestParam(required = true) String date,
-            @RequestParam(required = true) String startTime,
-            @RequestParam(required = true) String endTime,
-            @RequestParam(required = true) int numberOfGuests,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) int numberOfGuests,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 

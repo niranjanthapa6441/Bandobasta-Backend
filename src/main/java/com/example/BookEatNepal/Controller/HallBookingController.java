@@ -1,6 +1,6 @@
 package com.example.BookEatNepal.Controller;
 
-import com.example.BookEatNepal.Payload.Request.HallBookingRequest;
+import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Service.HallBookingService;
 import com.example.BookEatNepal.Util.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class HallBookingController {
 
     @PostMapping(value="/hall",produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> save(
-            @RequestBody HallBookingRequest request
+            @RequestBody BookingRequest request
             ) {
         return RestResponse.ok(hallBookingService.save(request));
     }
@@ -31,7 +31,7 @@ public class HallBookingController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> update(
             @PathVariable int id,
-            @RequestBody HallBookingRequest request
+            @RequestBody BookingRequest request
     ) {
         return RestResponse.ok(hallBookingService.update(request, id));
     }

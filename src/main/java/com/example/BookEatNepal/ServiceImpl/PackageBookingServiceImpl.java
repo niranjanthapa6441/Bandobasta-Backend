@@ -6,8 +6,8 @@ import com.example.BookEatNepal.Enums.PackageStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Model.Package;
 import com.example.BookEatNepal.Payload.DTO.*;
+import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Repository.*;
-import com.example.BookEatNepal.Payload.Request.PackageBookingRequest;
 import com.example.BookEatNepal.Service.PackageBookingService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.example.BookEatNepal.Util.Formatter;
@@ -51,16 +51,22 @@ public class PackageBookingServiceImpl implements PackageBookingService {
     @Autowired
     private EntityManager entityManager;
     @Override
-    public String save(PackageBookingRequest request) {
-        PackageAvailability packageAvailability = getPackageAvailability(request.getPackageAvailabilityId());
+    public String save(BookingRequest request) {
+        PackageAvailability packageAvailability = getPackageAvailability(request.getId());
 
-        AppUser user = getUser(request.getUserId());
+        if (packageAvailability.getStatus().equals(PackageStatus.AVAILABLE)){
+            AppUser user = getUser(request.getUserId());
 
-        packageBookingRepo.save(toBooking(request, packageAvailability, user));
+            packageBookingRepo.save(toBooking(request, packageAvailability, user));
 
-        updatePackageAvailabilityStatus(request.getPackageAvailabilityId(), PackageStatus.PENDING);
+            updatePackageAvailabilityStatus(request.getId(), PackageStatus.PENDING);
 
-        return SUCCESS_MESSAGE;
+            return SUCCESS_MESSAGE;
+        }
+        else {
+            throw new CustomException(CustomException.Type.BOOKING_HAS_ALREADY_BEEN_MADE);
+        }
+
     }
 
     @Override
@@ -142,7 +148,7 @@ public class PackageBookingServiceImpl implements PackageBookingService {
     }
 
     @Override
-    public String update(PackageBookingRequest request, int id) {
+    public String update(BookingRequest request, int id) {
         return SUCCESS_MESSAGE;
     }
 
@@ -161,10 +167,12 @@ public class PackageBookingServiceImpl implements PackageBookingService {
         packageAvailability.setStatus(packageStatus);
     }
 
-    private PackageBooking toBooking(PackageBookingRequest request, PackageAvailability packageAvailability, AppUser user) {
+    private PackageBooking toBooking(BookingRequest request, PackageAvailability packageAvailability, AppUser user) {
         PackageBooking packageBooking = new PackageBooking();
         packageBooking.setPackageAvailability(packageAvailability);
         packageBooking.setUser(user);
+        packageBooking.setNumberOfGuests(request.getNumberOfGuests());
+        packageBooking.setBookedForDate(packageAvailability.getDate());
         packageBooking.setStatus(BookingStatus.IN_PROGRESS);
         packageBooking.setEventType(EventType.valueOf(request.getEventType()));
         packageBooking.setRequestedDate(LocalDate.now());
@@ -208,10 +216,8 @@ public class PackageBookingServiceImpl implements PackageBookingService {
                 .requestedDate(Formatter.convertDateToStr(packageBooking.getRequestedDate(), "yyyy-MM-dd"))
                 .confirmedDate(Formatter.convertDateToStr(packageBooking.getConfirmedDate(), "yyyy-MM-dd"))
                 .requestedTime(packageBooking.getRequestedTime())
+                .bookedForDate(Formatter.convertDateToStr(packageBooking.getBookedForDate(), "yyyy-MM-dd"))
                 .confirmedTime(packageBooking.getConfirmedTime())
-                .price(packageBooking.getPackageAvailability().getAPackage().getPrice())
-                .status(String.valueOf(packageBooking.getStatus()))
-                .eventType(String.valueOf(packageBooking.getEventType()))
                 .build();
     }
     private PackageDetail convertToPackageDetail(Package aPackage) {
@@ -257,7 +263,7 @@ public class PackageBookingServiceImpl implements PackageBookingService {
                 .venueId(String.valueOf(hall.getVenue().getId()))
                 .capacity(hall.getCapacity())
                 .floorNumber(hall.getFloorNumber())
-                .description(hall.getDescription().toString())
+                .description(hall.getDescription())
                 .status(String.valueOf(hall.getStatus()))
                 .hallImagePaths(getHallImagePaths(hall.getId()))
                 .build();
