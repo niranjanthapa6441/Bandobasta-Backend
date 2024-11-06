@@ -2,6 +2,8 @@ package com.example.BookEatNepal.Payload.Request;
 
 import lombok.Data;
 
+import java.util.List;
+
 
 @Data
 public class BookingRequest {
@@ -10,4 +12,5 @@ public class BookingRequest {
     private String menuId;
     private String eventType;
     private int numberOfGuests;
+    private List<String> foodIds;
 }

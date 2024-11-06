@@ -1,14 +1,12 @@
 package com.example.BookEatNepal.Model;
 
-import com.example.BookEatNepal.Enums.FoodCategory;
-import com.example.BookEatNepal.Enums.FoodStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
 @Entity
-@Table(name="food_menu")
-public class FoodMenu {
+@Table(name="menu_item")
+public class MenuItem {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY

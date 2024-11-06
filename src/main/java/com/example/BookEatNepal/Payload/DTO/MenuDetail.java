@@ -15,4 +15,5 @@ public class MenuDetail {
     private String status;
     private String menuType;
     private List<FoodDetail> foodDetails;
+    private List<MenuItemSelectionRangeDetail> menuItemSelectionRangeDetails;
 }

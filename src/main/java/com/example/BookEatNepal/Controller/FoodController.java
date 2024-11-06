@@ -22,12 +22,11 @@ public class FoodController {
     @Autowired
     private FoodService service;
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> save(
-            @RequestPart("food") @Valid FoodRequest request,
-            @RequestPart("foodImage") MultipartFile foodImage
+            @RequestBody @Valid List<FoodRequest> requests
     ) {
-        return RestResponse.ok(service.save(request, foodImage));
+        return RestResponse.ok(service.save(requests));
     }
 
     @PostMapping(value = "/{id}",

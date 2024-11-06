@@ -43,7 +43,7 @@ public class PackageBookingServiceImpl implements PackageBookingService {
     private HallRepo hallRepo;
 
     @Autowired
-    private FoodMenuRepo foodMenuRepo;
+    private MenuItemRepo foodMenuRepo;
 
     @Autowired
     private PackageAmenityRepo packageAmenityRepo;
@@ -279,7 +279,7 @@ public class PackageBookingServiceImpl implements PackageBookingService {
         return hallImagePaths;
     }
     private MenuDetail toMenuDetail(Menu menu) {
-        List<FoodMenu> foodMenus = foodMenuRepo.findByMenu(menu);
+        List<MenuItem> foodMenus = foodMenuRepo.findByMenu(menu);
         return MenuDetail.builder().
                 id(String.valueOf(menu.getId())).
                 menuType(String.valueOf(menu.getMenuType())).
@@ -290,15 +290,15 @@ public class PackageBookingServiceImpl implements PackageBookingService {
                 foodDetails(convertToFoodDetail(foodMenus))
                 .build();
     }
-    private List<FoodDetail> convertToFoodDetail(List<FoodMenu> foodMenus) {
+    private List<FoodDetail> convertToFoodDetail(List<MenuItem> foodMenus) {
         List<FoodDetail> foodDetails = new ArrayList<>();
-        for (FoodMenu foodMenu : foodMenus
+        for (MenuItem foodMenu : foodMenus
         ) {
             foodDetails.add(FoodDetail.builder().
-                    foodCategory(String.valueOf(foodMenu.getFood().getCategory())).
+                    foodSubCategory(foodMenu.getFood().getSubCategory().getName()).
+                    foodCategory(foodMenu.getFood().getSubCategory().getFoodCategory().getName()).
                     name(foodMenu.getFood().getName()).
                     description(foodMenu.getFood().getDescription()).
-                    imageUrl(foodMenu.getFood().getImageUrl()).
                     id(String.valueOf(foodMenu.getFood().getId())).
                     status(String.valueOf(foodMenu.getFood().getStatus())).
                     venueId(String.valueOf(foodMenu.getFood().getVenue().getId())).

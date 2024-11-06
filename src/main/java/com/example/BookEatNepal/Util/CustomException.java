@@ -42,7 +42,9 @@ public class CustomException extends RuntimeException {
         HALL_AVAILABILITY_NOT_FOUND("Hall availability not found",400 ),
         BOOKING_NOT_FOUND("Booking not found", 400 ),
         PACKAGE_AVAILABILITY_NOT_FOUND("Package availability not found",400 ),
-        BOOKING_HAS_ALREADY_BEEN_MADE("Time Unavailable for the booking",500 );
+        BOOKING_HAS_ALREADY_BEEN_MADE("Time Unavailable for the booking",500 ),
+        SUB_CATEGORY_NOT_FOUND("Sub category not found",400 ),
+        NUMBER_OF_GUESTS_SHOULD_NOT_BE_EMPTY("Number of Guests should not be zero",400 );
         private String message;
         private int code;
 

@@ -16,4 +16,5 @@ public class    FoodDetail {
     private String imageUrl;
     private String status;
     private String foodCategory;
+    private String foodSubCategory;
 }

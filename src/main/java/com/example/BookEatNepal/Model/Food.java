@@ -29,14 +29,11 @@ public class Food {
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
 
-    @Column(name = "image_url", nullable = false)
-    private String imageUrl;
-
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)
     private FoodStatus status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="category",length = 40, nullable = false)
-    private FoodCategory category;
+    @ManyToOne
+    @JoinColumn(name = "sub_category_id", nullable = false)
+    private FoodSubCategory subCategory;
 }

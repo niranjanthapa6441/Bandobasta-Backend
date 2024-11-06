@@ -32,6 +32,10 @@ public class HallBookingServiceImpl implements HallBookingService {
 
     @Autowired
     private HallBookingRepo hallBookingRepo;
+
+    @Autowired
+    private FoodRepo foodRepo;
+
     @Autowired
     private AppUserRepo appUserRepo;
 
@@ -42,7 +46,10 @@ public class HallBookingServiceImpl implements HallBookingService {
     private HallRepo hallRepo;
 
     @Autowired
-    private FoodMenuRepo foodMenuRepo;
+    private MenuItemRepo foodMenuRepo;
+
+    @Autowired
+    private BookingMenuItemRepo bookingMenuItemRepo;
 
     @Autowired
     private EntityManager entityManager;
@@ -55,15 +62,21 @@ public class HallBookingServiceImpl implements HallBookingService {
 
         AppUser user = getUser(request.getUserId());
 
+        if (request.getNumberOfGuests() == 0){
+            throw  new CustomException(CustomException.Type.NUMBER_OF_GUESTS_SHOULD_NOT_BE_EMPTY);
+        }
         if (hallAvailability.getStatus().equals(HallStatus.AVAILABLE)){
-            hallBookingRepo.save(toBooking(request, menu, hallAvailability, user));
+            HallBooking hallBooking=hallBookingRepo.save(toBooking(request, menu, hallAvailability, user));
 
             updateHallAvailabilityStatus(request.getId(), HallStatus.PENDING);
+
+            toBookingMenuItem(request.getFoodIds(),hallBooking);
 
             return SUCCESS_MESSAGE;
         }
         else throw  new CustomException(CustomException.Type.BOOKING_HAS_ALREADY_BEEN_MADE);
     }
+
 
     @Override
     public String delete(int id) {
@@ -179,9 +192,8 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     private Hall getHall(int id) {
-        Hall hall = hallRepo.findById(id)
+        return hallRepo.findById(id)
                 .orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
-        return hall;
     }
 
     private HallDetail toHallDetail(Hall hall) {
@@ -191,7 +203,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .venueId(String.valueOf(hall.getVenue().getId()))
                 .capacity(hall.getCapacity())
                 .floorNumber(hall.getFloorNumber())
-                .description(hall.getDescription().toString())
+                .description(hall.getDescription())
                 .status(String.valueOf(hall.getStatus()))
                 .hallImagePaths(getHallImagePaths(hall.getId()))
                 .build();
@@ -249,7 +261,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     private MenuDetail toMenuDetail(Menu menu) {
-        List<FoodMenu> foodMenus = foodMenuRepo.findByMenu(menu);
+        List<MenuItem> foodMenus = foodMenuRepo.findByMenu(menu);
         return MenuDetail.builder().
                 id(String.valueOf(menu.getId())).
                 menuType(String.valueOf(menu.getMenuType())).
@@ -261,15 +273,15 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .build();
     }
 
-    private List<FoodDetail> toFoodDetail(List<FoodMenu> foodMenus) {
+    private List<FoodDetail> toFoodDetail(List<MenuItem> foodMenus) {
         List<FoodDetail> foodDetails = new ArrayList<>();
-        for (FoodMenu foodMenu : foodMenus
+        for (MenuItem foodMenu : foodMenus
         ) {
             foodDetails.add(FoodDetail.builder().
-                    foodCategory(String.valueOf(foodMenu.getFood().getCategory())).
+                    foodSubCategory(foodMenu.getFood().getSubCategory().getName()).
+                    foodCategory(foodMenu.getFood().getSubCategory().getFoodCategory().getName()).
                     name(foodMenu.getFood().getName()).
                     description(foodMenu.getFood().getDescription()).
-                    imageUrl(foodMenu.getFood().getImageUrl()).
                     id(String.valueOf(foodMenu.getFood().getId())).
                     status(String.valueOf(foodMenu.getFood().getStatus())).
                     venueId(String.valueOf(foodMenu.getFood().getVenue().getId())).
@@ -294,5 +306,19 @@ public class HallBookingServiceImpl implements HallBookingService {
             bookingDetails.add(convertToBookingDetail(hallBooking));
         }
         return bookingDetails;
+    }
+    private void toBookingMenuItem(List<String> foodIds,HallBooking hallBooking) {
+        for (String id : foodIds){
+            BookingMenuItem bookingMenuItem= new BookingMenuItem();
+            bookingMenuItem.setBooking(hallBooking);
+            bookingMenuItem.setName(toFood(id));
+
+            bookingMenuItemRepo.save(bookingMenuItem);
+        }
+    }
+
+    private String toFood(String id) {
+        Food food= foodRepo.findById(Integer.parseInt(id)).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
+        return  food.getName();
     }
 }
