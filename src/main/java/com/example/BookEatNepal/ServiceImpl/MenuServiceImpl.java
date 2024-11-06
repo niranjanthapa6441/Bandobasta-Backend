@@ -2,17 +2,13 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.Enums.MenuStatus;
 import com.example.BookEatNepal.Enums.MenuType;
-import com.example.BookEatNepal.Model.Food;
-import com.example.BookEatNepal.Model.FoodMenu;
-import com.example.BookEatNepal.Model.Menu;
-import com.example.BookEatNepal.Model.Venue;
+import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Payload.DTO.FoodDetail;
 import com.example.BookEatNepal.Payload.DTO.MenuDTO;
 import com.example.BookEatNepal.Payload.DTO.MenuDetail;
-import com.example.BookEatNepal.Repository.FoodMenuRepo;
-import com.example.BookEatNepal.Repository.FoodRepo;
-import com.example.BookEatNepal.Repository.MenuRepo;
-import com.example.BookEatNepal.Repository.VenueRepo;
+import com.example.BookEatNepal.Payload.DTO.MenuItemSelectionRangeDetail;
+import com.example.BookEatNepal.Payload.Request.MenuItemSelectionRangeRequest;
+import com.example.BookEatNepal.Repository.*;
 import com.example.BookEatNepal.Payload.Request.MenuRequest;
 import com.example.BookEatNepal.Service.MenuService;
 import com.example.BookEatNepal.Util.CustomException;
@@ -39,7 +35,14 @@ public class MenuServiceImpl implements MenuService {
     private MenuRepo menuRepo;
 
     @Autowired
-    private FoodMenuRepo foodMenuRepo;
+    private FoodSubCategoryRepo foodSubCategoryRepo;
+
+    @Autowired
+    private MenuItemRepo foodMenuRepo;
+
+    @Autowired
+    private MenuItemSelectionRangeRepo menuSelectionItemRangeRepo;
+
     @Autowired
     EntityManager entityManager;
 
@@ -48,7 +51,8 @@ public class MenuServiceImpl implements MenuService {
     public String save(MenuRequest request) {
         Venue venue = findVenueById(request.getVenueId());
         Menu menu = menuRepo.save(convertToMenu(request, venue));
-        linkFoodToMenu(request.getFoodIds(), menu);
+        menuItem(request.getFoodIds(), menu);
+        menuSelectionItemRange(menu,request.getMenuItemSelectionRangeRequests());
         return SUCCESS_MESSAGE;
     }
 
@@ -122,9 +126,9 @@ public class MenuServiceImpl implements MenuService {
     }
 
     private MenuDTO convertToMenuDTO(List<Menu> menus, int currentPage, int totalElements, int totalPages) {
-        List<MenuDetail> foodDetails = convertToMenuDetails(menus);
+        List<MenuDetail> menuDetails = convertToMenuDetails(menus);
         return MenuDTO.builder()
-                .menuDetails(foodDetails)
+                .menuDetails(menuDetails)
                 .currentPage(currentPage)
                 .totalPages(totalPages)
                 .totalElements(totalElements)
@@ -140,15 +144,15 @@ public class MenuServiceImpl implements MenuService {
         return menuDetails;
     }
 
-    private void linkFoodToMenu(List<String> foodIds, Menu menu) {
+    private void menuItem(List<String> foodIds, Menu menu) {
         for (String foodId : foodIds) {
             Food food = findFoodById(Integer.parseInt(foodId));
             foodMenuRepo.save(convertToFoodMenu(food, menu));
         }
     }
 
-    private FoodMenu convertToFoodMenu(Food food, Menu menu) {
-        FoodMenu foodMenu = new FoodMenu();
+    private MenuItem convertToFoodMenu(Food food, Menu menu) {
+        MenuItem foodMenu = new MenuItem();
         foodMenu.setFood(food);
         foodMenu.setMenu(menu);
         return foodMenu;
@@ -173,7 +177,8 @@ public class MenuServiceImpl implements MenuService {
     }
 
     private MenuDetail toMenuDetail(Menu menu) {
-        List<FoodMenu> foodMenus = foodMenuRepo.findByMenu(menu);
+        List<MenuItem> foodMenus = foodMenuRepo.findByMenu(menu);
+        List<MenuItemSelectionRange> menuItemSelectionRanges = menuSelectionItemRangeRepo.findByMenu(menu);
         return MenuDetail.builder().
                 id(String.valueOf(menu.getId())).
                 menuType(String.valueOf(menu.getMenuType())).
@@ -181,19 +186,31 @@ public class MenuServiceImpl implements MenuService {
                 description(menu.getDescription()).
                 venueId(String.valueOf(menu.getVenue().getId())).
                 status(String.valueOf(menu.getStatus())).
-                foodDetails(convertToFoodDetail(foodMenus))
+                foodDetails(convertToFoodDetail(foodMenus)).
+                menuItemSelectionRangeDetails(toMenuItemSelectionRange(menuItemSelectionRanges))
                 .build();
     }
 
-    private List<FoodDetail> convertToFoodDetail(List<FoodMenu> foodMenus) {
+    private List<MenuItemSelectionRangeDetail> toMenuItemSelectionRange(List<MenuItemSelectionRange> menuItemSelectionRanges) {
+        List<MenuItemSelectionRangeDetail> menuItemSelectionRangeDetails = new ArrayList<>();
+        for (MenuItemSelectionRange menuItemSelectionRange: menuItemSelectionRanges){
+            MenuItemSelectionRangeDetail menuItemSelectionRangeDetail = new MenuItemSelectionRangeDetail();
+            menuItemSelectionRangeDetail.setMaxSelection(menuItemSelectionRange.getMaxSelection());
+            menuItemSelectionRangeDetail.setFoodSubCategory(menuItemSelectionRange.getFoodSubCategory().getName());
+
+            menuItemSelectionRangeDetails.add(menuItemSelectionRangeDetail);
+        }
+        return menuItemSelectionRangeDetails;
+    }
+
+    private List<FoodDetail> convertToFoodDetail(List<MenuItem> foodMenus) {
         List<FoodDetail> foodDetails = new ArrayList<>();
-        for (FoodMenu foodMenu : foodMenus
+        for (MenuItem foodMenu : foodMenus
         ) {
             foodDetails.add(FoodDetail.builder().
-                    foodCategory(String.valueOf(foodMenu.getFood().getCategory())).
-                    name(foodMenu.getFood().getName()).
+                    foodSubCategory(foodMenu.getFood().getSubCategory().getName()).
+                    foodCategory(foodMenu.getFood().getSubCategory().getFoodCategory().getName()).                    name(foodMenu.getFood().getName()).
                     description(foodMenu.getFood().getDescription()).
-                    imageUrl(foodMenu.getFood().getImageUrl()).
                     id(String.valueOf(foodMenu.getFood().getId())).
                     status(String.valueOf(foodMenu.getFood().getStatus())).
                     venueId(String.valueOf(foodMenu.getFood().getVenue().getId())).
@@ -204,5 +221,19 @@ public class MenuServiceImpl implements MenuService {
 
     private Menu getMenuById(int id) {
         return menuRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.MENU_NOT_FOUND));
+    }
+    private void menuSelectionItemRange(Menu menu, List<MenuItemSelectionRangeRequest> requests) {
+        for (MenuItemSelectionRangeRequest request: requests){
+            MenuItemSelectionRange menuItemSelectionRange = new MenuItemSelectionRange();
+            menuItemSelectionRange.setFoodSubCategory(findFoodSubCategory(request.getFoodSubCategory()));
+            menuItemSelectionRange.setMenu(menu);
+            menuItemSelectionRange.setMaxSelection(request.getMaxSelection());
+
+            menuSelectionItemRangeRepo.save(menuItemSelectionRange);
+        }
+    }
+
+    private FoodSubCategory findFoodSubCategory(String subCategoryName) {
+        return foodSubCategoryRepo.findByName(subCategoryName).orElseThrow(() -> new CustomException(CustomException.Type.SUB_CATEGORY_NOT_FOUND));
     }
 }

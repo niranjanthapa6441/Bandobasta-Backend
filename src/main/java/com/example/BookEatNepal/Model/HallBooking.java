@@ -49,7 +49,7 @@ public class HallBooking {
     @Column(name = "price", nullable = true)
     private double price;
 
-    @Column(name = "number_of_guests", nullable = true)
+    @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
 
     @Enumerated(EnumType.STRING)

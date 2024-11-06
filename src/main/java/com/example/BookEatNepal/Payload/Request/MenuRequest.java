@@ -12,5 +12,6 @@ public class MenuRequest {
     private String menuType;
     private double price;
     private List<String> foodIds;
+    private List<MenuItemSelectionRangeRequest> menuItemSelectionRangeRequests;
     private String status;
 }

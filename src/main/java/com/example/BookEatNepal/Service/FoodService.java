@@ -11,7 +11,8 @@ import java.util.List;
 
 @Service
 public interface FoodService {
-    String save(FoodRequest request, MultipartFile image);
+
+    String save(List<FoodRequest> requests);
     String delete(int id);
 
     FoodDTO findAll(String venueId, int page, int size);
