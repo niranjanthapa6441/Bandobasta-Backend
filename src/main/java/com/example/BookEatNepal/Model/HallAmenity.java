@@ -14,11 +14,11 @@ public class HallAmenity {
     @Column(name="id",length=10)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "hall_id", nullable = false)
     private Hall hall;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "amenity_id", nullable = false)
     private Amenity amenity;
 }

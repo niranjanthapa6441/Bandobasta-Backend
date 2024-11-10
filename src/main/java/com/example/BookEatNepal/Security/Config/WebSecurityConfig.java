@@ -16,14 +16,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 
 @Configuration
 @EnableMethodSecurity
-// (securedEnabled = true,
-// jsr250Enabled = true,
-//prePostEnabled = true) // by default
-public class WebSecurityConfig  {
+public class WebSecurityConfig {
+
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
@@ -38,10 +40,8 @@ public class WebSecurityConfig  {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
@@ -53,6 +53,21 @@ public class WebSecurityConfig  {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    // Define the CORS configuration manually
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200")); // Allow requests from frontend
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Accept", "Authorization"));
+        configuration.setAllowCredentials(true); // Allow cookies or credentials to be sent
+        configuration.setMaxAge(3600L); // Cache pre-flight responses for 1 hour
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);  // Apply config to all endpoints
+        return source;
     }
 
     @Bean
@@ -71,17 +86,15 @@ public class WebSecurityConfig  {
                         .requestMatchers("/user/logOut").permitAll()
                         .requestMatchers("/user/authenticate/register/confirm").permitAll()
 
-//                        .requestMatchers("/hall/availability/save").hasRole("ADMIN")
-//                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
-
+                        // Other authenticated routes
                         .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(authenticationProvider());
 
+        // Add the authentication JWT filter to the filter chain
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 }
