@@ -18,7 +18,7 @@ public class Hall {
     @Column(name="id",length=10)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 

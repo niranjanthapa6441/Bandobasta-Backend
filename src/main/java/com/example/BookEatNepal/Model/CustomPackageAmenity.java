@@ -13,11 +13,11 @@ public class CustomPackageAmenity {
     @Column(name="id",length=10)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "custom_package_id", nullable = false)
     private CustomPackage customPackage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "amenity_id", nullable = false)
     private Amenity amenity;
 }

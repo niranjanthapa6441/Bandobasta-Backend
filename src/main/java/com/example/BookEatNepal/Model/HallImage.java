@@ -15,7 +15,7 @@ public class HallImage{
     @Column(name = "image_url", nullable = false, unique = true)
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "hall_id", nullable = false)
     private Hall hall;
 }

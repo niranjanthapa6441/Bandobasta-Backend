@@ -173,8 +173,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setUsername(request.getUsername());
         user.setPassword(encoder.encode(request.getPassword()));
         user.setRole(getRole(request.getRole()));
-        user.setEnabled(true);
-        user .setLocked(true);
+        user.setEnabled(false);
+        user.setLocked(true);
         user.setStatus("Registered");
         return user;
     }

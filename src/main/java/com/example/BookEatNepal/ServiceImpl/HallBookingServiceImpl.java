@@ -7,12 +7,14 @@ import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Payload.DTO.*;
 import com.example.BookEatNepal.Repository.*;
 import com.example.BookEatNepal.Payload.Request.BookingRequest;
+import com.example.BookEatNepal.Service.EmailService;
 import com.example.BookEatNepal.Service.HallBookingService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.example.BookEatNepal.Util.Formatter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class HallBookingServiceImpl implements HallBookingService {
     private static final String SUCCESS_MESSAGE = "successful";
+    private final EmailService emailService;
+
     @Autowired
     private HallAvailabilityRepo hallAvailabilityRepo;
 
@@ -71,7 +76,13 @@ public class HallBookingServiceImpl implements HallBookingService {
             updateHallAvailabilityStatus(request.getId(), HallStatus.PENDING);
 
             toBookingMenuItem(request.getFoodIds(),hallBooking);
-
+            emailService.sendEmail(user.getEmail(),"Thank You For Booking",
+                    buildEmail(
+                    user.getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
+                    hallBooking.getHallAvailability().getHall().getVenue().getVenueName(),
+                    Integer.toString(hallBooking.getNumberOfGuests()),
+                    hallBooking.getHallAvailability().getHall().getName()
+                    ));
             return SUCCESS_MESSAGE;
         }
         else throw  new CustomException(CustomException.Type.BOOKING_HAS_ALREADY_BEEN_MADE);
@@ -321,4 +332,64 @@ public class HallBookingServiceImpl implements HallBookingService {
         Food food= foodRepo.findById(Integer.parseInt(id)).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
         return  food.getName();
     }
+    private String buildEmail(String name,String bookedForDate, String venueName, String numberOfGuests, String hallName) {
+
+        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">" +
+                "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>" +
+                "<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
+                "<tbody><tr>" +
+                "<td width=\"100%\" height=\"53\" bgcolor=\"#0b0c0c\">" +
+                "<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;max-width:580px\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\">" +
+                "<tbody><tr>" +
+                "<td width=\"70\" bgcolor=\"#0b0c0c\" valign=\"middle\">" +
+                "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">" +
+                "<tbody><tr>" +
+                "<td style=\"padding-left:10px\"></td>" +
+                "<td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">" +
+                "<span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Thank you for booking</span>" +
+                "</td>" +
+                "</tr></tbody></table>" +
+                "</td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "</td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "<table role=\"presentation\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">" +
+                "<tbody><tr>" +
+                "<td width=\"10\" height=\"10\" valign=\"middle\"></td>" +
+                "<td>" +
+                "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">" +
+                "<tbody><tr>" +
+                "<td bgcolor=\"#1D70B8\" width=\"100%\" height=\"10\"></td>" +
+                "</tr></tbody></table>" +
+                "</td>" +
+                "<td width=\"10\" valign=\"middle\" height=\"10\"></td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "<table role=\"presentation\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">" +
+                "<tbody><tr>" +
+                "<td height=\"30\"><br></td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td width=\"10\" valign=\"middle\"><br></td>" +
+                "<td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Thank you for booking with Bandobasta Nepal. Below are your booking details:</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Venue:</strong> " + venueName + "</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Hall:</strong> " + hallName + "</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Booking Date:</strong> " + bookedForDate + "</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Number of Guests:</strong> " + numberOfGuests + "</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">The venue will contact you soon with more details.</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">We look forward to serving you!</p>" +
+                "</td>" +
+                "<td width=\"10\" valign=\"middle\"><br></td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td height=\"30\"><br></td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "</div>";
+    }
+
 }

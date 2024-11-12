@@ -16,10 +16,26 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-
+  mail:
+    host: smtp.gmail.com
+    username: bandobastanepal@gmail.com
+    password: wxhehpdcnglpdtft
+    port: 587
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+    debug: true
 server:
   servlet:
-    context-path: /book-eat-nepal/api/v1
+    context-path: /bandobasta/api/v1
   port: 8080
 
 bandobasta:

@@ -3,9 +3,10 @@ package com.example.BookEatNepal.Enums;
 public enum EventType {
     BRATABANDA,
     WEDDING,
-    PASNI,
-    SHRADHA,
-    MEETING,
-    CONFERENCE,
+    RICE_FEEDING_CEREMONY,
+    CORPORATE_EVENT,
+    PARTY,
+    OTHER,
+    BIRTHDAY,
     NONE
 }
