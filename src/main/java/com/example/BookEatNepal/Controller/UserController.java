@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 @Controller
 @RequestMapping("/user")
 public class UserController {
@@ -42,8 +43,7 @@ public class UserController {
     }
     @PutMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE,consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> update(@PathVariable String id, @Valid @RequestBody UpdateProfileRequest request){
-        System.out.println("Im here");
-        return RestResponse.ok(service.update(Integer.valueOf(id),request));
+        return RestResponse.ok(service.update(Integer.parseInt(id),request));
     }
     @DeleteMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE,consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> delete(@PathVariable String id){
