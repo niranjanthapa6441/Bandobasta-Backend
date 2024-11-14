@@ -27,7 +27,7 @@ public class UserController {
     }
     @GetMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findById(@PathVariable String id){
-        return RestResponse.ok(service.findById(Integer.valueOf(id)));
+        return RestResponse.ok(service.findById(Integer.parseInt(id)));
     }
     @PostMapping(value = "/authenticate/register",produces = MediaType.APPLICATION_JSON_VALUE,consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> save(@Valid @RequestBody SignUpRequest request){

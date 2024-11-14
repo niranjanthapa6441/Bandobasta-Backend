@@ -112,6 +112,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .id(String.valueOf(userDetails.getId()))
                 .username(userDetails.getUsername())
                 .type("Bearer")
+                .roles(roles)
                 .accessToken(jwt)
                 .build();
     }
