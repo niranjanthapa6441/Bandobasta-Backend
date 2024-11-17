@@ -18,9 +18,14 @@ public class ConfirmationTokenService {
     public Optional<ConfirmationToken> getToken(String token) {
         return confirmTokenRepository.findByToken(token);
     }
-
+    public boolean isTokenExists(String token) {
+        return confirmTokenRepository.findByToken(token).isPresent();
+    }
     public int setConfirmedAt(String token) {
         return confirmTokenRepository.updateConfirmedAt(
                 token, LocalDateTime.now());
+    }
+    public void deleteToken(ConfirmationToken token){
+        confirmTokenRepository.delete(token);
     }
 }

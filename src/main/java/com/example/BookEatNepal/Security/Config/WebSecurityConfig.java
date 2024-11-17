@@ -59,11 +59,11 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*")); // Allow all origins
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Accept", "Authorization")); // Allowed headers
-        configuration.setAllowCredentials(true); // Allow cookies or credentials to be sent
-        configuration.setMaxAge(3600L); // Cache pre-flight responses for 1 hour
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);  // Apply config to all endpoints
@@ -84,6 +84,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/images/venues/**").permitAll()
                         .requestMatchers("/user/authenticate/register").permitAll()
                         .requestMatchers("/user/authenticate/login").permitAll()
+                        .requestMatchers("/user/forgotPassword").permitAll()
+                        .requestMatchers("/user/resetUserPassword").permitAll()
+                        .requestMatchers("/user/validateOTP").permitAll()
                         .requestMatchers("/user/logOut").permitAll()
                         .requestMatchers("/user/authenticate/register/confirm").permitAll()
                         .anyRequest().authenticated()

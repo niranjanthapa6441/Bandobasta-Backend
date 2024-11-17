@@ -5,6 +5,7 @@ import com.example.BookEatNepal.Payload.DTO.UserDTO;
 import com.example.BookEatNepal.Enums.ERole;
 import com.example.BookEatNepal.Model.AppUser;
 import com.example.BookEatNepal.Model.Role;
+import com.example.BookEatNepal.Payload.Request.RequestPasswordRequest;
 import com.example.BookEatNepal.Registration.ConfirmationTokenService;
 import com.example.BookEatNepal.Registration.MessageResponse;
 import com.example.BookEatNepal.Registration.ConfirmationToken;
@@ -15,6 +16,7 @@ import com.example.BookEatNepal.Payload.Request.SignUpRequest;
 import com.example.BookEatNepal.Payload.Request.UpdateProfileRequest;
 import com.example.BookEatNepal.Security.JWT.JwtUtils;
 import com.example.BookEatNepal.Service.AuthenticationService;
+import com.example.BookEatNepal.Service.EmailService;
 import com.example.BookEatNepal.Util.CustomException;
 import com.google.common.net.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,6 +46,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Autowired
     private  ConfirmationTokenService confirmationTokenService;
 
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -59,7 +64,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         checkValidation(request);
         AppUser user = toUser(request);
         AppUser saveUser = repo.save(user);
-        String token = UUID.randomUUID().toString();
+
+        SecureRandom random = new SecureRandom();
+        String token;
+        do {
+            int otp = 100000 + random.nextInt(900000);
+            token = String.valueOf(otp);
+        } while (confirmationTokenService.isTokenExists(token));
+
         ConfirmationToken confirmationToken = new ConfirmationToken(
                 token,
                 LocalDateTime.now(),
@@ -69,6 +81,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         confirmationTokenService.saveConfirmationToken(confirmationToken);
         return token;
     }
+
     @Override
     public int enableAppUser(String email) {
         Optional<AppUser> findUser=repo.findByEmail(email);
@@ -99,6 +112,97 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public String sendForgetPasswordEmail(String email) {
+        AppUser user = repo.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User with email " + email + " not found"));
+
+        SecureRandom random = new SecureRandom();
+        String token;
+        do {
+            int otp = 100000 + random.nextInt(900000);
+            token = String.valueOf(otp);
+        } while (confirmationTokenService.isTokenExists(token));
+
+        ConfirmationToken confirmationToken = new ConfirmationToken(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(15),
+                user
+        );
+        confirmationTokenService.saveConfirmationToken(confirmationToken);
+
+        String subject = "Password Reset Request";
+        String body = buildEmail(user.getFirstName(),token );
+
+        emailService.sendEmail(email, subject, body);
+
+        return "Password reset OTP sent successfully to " + email;
+    }
+
+    @Override
+    public String verifyOTP(String otp) {
+        Optional<ConfirmationToken> optionalToken = confirmationTokenService.getToken(otp);
+
+        if (optionalToken.isEmpty()) {
+            throw new CustomException(CustomException.Type.INVALID_OTP);
+        }
+
+        ConfirmationToken token = optionalToken.get();
+
+        if (token.getConfirmedAt() != null) {
+            throw new CustomException(CustomException.Type.OTP_ALREADY_USED);
+        }
+
+        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new CustomException(CustomException.Type.OTP_HAS_EXPIRED);
+        }
+
+        token.setConfirmedAt(LocalDateTime.now());
+        confirmationTokenService.saveConfirmationToken(token);
+
+        return "OTP verified successfully";
+    }
+
+    @Override
+    public String resetUserPassword(RequestPasswordRequest request) {
+        Optional<AppUser> findUser=repo.findByEmail(request.getEmail());
+        Optional<ConfirmationToken> optionalToken = confirmationTokenService.getToken(request.getOtp());
+
+        if (optionalToken.isEmpty()) {
+            throw new CustomException(CustomException.Type.INVALID_OTP);
+        }
+
+        ConfirmationToken token = optionalToken.get();
+
+        if (token.getConfirmedAt() != null) {
+            AppUser updateUser=new AppUser();
+            if (findUser.isPresent()){
+                AppUser appUser= findUser.get();
+                updateUser.setId(appUser.getId());
+                updateUser.setFirstName(appUser.getFirstName());
+                updateUser.setEmail(appUser.getEmail());
+                updateUser.setLastName(appUser.getLastName());
+                updateUser.setMiddleName(appUser.getMiddleName());
+                updateUser.setPhoneNumber(appUser.getPhoneNumber());
+                updateUser.setUsername(appUser.getUsername());
+                updateUser.setPassword(encoder.encode(request.getPassword()));
+                updateUser.setEnabled(true);
+                updateUser.setLocked(true);
+                updateUser.setRole(appUser.getRole());
+                updateUser.setStatus(appUser.getStatus());
+                repo.save(updateUser);
+            }
+            confirmationTokenService.deleteToken(token);
+        }
+        else {
+            throw new CustomException(CustomException.Type.OTP_HAS_NOT_BEEN_VERIFIED);
+        }
+
+        return "password updated successfully";
+    }
+
+
+    @Override
     public LoginDTO login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -112,6 +216,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .id(String.valueOf(userDetails.getId()))
                 .username(userDetails.getUsername())
                 .type("Bearer")
+                .roles(roles)
                 .accessToken(jwt)
                 .build();
     }
@@ -240,4 +345,67 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (User.isPresent())
             throw new CustomException(CustomException.Type.PHONE_NUMBER_ALREADY_EXISTS);
     }
+    private String buildEmail(String name, String otp) {
+
+        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">" +
+                "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>" +
+                "<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
+                "<tbody><tr>" +
+                "<td width=\"100%\" height=\"53\" bgcolor=\"#0b0c0c\">" +
+                "<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;max-width:580px\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\">" +
+                "<tbody><tr>" +
+                "<td width=\"70\" bgcolor=\"#0b0c0c\" valign=\"middle\">" +
+                "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">" +
+                "<tbody><tr>" +
+                "<td style=\"padding-left:10px\"></td>" +
+                "<td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">" +
+                "<span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Your OTP Code</span>" +
+                "</td>" +
+                "</tr></tbody></table>" +
+                "</td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "</td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "<table role=\"presentation\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">" +
+                "<tbody><tr>" +
+                "<td width=\"10\" height=\"10\" valign=\"middle\"></td>" +
+                "<td>" +
+                "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">" +
+                "<tbody><tr>" +
+                "<td bgcolor=\"#1D70B8\" width=\"100%\" height=\"10\"></td>" +
+                "</tr></tbody></table>" +
+                "</td>" +
+                "<td width=\"10\" valign=\"middle\" height=\"10\"></td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "<table role=\"presentation\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">" +
+                "<tbody><tr>" +
+                "<td height=\"30\"><br></td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td width=\"10\" valign=\"middle\"><br></td>" +
+                "<td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Your OTP for verification is:</p>" +
+                "<blockquote style=\"margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\">" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">" +
+                "<strong style=\"font-size:24px;color:#1D70B8\">" + otp + "</strong>" +
+                "</p></blockquote>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">The OTP is valid for 15 minutes.</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">If you did not request this, please ignore this email.</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">Thank you!</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">Regards,</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\"><strong>Bandobasta Team</strong></p>" +
+                "</td>" +
+                "<td width=\"10\" valign=\"middle\"><br></td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td height=\"30\"><br></td>" +
+                "</tr>" +
+                "</tbody></table>" +
+                "</div>";
+    }
+
 }

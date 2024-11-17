@@ -44,7 +44,11 @@ public class CustomException extends RuntimeException {
         PACKAGE_AVAILABILITY_NOT_FOUND("Package availability not found",400 ),
         BOOKING_HAS_ALREADY_BEEN_MADE("Time Unavailable for the booking",500 ),
         SUB_CATEGORY_NOT_FOUND("Sub category not found",400 ),
-        NUMBER_OF_GUESTS_SHOULD_NOT_BE_EMPTY("Number of Guests should not be zero",400 );
+        NUMBER_OF_GUESTS_SHOULD_NOT_BE_EMPTY("Number of Guests should not be zero",400 ),
+        INVALID_OTP("Invalid OTP",400 ),
+        OTP_HAS_EXPIRED("OTP has expired",400 ),
+        OTP_ALREADY_USED("OTP already used",400 ),
+        OTP_HAS_NOT_BEEN_VERIFIED("OTP has not been verified",400 );
         private String message;
         private int code;
 
