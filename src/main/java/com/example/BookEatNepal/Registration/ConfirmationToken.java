@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "REGISTRATION_TOKEN")
+@Table(name = "Confirmation_Token")
 public class ConfirmationToken {
     @SequenceGenerator(
             name = "",
@@ -23,8 +23,10 @@ public class ConfirmationToken {
             generator="confirmation_token_sequence"
     )
     private long id;
-    @Column(nullable = false)
+
+    @Column(nullable = false, unique = true)
     private String token;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
     @Column(nullable = false)
