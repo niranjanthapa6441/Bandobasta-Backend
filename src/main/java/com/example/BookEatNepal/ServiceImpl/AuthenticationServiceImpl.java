@@ -223,7 +223,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public String update(int id, UpdateProfileRequest request) {
         Optional<AppUser> findUser = repo.findById(id);
-        checkUpdateValidation(request,findUser.get());
+//        checkUpdateValidation(request,findUser.get());
         if (findUser.isPresent()) {
             AppUser updateUser = toUpdateUser(request,findUser.get());
             AppUser updatedUser = repo.save(updateUser);
