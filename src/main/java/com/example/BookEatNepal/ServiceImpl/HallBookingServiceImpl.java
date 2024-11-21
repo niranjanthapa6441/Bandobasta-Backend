@@ -189,7 +189,9 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .id(hallBooking.getId())
                 .venueName(hallBooking.getHallAvailability().getHall().getVenue().getVenueName())
                 .hallDetail(toHallDetail(getHall(hallBooking.getHallAvailability().getHall().getId())))
-                .menuDetail(toMenuDetail(hallBooking.getMenu()))
+                .menuDetail(findBookingMenu(hallBooking,hallBooking.getMenu()))
+                .startTime(hallBooking.getHallAvailability().getStartTime())
+                .endTime(hallBooking.getHallAvailability().getEndTime())
                 .userId(String.valueOf(hallBooking.getUser().getId()))
                 .requestedDate(Formatter.convertDateToStr(hallBooking.getRequestedDate(), "yyyy-MM-dd"))
                 .confirmedDate(Formatter.convertDateToStr(hallBooking.getConfirmedDate(), "yyyy-MM-dd"))
@@ -199,8 +201,23 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .price(hallBooking.getPrice())
                 .status(String.valueOf(hallBooking.getStatus()))
                 .eventType(String.valueOf(hallBooking.getEventType()))
+                .numberOfGuests(hallBooking.getNumberOfGuests())
                 .build();
     }
+
+    private MenuDetail findBookingMenu(HallBooking hallBooking, Menu menu) {
+        List<Food> foods= bookingMenuItemRepo.findFoodsByBookingId(hallBooking);
+        return MenuDetail.builder().
+                id(String.valueOf(menu.getId())).
+                menuType(String.valueOf(menu.getMenuType())).
+                price(menu.getPrice()).
+                description(menu.getDescription()).
+                venueId(String.valueOf(menu.getVenue().getId())).
+                status(String.valueOf(menu.getStatus())).
+                foodDetails(toFoodDetails(foods))
+                .build();
+    }
+
 
     private Hall getHall(int id) {
         return hallRepo.findById(id)
@@ -256,6 +273,7 @@ public class HallBookingServiceImpl implements HallBookingService {
         HallBooking hallBooking = new HallBooking();
         hallBooking.setHallAvailability(hallAvailability);
         hallBooking.setMenu(menu);
+        hallBooking.setPrice(menu.getPrice() * request.getNumberOfGuests());
         hallBooking.setNumberOfGuests(request.getNumberOfGuests());
         hallBooking.setRequestedDate(LocalDate.now());
         hallBooking.setRequestedTime(LocalTime.now());
@@ -300,6 +318,22 @@ public class HallBookingServiceImpl implements HallBookingService {
         }
         return foodDetails;
     }
+    private List<FoodDetail> toFoodDetails(List<Food> foods) {
+        List<FoodDetail> foodDetails = new ArrayList<>();
+        for (Food food : foods
+        ) {
+            foodDetails.add(FoodDetail.builder().
+                    foodSubCategory(food.getSubCategory().getName()).
+                    foodCategory(food.getSubCategory().getFoodCategory().getName()).
+                    name(food.getName()).
+                    description(food.getDescription()).
+                    id(String.valueOf(food.getId())).
+                    status(String.valueOf(food.getStatus())).
+                    venueId(String.valueOf(food.getVenue().getId())).
+                    build());
+        }
+        return foodDetails;
+    }
     private HallBookingDTO toBookingDTO(List<HallBooking> bookings, int currentPage, int totalElements, int totalPages) {
         List<HallBookingDetail> bookingDetails = getBookingDetails(bookings);
         return  HallBookingDTO.builder()
@@ -322,15 +356,14 @@ public class HallBookingServiceImpl implements HallBookingService {
         for (String id : foodIds){
             BookingMenuItem bookingMenuItem= new BookingMenuItem();
             bookingMenuItem.setBooking(hallBooking);
-            bookingMenuItem.setName(toFood(id));
+            bookingMenuItem.setFood(toFood(id));
 
             bookingMenuItemRepo.save(bookingMenuItem);
         }
     }
 
-    private String toFood(String id) {
-        Food food= foodRepo.findById(Integer.parseInt(id)).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
-        return  food.getName();
+    private Food toFood(String id) {
+        return foodRepo.findById(Integer.parseInt(id)).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
     }
     private String buildEmail(String name,String bookedForDate, String venueName, String numberOfGuests, String hallName) {
 
