@@ -14,8 +14,9 @@ public class BookingMenuItem {
     @Column(name="id",length=10)
     private int id;
 
-    @Column(name="name",length=100,nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name="food",nullable = false)
+    private Food food;
 
     @ManyToOne
     @JoinColumn(name = "booking_id",nullable = false)

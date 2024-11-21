@@ -3,6 +3,7 @@ package com.example.BookEatNepal.Payload.DTO;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Time;
 import java.time.LocalTime;
 
 @Data
@@ -21,4 +22,7 @@ public class HallBookingDetail {
     private double price;
     private String status;
     private String eventType;
+    private Time startTime;
+    private Time     endTime;
+    private int numberOfGuests;
 }
