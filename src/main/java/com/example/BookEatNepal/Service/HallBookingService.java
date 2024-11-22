@@ -4,6 +4,7 @@ package com.example.BookEatNepal.Service;
 import com.example.BookEatNepal.Payload.DTO.HallBookingDTO;
 import com.example.BookEatNepal.Payload.DTO.HallBookingDetail;
 import com.example.BookEatNepal.Payload.Request.BookingRequest;
+import com.example.BookEatNepal.Payload.Request.UpdateBookingRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +17,9 @@ public interface HallBookingService {
 
     HallBookingDetail findById(int id);
 
-    String update(BookingRequest request, int id );
+    String update(UpdateBookingRequest request, int id );
 
     String confirmBooking(int id );
+    String cancelBooking(int id );
+
 }

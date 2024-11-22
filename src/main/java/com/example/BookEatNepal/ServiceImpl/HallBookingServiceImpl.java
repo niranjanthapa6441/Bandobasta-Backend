@@ -5,6 +5,7 @@ import com.example.BookEatNepal.Enums.EventType;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Payload.DTO.*;
+import com.example.BookEatNepal.Payload.Request.UpdateBookingRequest;
 import com.example.BookEatNepal.Repository.*;
 import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Service.EmailService;
@@ -78,6 +79,7 @@ public class HallBookingServiceImpl implements HallBookingService {
             toBookingMenuItem(request.getFoodIds(),hallBooking);
             emailService.sendEmail(user.getEmail(),"Thank You For Booking",
                     buildEmail(
+                            String.valueOf(hallBooking.getId()),
                     user.getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
                     hallBooking.getHallAvailability().getHall().getVenue().getVenueName(),
                     Integer.toString(hallBooking.getNumberOfGuests()),
@@ -111,6 +113,14 @@ public class HallBookingServiceImpl implements HallBookingService {
 
         if (id != 0 ) {
             predicates.add(cb.equal(hallBookingAppUserJoin.get("id"), id));
+        }
+
+        if (bookingStatus != null && !bookingStatus.isBlank() ) {
+            predicates.add(cb.equal(bookingRoot.get("status"), bookingStatus));
+        }
+
+        if ((startDate != null && !startDate.isEmpty())&&(endDate != null && !endDate.isEmpty())) {
+            predicates.add(cb.between(bookingRoot.get("bookedForDate"), Formatter.convertStrToDate(startDate,"yyyy-MM-dd"),Formatter.convertStrToDate(endDate,"yyyy-MM-dd")));
         }
         query.where(predicates.toArray(new Predicate[0]));
 
@@ -163,17 +173,78 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     @Override
-    public String update(BookingRequest request, int id) {
+    public String update(UpdateBookingRequest request, int id) {
+        HallBooking booking= getHallBooking(id);
+        updateHallAvailabilityStatus(String.valueOf(booking.getHallAvailability().getId()), HallStatus.AVAILABLE);
+
+        booking.setPrice(request.getPrice());
+        booking.setMenu(getMenu(request.getMenuId()));
+        booking.setHallAvailability(getHallAvailability(request.getHallAvailabilityId()));
+        booking.setBookedForDate(getHallAvailability(request.getHallAvailabilityId()).getDate());
+        booking.setNumberOfGuests(request.getNumberOfGuests());
+        booking.setStatus(BookingStatus.valueOf(request.getStatus()));
+        booking.setConfirmedDate(LocalDate.now());
+        booking.setConfirmedTime(LocalTime.now());
+
+        HallBooking updatedBooking = hallBookingRepo.save(booking);
+
+        updateHallAvailabilityStatus(String.valueOf(updatedBooking.getHallAvailability().getId()), HallStatus.PENDING);
+
+        deleteBookingMenu(booking);
+        toBookingMenuItem(request.getFoodIds(),booking);
+        emailService.sendEmail(booking.getUser().getEmail(),"Your Booking has been updated",
+                buildEmail(
+                        String.valueOf(booking.getId()),
+                        booking.getUser().getFirstName(), Formatter.convertDateToStr(booking.getBookedForDate(), "yyyy-MM-dd"),
+                        booking.getHallAvailability().getHall().getVenue().getVenueName(),
+                        Integer.toString(booking.getNumberOfGuests()),
+                        booking.getHallAvailability().getHall().getName()
+                ));
         return SUCCESS_MESSAGE;
+    }
+
+    private void deleteBookingMenu(HallBooking hallBooking) {
+        bookingMenuItemRepo.deleteAllByBooking(hallBooking);
     }
 
     @Override
     public String confirmBooking(int id) {
         HallBooking hallBooking = getHallBooking(id);
         hallBooking.setStatus(BookingStatus.BOOKED);
+        hallBooking.setConfirmedDate(LocalDate.now());
+        hallBooking.setConfirmedTime(LocalTime.now());
         hallBookingRepo.save(hallBooking);
 
         updateHallAvailabilityStatus(String.valueOf(hallBooking.getHallAvailability().getId()), HallStatus.BOOKED);
+
+        emailService.sendEmail(hallBooking.getUser().getEmail(),"Your Booking has been Confirmed",
+                buildEmail(
+                        String.valueOf(hallBooking.getId()),
+                        hallBooking.getUser().getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
+                        hallBooking.getHallAvailability().getHall().getVenue().getVenueName(),
+                        Integer.toString(hallBooking.getNumberOfGuests()),
+                        hallBooking.getHallAvailability().getHall().getName()
+                ));
+        return SUCCESS_MESSAGE;
+    }
+
+    @Override
+    public String cancelBooking(int id) {
+        HallBooking hallBooking = getHallBooking(id);
+        hallBooking.setStatus(BookingStatus.CANCELLED);
+        hallBooking.setConfirmedDate(LocalDate.now());
+        hallBooking.setConfirmedTime(LocalTime.now());
+        hallBookingRepo.save(hallBooking);
+
+        updateHallAvailabilityStatus(String.valueOf(hallBooking.getHallAvailability().getId()), HallStatus.AVAILABLE);
+        emailService.sendEmail(hallBooking.getUser().getEmail(),"Your Booking has been Cancelled",
+                buildEmail(
+                        String.valueOf(hallBooking.getId()),
+                        hallBooking.getUser().getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
+                        hallBooking.getHallAvailability().getHall().getVenue().getVenueName(),
+                        Integer.toString(hallBooking.getNumberOfGuests()),
+                        hallBooking.getHallAvailability().getHall().getName()
+                ));
 
         return SUCCESS_MESSAGE;
     }
@@ -187,6 +258,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     private HallBookingDetail convertToBookingDetail(HallBooking hallBooking) {
         return HallBookingDetail.builder()
                 .id(hallBooking.getId())
+                .hallAvailabilityId(hallBooking.getHallAvailability().getId())
                 .venueName(hallBooking.getHallAvailability().getHall().getVenue().getVenueName())
                 .hallDetail(toHallDetail(getHall(hallBooking.getHallAvailability().getHall().getId())))
                 .menuDetail(findBookingMenu(hallBooking,hallBooking.getMenu()))
@@ -365,7 +437,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     private Food toFood(String id) {
         return foodRepo.findById(Integer.parseInt(id)).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
     }
-    private String buildEmail(String name,String bookedForDate, String venueName, String numberOfGuests, String hallName) {
+    private String buildEmail(String bookingId, String name,String bookedForDate, String venueName, String numberOfGuests, String hallName) {
 
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">" +
                 "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>" +
@@ -409,6 +481,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 "<td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Thank you for booking with Bandobasta Nepal. Below are your booking details:</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Booking Id:</strong> " + bookingId + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Venue:</strong> " + venueName + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Hall:</strong> " + hallName + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Booking Date:</strong> " + bookedForDate + "</p>" +
