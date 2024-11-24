@@ -22,12 +22,14 @@ public class RegistrationService {
             throw new IllegalStateException("invalid email");
         }
         String token=authenticationService.save(registrationRequest);
-        String link="https://bandobasta.onrender.com/bandobasta/api/v1/user/authenticate/register/confirm?token="+token;
-        emailService.sendEmail(registrationRequest.getEmail(),"Confirm your account Registration",buildEmail(
+        emailService.sendEmail(registrationRequest.getEmail(),
+                "Confirm your account Registration",
+                buildEmail(
                 registrationRequest.getFirstName(),
-                link));
+                token));
         return Status.REGISTERED;
     }
+
     @Transactional
     public Status confirmToken(String token) {
         ConfirmationToken confirmationToken = confirmationTokenService
@@ -50,8 +52,10 @@ public class RegistrationService {
                 confirmationToken.getUser().getEmail());
         return Status.SUCCESS;
     }
-    private String buildEmail(String name, String link) {
-        String emailContent = "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">" +
+
+    private String buildEmail(String name, String otp) {
+
+        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">" +
                 "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>" +
                 "<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
                 "<tbody><tr>" +
@@ -63,7 +67,7 @@ public class RegistrationService {
                 "<tbody><tr>" +
                 "<td style=\"padding-left:10px\"></td>" +
                 "<td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">" +
-                "<span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Confirm your email</span>" +
+                "<span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Your OTP Code</span>" +
                 "</td>" +
                 "</tr></tbody></table>" +
                 "</td>" +
@@ -92,13 +96,16 @@ public class RegistrationService {
                 "<td width=\"10\" valign=\"middle\"><br></td>" +
                 "<td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p>" +
-                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Thank you for registering. Please click the link below to activate your account:</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Your OTP for verification is:</p>" +
                 "<blockquote style=\"margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\">" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">" +
-                "<a href=\"" + link + "\" style=\"color:#1D70B8;text-decoration:none;font-weight:700;\">Activate Now</a>" +
+                "<strong style=\"font-size:24px;color:#1D70B8\">" + otp + "</strong>" +
                 "</p></blockquote>" +
-                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">The link will expire in 15 minutes.</p>" +
-                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">See you soon!</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">The OTP is valid for 15 minutes.</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">If you did not request this, please ignore this email.</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">Thank you!</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\">Regards,</p>" +
+                "<p style=\"font-size:16px;line-height:24px;color:#0b0c0c\"><strong>Bandobasta Team</strong></p>" +
                 "</td>" +
                 "<td width=\"10\" valign=\"middle\"><br></td>" +
                 "</tr>" +
@@ -107,7 +114,6 @@ public class RegistrationService {
                 "</tr>" +
                 "</tbody></table>" +
                 "</div>";
-
-        return emailContent;
     }
+
 }
