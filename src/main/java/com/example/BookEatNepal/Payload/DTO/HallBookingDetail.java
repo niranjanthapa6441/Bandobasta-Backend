@@ -10,6 +10,7 @@ import java.time.LocalTime;
 @Builder
 public class HallBookingDetail {
     private int id;
+    private int hallAvailabilityId;
     private String venueName;
     private String userId;
     private String bookedForDate;
@@ -23,6 +24,6 @@ public class HallBookingDetail {
     private String status;
     private String eventType;
     private Time startTime;
-    private Time     endTime;
+    private Time endTime;
     private int numberOfGuests;
 }

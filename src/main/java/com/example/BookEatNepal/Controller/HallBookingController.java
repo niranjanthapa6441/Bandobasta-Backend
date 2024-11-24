@@ -1,6 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
 import com.example.BookEatNepal.Payload.Request.BookingRequest;
+import com.example.BookEatNepal.Payload.Request.UpdateBookingRequest;
 import com.example.BookEatNepal.Service.HallBookingService;
 import com.example.BookEatNepal.Util.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,10 @@ public class HallBookingController {
 
     @PostMapping(value = "/hall/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> update(
             @PathVariable int id,
-            @RequestBody BookingRequest request
+            @RequestBody UpdateBookingRequest request
     ) {
         return RestResponse.ok(hallBookingService.update(request, id));
     }
@@ -66,12 +67,18 @@ public class HallBookingController {
         return RestResponse.ok(hallBookingService.findBookingByUser(userId,startDate,endDate,bookingStatus,sortBy,page, size), "Data Retrieval Successful");
     }
     @PostMapping(value = "/hall/confirm/{id}",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> confirmHallBooking(
             @PathVariable int id
     ) {
         return RestResponse.ok(hallBookingService.confirmBooking(id));
+    }
+    @PostMapping(value = "/hall/cancel/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> cancelBooking(
+            @PathVariable int id
+    ) {
+        return RestResponse.ok(hallBookingService.cancelBooking(id));
     }
 
 }
