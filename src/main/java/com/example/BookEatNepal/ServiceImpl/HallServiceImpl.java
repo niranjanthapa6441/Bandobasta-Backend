@@ -12,6 +12,7 @@ import com.example.BookEatNepal.Repository.HallRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
 import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Payload.Request.HallRequest;
+import com.example.BookEatNepal.Service.AWSService;
 import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Util.Formatter;
 import com.example.BookEatNepal.Util.CustomException;
@@ -20,7 +21,9 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +41,8 @@ import java.util.Objects;
 @Service
 public class HallServiceImpl implements HallService {
     private static final String SUCCESS_MESSAGE = "successful";
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
     @Autowired
     private HallRepo hallRepo;
 
@@ -46,6 +51,9 @@ public class HallServiceImpl implements HallService {
 
     @Autowired
     private HallImageRepo hallImageRepo;
+
+    @Autowired
+    private AWSService awsService;
 
     @Autowired
     private HallAvailabilityRepo hallAvailabilityRepo;
@@ -236,7 +244,7 @@ public class HallServiceImpl implements HallService {
 
                 HallImage hallImage = new HallImage();
                 hallImage.setHall(hall);
-                hallImage.setImageUrl(getImagePath(image, venueName, hall.getName(), fileName));
+                hallImage.setImageUrl(uploadImageToS3(image, venueName, hall.getName(), fileName));
 
                 hallImageRepo.save(hallImage);
             } catch (CustomException e) {
@@ -245,6 +253,14 @@ public class HallServiceImpl implements HallService {
                 System.err.println("Unexpected error: " + e.getMessage());
             }
         }
+    }
+
+    private String uploadImageToS3(MultipartFile image, String venueName, String hallName, String fileName) throws IOException {
+        String s3Key = "images/venues/" + venueName.replaceAll("\\s", "") + "/" + hallName.replaceAll("\\s", "") + "/" + fileName;
+        String contentType = image.getContentType();
+        long fileSize = image.getSize();
+        InputStream inputStream = image.getInputStream();
+        return awsService.uploadFile(bucketName,s3Key,fileSize,contentType,inputStream);
     }
 
     private void validate(MultipartFile multipartFile) {

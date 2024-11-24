@@ -7,6 +7,7 @@ import com.example.BookEatNepal.Enums.VenueStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Repository.*;
 import com.example.BookEatNepal.Payload.Request.VenueRequest;
+import com.example.BookEatNepal.Service.AWSService;
 import com.example.BookEatNepal.Service.VenueService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
@@ -14,6 +15,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,8 +34,16 @@ import java.util.Objects;
 @Service
 public class VenueServiceImpl implements VenueService {
     private static final String SUCCESS_MESSAGE = "successful";
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
+
     @Autowired
     private VenueRepo venueRepo;
+
+    @Autowired
+    private AWSService awsService;
+
     @Autowired
     private VenueImageRepo venueImageRepo;
     @Autowired
@@ -244,7 +254,7 @@ public class VenueServiceImpl implements VenueService {
 
                 VenueImage venueImage = new VenueImage();
                 venueImage.setVenue(venue);
-                venueImage.setImageUrl(getImagePath(image, venue.getVenueName(), fileName));
+                venueImage.setImageUrl(uploadImageToS3(image, venue.getVenueName(), fileName));
 
                 venueImageRepo.save(venueImage);
             } catch (CustomException e) {
@@ -255,6 +265,13 @@ public class VenueServiceImpl implements VenueService {
         }
     }
 
+    private String uploadImageToS3(MultipartFile image, String venueName, String fileName) throws IOException {
+        String s3Key = "images/venues/" + venueName.replaceAll("\\s", "") + "/" + fileName;
+        String contentType = image.getContentType();
+        long fileSize = image.getSize();
+        InputStream inputStream = image.getInputStream();
+        return awsService.uploadFile(bucketName,s3Key,fileSize,contentType,inputStream);
+    }
     private String getImagePath(MultipartFile image, VenueRequest request) {
         validate(image);
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
