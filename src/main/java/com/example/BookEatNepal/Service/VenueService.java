@@ -15,9 +15,11 @@ public interface VenueService {
     String delete(int id);
 
 
-    VenueDTO findAll(String venueName, String location,int minCapacity, int maxCapacity,double minPrice, double maxPrice,String venueType, double rating, int page, int size);
+    VenueDTO findAll(String venueName,String location,int minCapacity, int maxCapacity,double minPrice, double maxPrice,String venueType, double rating, int page, int size);
 
     Venue findById(int id);
 
     String update(VenueRequest request, int id, MultipartFile licenseImage, MultipartFile panImage);
+
+    VenueDTO findByOwner(String venueName, String location, int minCapacity, int maxCapacity, double minPrice, double maxPrice, String ownerId, double rating, int page, int size);
 }

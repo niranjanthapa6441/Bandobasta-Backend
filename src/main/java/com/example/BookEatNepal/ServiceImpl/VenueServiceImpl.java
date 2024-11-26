@@ -167,6 +167,65 @@ public class VenueServiceImpl implements VenueService {
         return SUCCESS_MESSAGE;
     }
 
+    @Override
+    public VenueDTO findByOwner(String venueName, String location, int minCapacity, int maxCapacity, double minPrice, double maxPrice, String ownerId, double rating, int page, int size) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Venue> cq = cb.createQuery(Venue.class);
+        Root<Venue> venueRoot = cq.from(Venue.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (venueName != null && !venueName.isEmpty()) {
+            predicates.add(cb.like(cb.lower(venueRoot.get("venueName")), "%" + venueName.toLowerCase() + "%"));
+        }
+
+        if (location != null && !location.isEmpty()) {
+            predicates.add(cb.like(cb.lower(venueRoot.get("address")), "%" + location.toLowerCase() + "%"));
+        }
+
+        if (minPrice >= 0 && maxPrice > minPrice) {
+            Subquery<Long> menuPriceSubquery = cq.subquery(Long.class);
+            Root<Menu> menu = menuPriceSubquery.from(Menu.class);
+            menuPriceSubquery.select(menu.get("id"))
+                    .where(cb.equal(menu.get("venue").get("id"), venueRoot.get("id")),
+                            cb.between(menu.get("price"), minPrice, maxPrice));
+            predicates.add(cb.exists(menuPriceSubquery));
+        }
+
+        if (minCapacity > 0 && maxCapacity > minCapacity) {
+            Subquery<Long> hallCapacitySubQuery = cq.subquery(Long.class);
+            Root<Hall> hallRoot = hallCapacitySubQuery.from(Hall.class);
+            hallCapacitySubQuery.select(hallRoot.get("id"))
+                    .where(cb.equal(hallRoot.get("venue").get("id"), venueRoot.get("id")),
+                            cb.between(hallRoot.get("capacity"), minCapacity, maxCapacity));
+            predicates.add(cb.exists(hallCapacitySubQuery));
+        }
+
+        if (ownerId != null && !ownerId.isEmpty()) {
+            predicates.add(cb.equal(venueRoot.get("appUser").get("id"), ownerId));
+        }
+
+        if (rating > 0) {
+            predicates.add(cb.greaterThanOrEqualTo(venueRoot.get("rating"), rating));
+        }
+
+        if (!predicates.isEmpty()) {
+            cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        }
+        List<Venue> venues = entityManager.createQuery(cq).getResultList();
+
+        TypedQuery<Venue> typedQuery = entityManager.createQuery(cq);
+        typedQuery.setFirstResult((page - 1) * size);
+        typedQuery.setMaxResults(size);
+
+        List<Venue> pagedVenues = typedQuery.getResultList();
+
+        int totalElements = venues.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        return toVenueDTO(pagedVenues, page, totalElements, totalPages);
+    }
+
     private Venue toVenue(VenueRequest request, AppUser owner) {
         Venue venue = new Venue();
         venue.setVenueName(request.getName());
