@@ -59,7 +59,7 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200","https://bbangular.onrender.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Accept", "Authorization")); // Allowed headers
         configuration.setAllowCredentials(true);
@@ -81,6 +81,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/hall/findAll").permitAll()
                         .requestMatchers("/menu/findAll").permitAll()
                         .requestMatchers("/venue/findAll").permitAll()
+                        .requestMatchers("/venue/checkVenueAvailability").permitAll()
                         .requestMatchers("/images/venues/**").permitAll()
                         .requestMatchers("/user/authenticate/register").permitAll()
                         .requestMatchers("/user/authenticate/login").permitAll()

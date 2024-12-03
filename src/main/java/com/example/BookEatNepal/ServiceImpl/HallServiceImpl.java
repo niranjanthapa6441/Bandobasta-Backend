@@ -73,7 +73,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallDTO findAll(String venueId,int numberOfGuests, int page, int size) {
+    public HallDTO findAll(String venueId,int numberOfGuests, int page, int size, String checkAvailableDate) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Hall> query = cb.createQuery(Hall.class);
@@ -86,6 +86,21 @@ public class HallServiceImpl implements HallService {
         if (id != 0) {
             predicates.add(cb.equal(hallVenueJoin.get("id"), id));
         }
+
+        if (checkAvailableDate != null && !checkAvailableDate.isEmpty()) {
+            Subquery<Long> hallAvailabilitySubquery = query.subquery(Long.class);
+            Root<HallAvailability> hallAvailabilityRoot = hallAvailabilitySubquery.from(HallAvailability.class);
+            Join<HallAvailability, Hall> hallJoin = hallAvailabilityRoot.join("hall");
+
+            hallAvailabilitySubquery.select(hallJoin.get("id")) // Select hall IDs that match the criteria
+                    .where(
+                            cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(checkAvailableDate, "yyyy-MM-dd")), // Match the date
+                            cb.equal(hallAvailabilityRoot.get("status"), HallStatus.AVAILABLE) // Ensure the hall is available
+                    );
+
+            predicates.add(cb.in(hallRoot.get("id")).value(hallAvailabilitySubquery)); // Check if the hall's ID is in the subquery result
+        }
+
         if (numberOfGuests != 0){
             predicates.add(cb.greaterThanOrEqualTo(hallRoot.get("capacity"), numberOfGuests));
         }
@@ -138,7 +153,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallAvailabilityDTO checkAvailability(String venueId, String date, String startTime, String endTime, int numberOfGuests, int page, int size) {
+    public HallAvailabilityDTO checkAvailability(String venueId,int hallId, String date, String startTime, String endTime, int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
@@ -151,6 +166,10 @@ public class HallServiceImpl implements HallService {
 
         if (id != 0) {
             predicates.add(cb.equal(hallVenueJoin.get("id"), id));
+        }
+
+        if (hallId!= 0) {
+            predicates.add(cb.equal(hallAvailabilityJoin.get("id"), hallId));
         }
 
         if (date != null) {

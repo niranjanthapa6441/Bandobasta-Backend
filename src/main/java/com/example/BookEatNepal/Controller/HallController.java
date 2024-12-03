@@ -20,6 +20,7 @@ public class HallController {
     public static final String SIZE = "5";
     public static final String PAGE = "1";
     public static final String NUMBER_OF_GUESTS = "5";
+    public static final String HALL_ID = "0";
 
     @Autowired
     private HallService service;
@@ -43,6 +44,7 @@ public class HallController {
     public ResponseEntity<Object> checkAvailability(
             @RequestParam(required = true) String venueId,
             @RequestParam(required = true) String date,
+            @RequestParam(required = false,defaultValue = HALL_ID) int hallId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(defaultValue = NUMBER_OF_GUESTS) int numberOfGuests,
@@ -50,7 +52,7 @@ public class HallController {
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.checkAvailability(venueId, date, startTime, endTime, numberOfGuests, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.checkAvailability(venueId, hallId,date, startTime, endTime, numberOfGuests, page, size), "Data Retrieval Successful");
     }
     @PostMapping(value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
@@ -71,11 +73,12 @@ public class HallController {
     @GetMapping(value="/findAll",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
             @RequestParam(required = true) String venueId,
+            @RequestParam(required = false) String checkAvailableDate,
             @RequestParam(defaultValue = NUMBER_OF_GUESTS) int numberOfGuests,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.findAll(venueId,numberOfGuests, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.findAll(venueId,numberOfGuests, page, size,checkAvailableDate), "Data Retrieval Successful");
     }
 }

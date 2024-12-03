@@ -48,7 +48,9 @@ public class CustomException extends RuntimeException {
         INVALID_OTP("Invalid OTP",400 ),
         OTP_HAS_EXPIRED("OTP has expired",400 ),
         OTP_ALREADY_USED("OTP already used",400 ),
-        OTP_HAS_NOT_BEEN_VERIFIED("OTP has not been verified",400 );
+        OTP_HAS_NOT_BEEN_VERIFIED("OTP has not been verified",400 ),
+        FO0D_SUB_CATEGORY_FOR_VENUE_IS_PRESENT(" Food  sub-category for venue is present",500 ),
+        FO0D_CATEGORY_FOR_VENUE_IS_PRESENT("Food category for venue is present", 500);
         private String message;
         private int code;
 
