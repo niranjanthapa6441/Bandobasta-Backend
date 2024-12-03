@@ -1,12 +1,16 @@
 package com.example.BookEatNepal.ServiceImpl;
 
 
+import com.example.BookEatNepal.Model.FoodCategory;
 import com.example.BookEatNepal.Model.FoodSubCategory;
+import com.example.BookEatNepal.Payload.DTO.FoodCategoryDetail;
 import com.example.BookEatNepal.Payload.DTO.FoodDTO;
 import com.example.BookEatNepal.Payload.DTO.FoodDetail;
 import com.example.BookEatNepal.Enums.FoodStatus;
 import com.example.BookEatNepal.Model.Food;
 import com.example.BookEatNepal.Model.Venue;
+import com.example.BookEatNepal.Payload.Request.VenueFoodCategoryRequest;
+import com.example.BookEatNepal.Repository.FoodCategoryRepo;
 import com.example.BookEatNepal.Repository.FoodRepo;
 import com.example.BookEatNepal.Repository.FoodSubCategoryRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
@@ -14,6 +18,7 @@ import com.example.BookEatNepal.Payload.Request.FoodRequest;
 import com.example.BookEatNepal.Service.FoodService;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FoodServiceImpl implements FoodService {
@@ -31,6 +39,9 @@ public class FoodServiceImpl implements FoodService {
 
     @Autowired
     private VenueRepo venueRepo;
+
+    @Autowired
+    private FoodCategoryRepo foodCategoryRepo;
 
     @Autowired
     private FoodSubCategoryRepo foodSubCategoryRepo;
@@ -102,6 +113,62 @@ public class FoodServiceImpl implements FoodService {
         return SUCCESS_MESSAGE;
     }
 
+    @Override
+    public String saveVenueFoodCategory(String venueId, List<VenueFoodCategoryRequest> requests) {
+        Venue venue = findVenueById(venueId);
+        for (VenueFoodCategoryRequest request: requests){
+          FoodCategory foodCategory =  saveFoodCategory(request, venue);
+          for (String subCategory: request.getSubCategories()){
+              saveFoodSubCategory(subCategory, foodCategory);
+          }
+        }
+        return SUCCESS_MESSAGE;
+    }
+
+    @Override
+    public List<FoodCategoryDetail> findAllFoodCategoryVenue(String venueId) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<Tuple> query = cb.createTupleQuery();
+
+        Root<FoodCategory> foodCategoryRoot = query.from(FoodCategory.class);
+
+        Join<FoodCategory, FoodSubCategory> subCategoryJoin = foodCategoryRoot.join("foodSubCategories", JoinType.INNER);
+
+        List<Predicate> predicates = new ArrayList<>();
+        if (venueId != null && !venueId.isEmpty()) {
+            predicates.add(cb.equal(foodCategoryRoot.get("venue").get("id"), venueId));
+        }
+
+        query.multiselect(
+                foodCategoryRoot.get("name").alias("categoryName"),
+                subCategoryJoin.get("id").alias("subCategoryId"),
+                subCategoryJoin.get("name").alias("subCategoryName")
+        );
+
+        query.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        List<Tuple> resultList = entityManager.createQuery(query).getResultList();
+
+        Map<String, Map<Integer, String>> groupedData = resultList.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get("categoryName", String.class),
+                        Collectors.toMap(
+                                tuple -> tuple.get("subCategoryId", Integer.class),
+                                tuple -> tuple.get("subCategoryName", String.class)
+                        )
+                ));
+
+        return groupedData.entrySet().stream()
+                .map(entry -> FoodCategoryDetail.builder()
+                        .category(entry.getKey())
+                        .subCategory(entry.getValue())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
+
     private Venue findVenueById(String venueId) {
         return venueRepo.findById(Integer.valueOf(venueId)).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
     }
@@ -148,5 +215,36 @@ public class FoodServiceImpl implements FoodService {
                 .foodCategory(food.getSubCategory().getFoodCategory().getName())
                 .foodSubCategory(food.getSubCategory().getName())
                 .build();
+    }
+    private void saveFoodSubCategory(String subCategory, FoodCategory foodCategory) {
+        validateFoodSubCategory(subCategory);
+        FoodSubCategory sfoodSubCategory = new FoodSubCategory();
+        sfoodSubCategory.setFoodCategory(foodCategory);
+        sfoodSubCategory.setName(subCategory);
+
+        foodSubCategoryRepo.save(sfoodSubCategory);
+    }
+
+    private void validateFoodSubCategory(String subCategory) {
+        Optional<FoodSubCategory> foodSubCategory = foodSubCategoryRepo.findByName(subCategory);
+        if (foodSubCategory.isPresent()){
+            throw  new CustomException(CustomException.Type.FO0D_SUB_CATEGORY_FOR_VENUE_IS_PRESENT);
+        }
+    }
+
+    private FoodCategory saveFoodCategory(VenueFoodCategoryRequest request, Venue venue) {
+        validateFoodCategory(request.getCategory());
+        FoodCategory foodCategory= new FoodCategory();
+        foodCategory.setVenue(venue);
+        foodCategory.setName(request.getCategory());
+
+        return foodCategoryRepo.save(foodCategory);
+    }
+
+    private void validateFoodCategory(String category) {
+        Optional<FoodCategory> foodCategory = foodCategoryRepo.findByName(category);
+        if (foodCategory.isPresent()){
+            throw  new CustomException(CustomException.Type.FO0D_CATEGORY_FOR_VENUE_IS_PRESENT);
+        }
     }
 }

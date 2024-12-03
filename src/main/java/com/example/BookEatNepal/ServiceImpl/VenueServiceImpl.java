@@ -128,7 +128,6 @@ public class VenueServiceImpl implements VenueService {
                             cb.greaterThanOrEqualTo(hallJoin.get("capacity"), numberOfGuests) // Ensure capacity is sufficient
                     );
 
-            // Use the subquery to filter venues
             predicates.add(cb.in(venueRoot.get("id")).value(hallAvailabilitySubquery));
         }
 

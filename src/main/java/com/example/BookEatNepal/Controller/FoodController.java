@@ -1,6 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
 import com.example.BookEatNepal.Payload.Request.FoodRequest;
+import com.example.BookEatNepal.Payload.Request.VenueFoodCategoryRequest;
 import com.example.BookEatNepal.Service.FoodService;
 import com.example.BookEatNepal.Util.RestResponse;
 import jakarta.validation.Valid;
@@ -53,5 +54,19 @@ public class FoodController {
 
     ) {
         return RestResponse.ok(service.findAll(venueId, page, size), "Data Retrieval Successful");
+    }
+
+    @PostMapping(value = "/category/venue/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> saveFoodCategoryVenue(
+            @PathVariable String id,
+            @RequestBody @Valid List<VenueFoodCategoryRequest> requests
+    ) {
+        return RestResponse.ok(service.saveVenueFoodCategory(id,requests));
+    }
+    @GetMapping(value = "/category/venue", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> findAllFoodCategoryVenue(
+            @RequestParam(required = true) String venueId
+    ) {
+        return RestResponse.ok(service.findAllFoodCategoryVenue(venueId), "Data Retrieval Successful");
     }
 }
