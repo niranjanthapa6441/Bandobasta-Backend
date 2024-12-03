@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class HallAvailabilityDetail {
     private String id;
+    private String venueName;
     private String hallId;
     private String hallName;
     private String description;

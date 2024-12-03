@@ -21,7 +21,6 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,10 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -78,7 +73,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallDTO findAll(String venueId, int page, int size) {
+    public HallDTO findAll(String venueId,int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Hall> query = cb.createQuery(Hall.class);
@@ -90,6 +85,9 @@ public class HallServiceImpl implements HallService {
 
         if (id != 0) {
             predicates.add(cb.equal(hallVenueJoin.get("id"), id));
+        }
+        if (numberOfGuests != 0){
+            predicates.add(cb.greaterThanOrEqualTo(hallRoot.get("capacity"), numberOfGuests));
         }
         query.where(predicates.toArray(new Predicate[0]));
 
@@ -172,6 +170,7 @@ public class HallServiceImpl implements HallService {
         }
 
         predicates.add(cb.equal(hallAvailabilityRoot.get("status"), HallStatus.AVAILABLE));
+
         query.where(predicates.toArray(new Predicate[0]));
 
         List<HallAvailability> hallAvailabilities = entityManager.createQuery(query).getResultList();
@@ -210,6 +209,7 @@ public class HallServiceImpl implements HallService {
     private HallAvailabilityDetail toHallAvailabilityDetail(HallAvailability hallAvailability) {
         return HallAvailabilityDetail.builder()
                 .id(String.valueOf(hallAvailability.getId()))
+                .venueName(hallAvailability.getHall().getVenue().getVenueName())
                 .hallName(hallAvailability.getHall().getName())
                 .hallId(String.valueOf(hallAvailability.getHall().getId()))
                 .description(String.valueOf(hallAvailability.getHall().getDescription()))
@@ -290,25 +290,6 @@ public class HallServiceImpl implements HallService {
 
     }
 
-    private String getImagePath(MultipartFile multipartFile, String venueName, String hallName, String fileName) {
-        String uploadDirectory = "./images/venues/" + venueName.replaceAll("\\s", "") + "/" + hallName.replaceAll("\\s", "");
-        Path path = Paths.get(uploadDirectory);
-        Path filePath = path.resolve(fileName);
-        if (!Files.exists(path)) {
-            try {
-                Files.createDirectories(path);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        try (InputStream inputStream = multipartFile.getInputStream()) {
-            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return filePath.toString().replace("./", "/").trim();
-    }
-
     private Hall toHall(HallRequest request, Venue venue) {
         Hall hall = new Hall();
         hall.setDescription(request.getDescription());
@@ -361,7 +342,7 @@ public class HallServiceImpl implements HallService {
                 .venueId(String.valueOf(hall.getVenue().getId()))
                 .capacity(hall.getCapacity())
                 .floorNumber(hall.getFloorNumber())
-                .description(hall.getDescription().toString())
+                .description(hall.getDescription())
                 .status(String.valueOf(hall.getStatus()))
                 .hallImagePaths(getHallImagePaths(hall.getId()))
                 .build();

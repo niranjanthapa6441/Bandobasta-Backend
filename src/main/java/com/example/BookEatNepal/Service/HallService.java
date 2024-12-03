@@ -19,7 +19,7 @@ public interface HallService {
     String delete(int id);
 
 
-    HallDTO findAll(String venueId, int page, int size);
+    HallDTO findAll(String venueId,int numberOfGuests, int page, int size);
 
     HallDetail findById(int id);
 

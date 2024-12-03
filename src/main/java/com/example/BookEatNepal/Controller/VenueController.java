@@ -71,4 +71,39 @@ public class VenueController {
     ) {
         return RestResponse.ok(service.findAll(venueName, location,minCapacity,maxCapacity,minPrice,maxPrice,venueType, rating, page, size), "Data Retrieval Successful");
     }
+
+    @GetMapping(value="/findByOwner",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> findByOwner(
+            @RequestParam(required = false) String venueName,
+            @RequestParam(required = false) String location,
+            @RequestParam(defaultValue = MAX_CAPACITY) int maxCapacity,
+            @RequestParam(defaultValue = MIN_CAPACITY) int minCapacity,
+            @RequestParam(defaultValue = MIN_PRICE) double minPrice,
+            @RequestParam(defaultValue = MAX_PRICE) double maxPrice,
+            @RequestParam(required = true) String ownerId,
+            @RequestParam(defaultValue = RATING) double rating,
+            @RequestParam(defaultValue = PAGE) int page,
+            @RequestParam(defaultValue = SIZE) int size
+
+    ) {
+        return RestResponse.ok(service.findByOwner(venueName, location,minCapacity,maxCapacity,minPrice,maxPrice,ownerId, rating, page, size), "Data Retrieval Successful");
+    }
+
+    @GetMapping(value="/checkVenueAvailability",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> checkVenueAvailability(
+            @RequestParam(required = false) String venueName,
+            @RequestParam(required = false) String location,
+            @RequestParam(defaultValue = MAX_CAPACITY) int maxCapacity,
+            @RequestParam(defaultValue = MIN_CAPACITY) int minCapacity,
+            @RequestParam(defaultValue = MIN_PRICE) double minPrice,
+            @RequestParam(defaultValue = MAX_PRICE) double maxPrice,
+            @RequestParam(required = true) String checkAvailableDate,
+            @RequestParam(required = true) int numberOfGuests,
+            @RequestParam(defaultValue = RATING) double rating,
+            @RequestParam(defaultValue = PAGE) int page,
+            @RequestParam(defaultValue = SIZE) int size
+
+    ) {
+        return RestResponse.ok(service.findAvailableVenues(venueName,checkAvailableDate,numberOfGuests,location,minCapacity,maxCapacity,minPrice,maxPrice,rating, page, size), "Data Retrieval Successful");
+    }
 }

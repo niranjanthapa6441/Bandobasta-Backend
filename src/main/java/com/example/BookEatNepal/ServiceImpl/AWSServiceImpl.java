@@ -37,8 +37,7 @@ public class AWSServiceImpl implements AWSService {
         metadata.setContentType(contentType);
 
         s3Client.putObject(bucketName, keyName, value, metadata);
-        String s3Url = s3Client.getUrl(bucketName, keyName).toString();
-        return s3Url;
+        return s3Client.getUrl(bucketName, keyName).toString();
     }
 
     @Override

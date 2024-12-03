@@ -31,12 +31,14 @@ public class HallController {
     ) {
         return RestResponse.ok(service.save(request, hallImages));
     }
+
     @PostMapping(value = "/availability/save",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> saveAvailability(
             @RequestBody List<HallAvailabilityRequest> requests
             ) {
         return RestResponse.ok(service.saveHallAvailability(requests));
     }
+
     @GetMapping(value = "/availability",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> checkAvailability(
             @RequestParam(required = true) String venueId,
@@ -69,10 +71,11 @@ public class HallController {
     @GetMapping(value="/findAll",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
             @RequestParam(required = true) String venueId,
+            @RequestParam(defaultValue = NUMBER_OF_GUESTS) int numberOfGuests,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.findAll(venueId, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.findAll(venueId,numberOfGuests, page, size), "Data Retrieval Successful");
     }
 }
