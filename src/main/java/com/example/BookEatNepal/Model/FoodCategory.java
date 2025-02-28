@@ -18,7 +18,7 @@ public class FoodCategory {
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @Column(name = "name", length = 100, nullable = false, unique = true)
+    @Column(name="name",length=100,nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "foodCategory", cascade = CascadeType.ALL, orphanRemoval = true)

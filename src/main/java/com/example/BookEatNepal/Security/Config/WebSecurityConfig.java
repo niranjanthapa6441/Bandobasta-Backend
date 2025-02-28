@@ -59,7 +59,7 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200","https://bbangular.onrender.com"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200","https://bbangular.onrender.com","https://uat.bandobasta.com","https://uat.bandobasta.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Accept", "Authorization")); // Allowed headers
         configuration.setAllowCredentials(true);
@@ -90,6 +90,13 @@ public class WebSecurityConfig {
                         .requestMatchers("/user/validateOTP").permitAll()
                         .requestMatchers("/user/logOut").permitAll()
                         .requestMatchers("/user/authenticate/register/confirm").permitAll()
+                        .requestMatchers("/event/order/save").permitAll()
+                        .requestMatchers("/event/order/confirmOrder").permitAll()
+                        .requestMatchers("/event/order/checkIn").permitAll()
+                        .requestMatchers("/event/ticket/findAll").permitAll()
+                        .requestMatchers("/event/ticket/findAllByUser").permitAll()
+                        .requestMatchers("/event/order/findAllTicketOrderByEvent").permitAll()
+                        .requestMatchers("/event/order/countOfBookedAndCheckedInTicket").permitAll()
                         .anyRequest().authenticated()
                 );
 

@@ -15,6 +15,7 @@ import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,7 @@ public class MenuServiceImpl implements MenuService {
 
 
     @Override
+    @Transactional
     public String save(MenuRequest request) {
         Venue venue = findVenueById(request.getVenueId());
         Menu menu = menuRepo.save(convertToMenu(request, venue));

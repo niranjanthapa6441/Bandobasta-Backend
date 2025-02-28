@@ -50,7 +50,15 @@ public class CustomException extends RuntimeException {
         OTP_ALREADY_USED("OTP already used",400 ),
         OTP_HAS_NOT_BEEN_VERIFIED("OTP has not been verified",400 ),
         FO0D_SUB_CATEGORY_FOR_VENUE_IS_PRESENT(" Food  sub-category for venue is present",500 ),
-        FO0D_CATEGORY_FOR_VENUE_IS_PRESENT("Food category for venue is present", 500);
+        FO0D_CATEGORY_FOR_VENUE_IS_PRESENT("Food category for venue is present", 500),
+        TICKET_NOT_FOUND("Ticket not found",500 ),
+        INVALID_REQUEST("Ticket Details are required", 400 ),
+        ORDER_NOT_FOUND("Order not found", 500),
+        INSUFFICIENT_TICKET_QUANTITY("Insufficient Number of tickets",400 ),
+        EVENT_NOT_FOUND("Event not found",500 ),
+        ORDER_TICKET_NOT_FOUND("Ordered Ticket not found",500 ),
+        TICKET_HAS_ALREADY_BEEN_CHECKED_IN("Ticket has already been checked in",400 ),
+        INVALID_TICKET_ORDER_ID("Ticket not found",500 );
         private String message;
         private int code;
 

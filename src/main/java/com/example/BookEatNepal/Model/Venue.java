@@ -66,6 +66,9 @@ public class Venue {
     @Column(length = 20, nullable = false)
     private VenueStatus status;
 
+    @Column(name = "menu_price", nullable = true)
+    private double menuPrice;
+
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VenueImage> images = new ArrayList<>();
 

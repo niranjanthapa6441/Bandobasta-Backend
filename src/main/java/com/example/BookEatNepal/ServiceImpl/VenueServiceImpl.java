@@ -48,15 +48,19 @@ public class VenueServiceImpl implements VenueService {
 
     @Autowired
     private VenueImageRepo venueImageRepo;
+
     @Autowired
     private AppUserRepo appUserRepo;
 
     @Autowired
     private AmenityRepo amenityRepo;
+
     @Autowired
     private MenuRepo menuRepo;
+
     @Autowired
     private HallRepo hallRepo;
+
     @Autowired
     private HallImageRepo hallImageRepo;
 
@@ -307,6 +311,7 @@ public class VenueServiceImpl implements VenueService {
         venue.setVenueName(request.getName());
         venue.setEmail(request.getEmail());
         venue.setAppUser(owner);
+        venue.setMenuPrice(request.getMenuPrice());
         venue.setPrimaryPhoneNumber(request.getPrimaryPhoneNumber());
         venue.setSecondaryPhoneNumber(request.getSecondaryPhoneNumber());
         venue.setDescription(request.getDescription());
@@ -434,6 +439,7 @@ public class VenueServiceImpl implements VenueService {
                         .id(String.valueOf(venue.getId()))
                         .name(venue.getVenueName())
                         .address(venue.getAddress())
+                        .menuPrice(String.valueOf(venue.getMenuPrice()))
                         .description(venue.getDescription().toString())
                         .status(String.valueOf(venue.getStatus()))
                         .startingPrice(getMinMenuPrice(venue))
@@ -465,6 +471,7 @@ public class VenueServiceImpl implements VenueService {
 
         return String.valueOf(minMenuPrice);
     }
+
     private String getMaxCapacity(Venue venue) {
         List<Hall> halls = hallRepo.findByVenue(venue);
 
@@ -492,6 +499,7 @@ public class VenueServiceImpl implements VenueService {
             }
             return hallDetails;
         }
+
     private HallDetail toHallDetail(Hall hall) {
         return HallDetail.builder()
                 .name(hall.getName())
