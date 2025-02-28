@@ -1,5 +1,6 @@
 package com.example.BookEatNepal.Controller;
 
+import com.example.BookEatNepal.Payload.Request.BookingDateRequest;
 import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Payload.Request.UpdateBookingRequest;
 import com.example.BookEatNepal.Service.HallBookingService;
@@ -35,6 +36,15 @@ public class HallBookingController {
             @RequestBody UpdateBookingRequest request
     ) {
         return RestResponse.ok(hallBookingService.update(request, id));
+    }
+
+        @PostMapping(value = "/hall/bookingDateRequest",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> BookingDateRequest(
+            @RequestBody BookingDateRequest request
+    ) {
+        return RestResponse.ok(hallBookingService.bookingDateRequest(request));
     }
 
     @DeleteMapping(value = "/hall/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

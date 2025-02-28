@@ -22,4 +22,5 @@ public class VenueRequest {
     private String description;
     private String licenseImagePath;
     private String panImagePath;
+    private double menuPrice;
 }

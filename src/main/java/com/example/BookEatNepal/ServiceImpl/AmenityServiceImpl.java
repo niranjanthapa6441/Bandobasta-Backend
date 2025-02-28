@@ -13,6 +13,7 @@ import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ public class AmenityServiceImpl implements AmenityService {
     private EntityManager entityManager;
 
     @Override
+    @Transactional
     public String save(AmenityRequest request, MultipartFile image) {
         Venue venue = getVenue(request.getVenueId());
         request.setImageUrl(getImagePath(image, venue.getVenueName(), request));

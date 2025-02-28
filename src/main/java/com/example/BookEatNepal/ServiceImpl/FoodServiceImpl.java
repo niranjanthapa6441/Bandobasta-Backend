@@ -21,6 +21,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,6 +51,7 @@ public class FoodServiceImpl implements FoodService {
     private EntityManager entityManager;
 
     @Override
+    @Transactional
     public String save(List<FoodRequest> requests) {
         for(FoodRequest request: requests){
             Venue venue = findVenueById(request.getVenueId());
@@ -57,6 +59,7 @@ public class FoodServiceImpl implements FoodService {
         }
         return SUCCESS_MESSAGE;
     }
+
     @Override
     public String delete(int id) {
         Food food = foodRepo.findById(id).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
@@ -114,12 +117,13 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
+    @Transactional
     public String saveVenueFoodCategory(String venueId, List<VenueFoodCategoryRequest> requests) {
         Venue venue = findVenueById(venueId);
         for (VenueFoodCategoryRequest request: requests){
           FoodCategory foodCategory =  saveFoodCategory(request, venue);
           for (String subCategory: request.getSubCategories()){
-              saveFoodSubCategory(subCategory, foodCategory);
+              saveFoodSubCategory(subCategory, foodCategory, venue);
           }
         }
         return SUCCESS_MESSAGE;
@@ -216,8 +220,8 @@ public class FoodServiceImpl implements FoodService {
                 .foodSubCategory(food.getSubCategory().getName())
                 .build();
     }
-    private void saveFoodSubCategory(String subCategory, FoodCategory foodCategory) {
-        validateFoodSubCategory(subCategory);
+    private void saveFoodSubCategory(String subCategory, FoodCategory foodCategory, Venue venue) {
+        validateFoodSubCategory(subCategory,venue,foodCategory);
         FoodSubCategory sfoodSubCategory = new FoodSubCategory();
         sfoodSubCategory.setFoodCategory(foodCategory);
         sfoodSubCategory.setName(subCategory);
@@ -225,15 +229,15 @@ public class FoodServiceImpl implements FoodService {
         foodSubCategoryRepo.save(sfoodSubCategory);
     }
 
-    private void validateFoodSubCategory(String subCategory) {
-        Optional<FoodSubCategory> foodSubCategory = foodSubCategoryRepo.findByName(subCategory);
-        if (foodSubCategory.isPresent()){
-            throw  new CustomException(CustomException.Type.FO0D_SUB_CATEGORY_FOR_VENUE_IS_PRESENT);
+    private void validateFoodSubCategory(String subCategory, Venue venue, FoodCategory category) {
+        Optional<FoodSubCategory> foodSubCategory = foodSubCategoryRepo.findByNameAndVenueAndCategory(subCategory, venue, category);
+        if (foodSubCategory.isPresent()) {
+            throw new CustomException(CustomException.Type.FO0D_SUB_CATEGORY_FOR_VENUE_IS_PRESENT);
         }
     }
 
     private FoodCategory saveFoodCategory(VenueFoodCategoryRequest request, Venue venue) {
-        validateFoodCategory(request.getCategory());
+        validateFoodCategory(request.getCategory(),venue);
         FoodCategory foodCategory= new FoodCategory();
         foodCategory.setVenue(venue);
         foodCategory.setName(request.getCategory());
@@ -241,8 +245,8 @@ public class FoodServiceImpl implements FoodService {
         return foodCategoryRepo.save(foodCategory);
     }
 
-    private void validateFoodCategory(String category) {
-        Optional<FoodCategory> foodCategory = foodCategoryRepo.findByName(category);
+    private void validateFoodCategory(String category, Venue venue) {
+        Optional<FoodCategory> foodCategory = foodCategoryRepo.findByNameAndVenue(category,venue);
         if (foodCategory.isPresent()){
             throw  new CustomException(CustomException.Type.FO0D_CATEGORY_FOR_VENUE_IS_PRESENT);
         }

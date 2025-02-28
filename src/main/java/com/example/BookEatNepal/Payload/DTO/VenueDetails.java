@@ -16,5 +16,6 @@ public class VenueDetails {
     private String startingPrice;
     private List<String> venueImagePaths;
     private String maxCapacity;
+    private String menuPrice;
     private List<String> amenities;
 }

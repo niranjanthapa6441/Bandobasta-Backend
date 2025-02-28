@@ -19,7 +19,7 @@ spring:
   mail:
     host: smtp.gmail.com
     username: bandobastanepal@gmail.com
-    password: wxhehpdcnglpdtft
+    password: vdlqwrtkcyorrcou
     port: 587
     properties:
       mail:

@@ -19,6 +19,7 @@ import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,7 @@ public class HallServiceImpl implements HallService {
     private EntityManager entityManager;
 
     @Override
+    @Transactional
     public String save(HallRequest request, List<MultipartFile> hallImages) {
         Venue venue = getVenue(request.getVenueId());
         Hall hall = hallRepo.save(toHall(request, venue));
@@ -127,6 +129,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
+    @Transactional
     public String update(HallRequest request, int id, List<MultipartFile> hallImages) {
         Hall hall = hallRepo.findById(id)
                 .orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
