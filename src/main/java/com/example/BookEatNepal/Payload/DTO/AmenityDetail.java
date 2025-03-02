@@ -13,5 +13,4 @@ public class AmenityDetail {
     private double price;
     private String imageUrl;
     private String status;
-    private String hello;
 }
