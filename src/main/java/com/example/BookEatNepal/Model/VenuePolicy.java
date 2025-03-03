@@ -39,6 +39,5 @@ public class VenuePolicy {
 
     @OneToOne
     @JoinColumn(name = "id")
-    @Column(name = "venue_id")
     private Venue venue;
 }
