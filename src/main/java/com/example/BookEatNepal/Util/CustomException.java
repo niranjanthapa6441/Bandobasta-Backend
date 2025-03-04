@@ -59,7 +59,7 @@ public class CustomException extends RuntimeException {
         ORDER_TICKET_NOT_FOUND("Ordered Ticket not found",500 ),
         TICKET_HAS_ALREADY_BEEN_CHECKED_IN("Ticket has already been checked in",400 ),
         INVALID_TICKET_ORDER_ID("Ticket not found",500 ),
-        POLICY_NOT_FOUND("Policy not Found",400);
+        POLICY_NOT_FOUND("Policy not Found",404);
 
         private String message;
         private int code;
