@@ -69,7 +69,7 @@ public class Venue {
     @Column(name = "menu_price", nullable = true)
     private double menuPrice;
 
-    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VenueImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
