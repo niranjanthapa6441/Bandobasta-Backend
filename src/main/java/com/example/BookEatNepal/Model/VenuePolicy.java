@@ -17,7 +17,7 @@ public class VenuePolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "policy_id")
-    private Integer policyId;
+    private int policyId;
 
     @Column(name = "category")
     private String category;

@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class PolicyUpdateRequest {
     @NotNull(message = "Cannot be Null")
-    private Integer policyId;
+    private int policyId;
     private String category;
     private String policyName;
     private String description;
