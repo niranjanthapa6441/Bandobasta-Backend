@@ -1,11 +1,12 @@
 package com.example.BookEatNepal.Model;
 
 import com.example.BookEatNepal.Enums.PolicyStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.joda.time.LocalDateTime;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -37,7 +38,7 @@ public class VenuePolicy {
     @Column(name = "effective_date")
     private LocalDate effectiveDate;
 
-    @OneToOne
-    @JoinColumn(name = "id")
+    @ManyToOne
+    @JoinColumn(name = "venue_id", referencedColumnName = "id",nullable = false)
     private Venue venue;
 }
