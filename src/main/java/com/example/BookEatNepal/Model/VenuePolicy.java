@@ -1,7 +1,5 @@
 package com.example.BookEatNepal.Model;
-
 import com.example.BookEatNepal.Enums.PolicyStatus;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 

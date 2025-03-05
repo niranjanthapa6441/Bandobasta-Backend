@@ -1,5 +1,4 @@
 package com.example.BookEatNepal.ServiceImpl;
-
 import com.example.BookEatNepal.Enums.PolicyStatus;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Model.VenuePolicy;
@@ -91,8 +90,8 @@ public class VenuePolicyServiceImpl implements VenuePolicyService {
     }
 
     @Override
-    public String updateThePolicy(PolicyUpdateRequest policyUpdateRequest) {
-       VenuePolicy venuePolicy = venuePolicyRepository.findById(policyUpdateRequest.getPolicyId()).orElseThrow();
+    public String update(PolicyUpdateRequest policyUpdateRequest) {
+       VenuePolicy venuePolicy = venuePolicyRepository.findById(policyUpdateRequest.getPolicyId()).get();
        venuePolicy.setPolicyName(policyUpdateRequest.getPolicyName());
        venuePolicy.setStatus(policyUpdateRequest.getStatus());
        venuePolicy.setDescription(policyUpdateRequest.getDescription());

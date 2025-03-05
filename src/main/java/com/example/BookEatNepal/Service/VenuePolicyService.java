@@ -17,5 +17,5 @@ public interface VenuePolicyService {
 
      String addNewPolicy(PolicyAddRequest policy);
 
-     String updateThePolicy(PolicyUpdateRequest updateRequest);
+     String update(PolicyUpdateRequest updateRequest);
 }

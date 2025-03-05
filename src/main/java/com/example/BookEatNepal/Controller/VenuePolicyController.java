@@ -1,6 +1,4 @@
 package com.example.BookEatNepal.Controller;
-
-import com.example.BookEatNepal.Model.VenuePolicy;
 import com.example.BookEatNepal.Payload.Request.PolicyAddRequest;
 import com.example.BookEatNepal.Payload.Request.PolicyUpdateRequest;
 import com.example.BookEatNepal.Service.VenuePolicyService;
@@ -21,7 +19,7 @@ public class VenuePolicyController {
     @GetMapping("/policies")
     private ResponseEntity<Object> getPolicyByVenueId(@RequestParam Integer venueId)
     {
-        return RestResponse.ok(policyService.getVenuePolicyByVenueId(venueId));
+        return RestResponse.ok(policyService.getVenuePolicyByVenueId(venueId),"Data retrieval Successful");
     }
 
 
@@ -33,26 +31,26 @@ public class VenuePolicyController {
 
 
 
-    @PostMapping(value = "/policies",consumes =  MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/policy/save",consumes =  MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Object> addNewPolicy(@RequestBody PolicyAddRequest policy)
     {
     return RestResponse.ok(policyService.addNewPolicy(policy));
     }
 
 
-    @DeleteMapping("/delete/{policyId}")
-    private ResponseEntity<Object> delete(@PathVariable Integer policyId)
+    @DeleteMapping("/policy/{id}")
+    private ResponseEntity<Object> delete(@PathVariable Integer id)
     {
 
-        return RestResponse.ok( policyService.deleteVenuePolicyByPolicyId(policyId));
+        return RestResponse.ok( policyService.deleteVenuePolicyByPolicyId(id));
 
     }
 
 
-    @PutMapping("/update")
+    @PutMapping("/policy/update")
     private ResponseEntity<Object> updatePolicy(@RequestBody PolicyUpdateRequest updateRequest)
     {
-        return RestResponse.ok( policyService.updateThePolicy(updateRequest));
+        return RestResponse.ok( policyService.update(updateRequest));
     }
 
 
