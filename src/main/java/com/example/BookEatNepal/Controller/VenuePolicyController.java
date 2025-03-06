@@ -30,7 +30,6 @@ public class VenuePolicyController {
     }
 
 
-
     @PostMapping(value = "/policy/save",consumes =  MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Object> addNewPolicy(@RequestBody PolicyAddRequest policy)
     {
@@ -52,6 +51,5 @@ public class VenuePolicyController {
     {
         return RestResponse.ok( policyService.update(updateRequest));
     }
-
 
 }

@@ -1,5 +1,4 @@
 package com.example.BookEatNepal.ServiceImpl;
-
 import com.example.BookEatNepal.Enums.PolicyStatus;
 import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Model.VenuePolicy;
@@ -17,7 +16,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
