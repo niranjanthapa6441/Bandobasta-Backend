@@ -1,7 +1,10 @@
 package com.example.BookEatNepal.Model;
+
 import com.example.BookEatNepal.Enums.PolicyStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +17,7 @@ import java.time.LocalDateTime;
 public class VenuePolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "policy_id")
+    @Column(name = "id")
     private int policyId;
 
     @Column(name = "category")
@@ -37,6 +40,6 @@ public class VenuePolicy {
     private LocalDate effectiveDate;
 
     @ManyToOne
-    @JoinColumn(name = "venue_id", referencedColumnName = "id",nullable = false)
+    @JoinColumn(name = "venue_id", referencedColumnName = "id", nullable = false)
     private Venue venue;
 }

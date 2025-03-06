@@ -26,7 +26,7 @@ public class VenuePolicyController {
     @GetMapping("/policy")
     private ResponseEntity<Object> getPolicyByPolicyId(@RequestParam Integer policyId)
     {
-        return RestResponse.ok(policyService.getVenuePolicyByPolicyId(policyId));
+        return RestResponse.ok(policyService.getVenuePolicyByPolicyId(policyId),"Data Retrieval Successful");
     }
 
 
@@ -34,7 +34,7 @@ public class VenuePolicyController {
     @PostMapping(value = "/policy/save",consumes =  MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Object> addNewPolicy(@RequestBody PolicyAddRequest policy)
     {
-    return RestResponse.ok(policyService.addNewPolicy(policy));
+    return RestResponse.ok(policyService.save(policy));
     }
 
 
@@ -42,12 +42,12 @@ public class VenuePolicyController {
     private ResponseEntity<Object> delete(@PathVariable Integer id)
     {
 
-        return RestResponse.ok( policyService.deleteVenuePolicyByPolicyId(id));
+        return RestResponse.ok( policyService.delete(id));
 
     }
 
 
-    @PutMapping("/policy/update")
+    @PostMapping("/policy/update")
     private ResponseEntity<Object> updatePolicy(@RequestBody PolicyUpdateRequest updateRequest)
     {
         return RestResponse.ok( policyService.update(updateRequest));
