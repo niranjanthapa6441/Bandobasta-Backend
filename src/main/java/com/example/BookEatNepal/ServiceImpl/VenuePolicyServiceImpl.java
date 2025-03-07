@@ -86,9 +86,8 @@ public class VenuePolicyServiceImpl implements VenuePolicyService {
     }
 
     @Override
-    public String update(PolicyUpdateRequest policyUpdateRequest) {
-        int policyId = policyUpdateRequest.getPolicyId();
-        Optional<VenuePolicy> venuePolicyOpt = venuePolicyRepository.findById(policyId);
+    public String update(int id,PolicyUpdateRequest policyUpdateRequest) {
+        Optional<VenuePolicy> venuePolicyOpt = venuePolicyRepository.findById(id);
         if (venuePolicyOpt.isEmpty()) {
             throw new CustomException(CustomException.Type.POLICY_NOT_FOUND);
         }

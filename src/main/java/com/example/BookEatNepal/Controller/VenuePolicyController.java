@@ -46,10 +46,10 @@ public class VenuePolicyController {
     }
 
 
-    @PostMapping("/policy/update")
-    private ResponseEntity<Object> updatePolicy(@RequestBody PolicyUpdateRequest updateRequest)
+    @PostMapping("/policy/{id}")
+    private ResponseEntity<Object> updatePolicy(@PathVariable int id,@RequestBody PolicyUpdateRequest updateRequest)
     {
-        return RestResponse.ok( policyService.update(updateRequest));
+        return RestResponse.ok( policyService.update(id,updateRequest));
     }
 
 }
