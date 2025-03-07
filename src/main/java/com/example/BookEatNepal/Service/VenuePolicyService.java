@@ -7,11 +7,11 @@ import java.util.List;
 
 @Service
 public interface VenuePolicyService {
-    List<VenuePolicyDTO> getVenuePolicyByVenueId(Integer venueId);
+    List<VenuePolicyDTO> getVenuePolicyByVenueId(int venueId);
 
-    List<VenuePolicyDTO> getVenuePolicyByPolicyId(Integer policyId);
+    List<VenuePolicyDTO> getVenuePolicyByPolicyId(int policyId);
 
-    String delete(Integer venueId);
+    String delete(int venueId);
 
     String save(PolicyAddRequest policy);
 

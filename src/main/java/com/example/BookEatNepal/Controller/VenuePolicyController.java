@@ -16,17 +16,17 @@ public class VenuePolicyController {
     VenuePolicyService policyService;
 
 
-    @GetMapping("/policies")
-    private ResponseEntity<Object> getPolicyByVenueId(@RequestParam Integer venueId)
+    @GetMapping("{id}/policies")
+    private ResponseEntity<Object> getPolicyByVenueId(@PathVariable int id)
     {
-        return RestResponse.ok(policyService.getVenuePolicyByVenueId(venueId),"Data retrieval Successful");
+        return RestResponse.ok(policyService.getVenuePolicyByVenueId(id),"Data retrieval Successful");
     }
 
 
-    @GetMapping("/policy")
-    private ResponseEntity<Object> getPolicyByPolicyId(@RequestParam Integer policyId)
+    @GetMapping("/policy/{id}")
+    private ResponseEntity<Object> getPolicyByPolicyId(@PathVariable int id)
     {
-        return RestResponse.ok(policyService.getVenuePolicyByPolicyId(policyId),"Data Retrieval Successful");
+        return RestResponse.ok(policyService.getVenuePolicyByPolicyId(id),"Data Retrieval Successful");
     }
 
 
@@ -38,7 +38,7 @@ public class VenuePolicyController {
 
 
     @DeleteMapping("/policy/{id}")
-    private ResponseEntity<Object> delete(@PathVariable Integer id)
+    private ResponseEntity<Object> delete(@PathVariable int id)
     {
 
         return RestResponse.ok( policyService.delete(id));

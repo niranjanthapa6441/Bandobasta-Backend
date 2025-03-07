@@ -33,46 +33,12 @@ public class VenuePolicyServiceImpl implements VenuePolicyService {
     @Autowired
     VenueRepo venueRepo;
 
-    // Method to convert a List of VenuePolicy to List of DTOs
-    public static List<VenuePolicyDTO> toVenuePolicyDTOList(List<VenuePolicy> venuePolicies) {
-        if (venuePolicies == null || venuePolicies.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<VenuePolicyDTO> dtoList = new ArrayList<>();
-        for (VenuePolicy venuePolicy : venuePolicies) {
-            if (venuePolicy != null) {
-                dtoList.add(toVenuePolicyDTO(venuePolicy));
-            }
-        }
-
-        return dtoList;
-    }
-
-    public static VenuePolicyDTO toVenuePolicyDTO(VenuePolicy venuePolicy) {
-        if (venuePolicy == null) {
-            return null;
-        }
-        Venue venue = venuePolicy.getVenue();
-        Integer venueId = (venue != null) ? venue.getId() : null;
-
-        return VenuePolicyDTO.builder()
-                .policyId(venuePolicy.getPolicyId())
-                .category(venuePolicy.getCategory())
-                .policyName(venuePolicy.getPolicyName())
-                .description(venuePolicy.getDescription())
-                .createdAt(venuePolicy.getCreatedAt())
-                .effectiveDate(venuePolicy.getEffectiveDate())
-                .status(venuePolicy.getStatus())
-                .venueId(venueId)
-                .build();
-    }
-
     @Override
-    public List<VenuePolicyDTO> getVenuePolicyByVenueId(Integer venueId) {
+    public List<VenuePolicyDTO> getVenuePolicyByVenueId(int venueId) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<VenuePolicy> criteriaQuery = criteriaBuilder.createQuery(VenuePolicy.class);
         Root<VenuePolicy> root = criteriaQuery.from(VenuePolicy.class);
-        if (venueId == null || venueRepo.findById(venueId).isEmpty()) {
+        if (venueRepo.findById(venueId).isEmpty()) {
             throw new CustomException(CustomException.Type.VENUE_NOT_FOUND);
         }
         Predicate predicate = criteriaBuilder.equal(root.get("venue").get("id"), venueId);
@@ -82,11 +48,11 @@ public class VenuePolicyServiceImpl implements VenuePolicyService {
     }
 
     @Override
-    public List<VenuePolicyDTO> getVenuePolicyByPolicyId(Integer policyId) {
+    public List<VenuePolicyDTO> getVenuePolicyByPolicyId(int policyId) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<VenuePolicy> criteriaQuery = criteriaBuilder.createQuery(VenuePolicy.class);
         Root<VenuePolicy> root = criteriaQuery.from(VenuePolicy.class);
-        if (policyId == null || venuePolicyRepository.findById(policyId).isEmpty()) {
+        if (venuePolicyRepository.findById(policyId).isEmpty()) {
             throw new CustomException(CustomException.Type.POLICY_NOT_FOUND);
         }
         Predicate predicate = criteriaBuilder.equal(root.get("policyId"), policyId);
@@ -96,7 +62,7 @@ public class VenuePolicyServiceImpl implements VenuePolicyService {
     }
 
     @Override
-    public String delete(Integer venueId) {
+    public String delete(int venueId) {
         VenuePolicy venuePolicy = venuePolicyRepository.findById(venueId).get();
         venuePolicy.setStatus(PolicyStatus.INACTIVE);
         return SUCCESS_MESSAGE;
@@ -134,6 +100,40 @@ public class VenuePolicyServiceImpl implements VenuePolicyService {
         venuePolicy.setEffectiveDate(policyUpdateRequest.getEffectiveDate());
         venuePolicyRepository.save(venuePolicy);
         return SUCCESS_MESSAGE;
+    }
+
+    // Method to convert a List of VenuePolicy to List of DTOs
+    public static List<VenuePolicyDTO> toVenuePolicyDTOList(List<VenuePolicy> venuePolicies) {
+        if (venuePolicies == null || venuePolicies.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<VenuePolicyDTO> dtoList = new ArrayList<>();
+        for (VenuePolicy venuePolicy : venuePolicies) {
+            if (venuePolicy != null) {
+                dtoList.add(toVenuePolicyDTO(venuePolicy));
+            }
+        }
+
+        return dtoList;
+    }
+
+    public static VenuePolicyDTO toVenuePolicyDTO(VenuePolicy venuePolicy) {
+        if (venuePolicy == null) {
+            return null;
+        }
+        Venue venue = venuePolicy.getVenue();
+        Integer venueId = (venue != null) ? venue.getId() : null;
+
+        return VenuePolicyDTO.builder()
+                .policyId(venuePolicy.getPolicyId())
+                .category(venuePolicy.getCategory())
+                .policyName(venuePolicy.getPolicyName())
+                .description(venuePolicy.getDescription())
+                .createdAt(venuePolicy.getCreatedAt())
+                .effectiveDate(venuePolicy.getEffectiveDate())
+                .status(venuePolicy.getStatus())
+                .venueId(venueId)
+                .build();
     }
 
 
