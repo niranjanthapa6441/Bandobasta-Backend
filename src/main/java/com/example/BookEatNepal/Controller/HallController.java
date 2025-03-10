@@ -1,5 +1,7 @@
 package com.example.BookEatNepal.Controller;
 
+import com.example.BookEatNepal.Enums.HallShift;
+import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Payload.Request.HallRequest;
 import com.example.BookEatNepal.Service.HallService;
@@ -36,7 +38,7 @@ public class HallController {
     @PostMapping(value = "/availability/save",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> saveAvailability(
             @RequestBody List<HallAvailabilityRequest> requests
-            ) {
+    ) {
         return RestResponse.ok(service.saveHallAvailability(requests));
     }
 
@@ -45,14 +47,13 @@ public class HallController {
             @RequestParam(required = true) String venueId,
             @RequestParam(required = true) String date,
             @RequestParam(required = false,defaultValue = HALL_ID) int hallId,
-            @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false)HallShift shift,
             @RequestParam(defaultValue = NUMBER_OF_GUESTS) int numberOfGuests,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.checkAvailability(venueId, hallId,date, startTime, endTime, numberOfGuests, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.checkAvailability(venueId, hallId,date, shift, numberOfGuests, page, size), "Data Retrieval Successful");
     }
     @PostMapping(value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,

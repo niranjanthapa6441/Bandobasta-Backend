@@ -1,5 +1,8 @@
+
 package com.example.BookEatNepal.Controller;
 
+import com.example.BookEatNepal.Enums.HallShift;
+import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Payload.Request.BookingDateRequest;
 import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Payload.Request.UpdateBookingRequest;
@@ -24,7 +27,7 @@ public class HallBookingController {
     @PostMapping(value="/hall",produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> save(
             @RequestBody BookingRequest request
-            ) {
+    ) {
         return RestResponse.ok(hallBookingService.save(request));
     }
 
@@ -38,7 +41,7 @@ public class HallBookingController {
         return RestResponse.ok(hallBookingService.update(request, id));
     }
 
-        @PostMapping(value = "/hall/bookingDateRequest",
+    @PostMapping(value = "/hall/bookingDateRequest",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> BookingDateRequest(
@@ -91,4 +94,11 @@ public class HallBookingController {
         return RestResponse.ok(hallBookingService.cancelBooking(id));
     }
 
+    @PostMapping("/hall/update/{id}")
+    private ResponseEntity<Object> updateShift(@RequestParam HallShift shift,
+                                               @PathVariable String id,
+                                               @RequestParam HallStatus status)
+    {
+        return RestResponse.ok(hallBookingService.updateHallAvailablityByShift(shift,id,status));
+    }
 }

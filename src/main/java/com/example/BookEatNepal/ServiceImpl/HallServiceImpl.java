@@ -1,5 +1,6 @@
 package com.example.BookEatNepal.ServiceImpl;
 
+import com.example.BookEatNepal.Enums.HallShift;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Payload.DTO.HallAvailabilityDTO;
@@ -30,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -147,7 +149,7 @@ public class HallServiceImpl implements HallService {
     @Override
     public String saveHallAvailability(List<HallAvailabilityRequest> requests) {
         for (HallAvailabilityRequest request: requests
-             ) {
+        ) {
             Hall hall = hallRepo.findById(Integer.parseInt(request.getHallId()))
                     .orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
             hallAvailabilityRepo.save(convertToHallAvailability(request,hall));
@@ -155,8 +157,9 @@ public class HallServiceImpl implements HallService {
         return SUCCESS_MESSAGE;
     }
 
+    //Changes Done here
     @Override
-    public HallAvailabilityDTO checkAvailability(String venueId,int hallId, String date, String startTime, String endTime, int numberOfGuests, int page, int size) {
+    public HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, HallShift shift, int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
@@ -179,18 +182,14 @@ public class HallServiceImpl implements HallService {
             predicates.add(cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(date,"yyyy-MM-dd")));
         }
 
-        if (startTime != null && endTime != null) {
-            Predicate overlap = cb.and(
-                    cb.lessThanOrEqualTo(hallAvailabilityRoot.get("startTime"), Formatter.getTimeFromString(endTime)),
-                    cb.greaterThanOrEqualTo(hallAvailabilityRoot.get("endTime"), Formatter.getTimeFromString(startTime))
-            );
-            predicates.add(overlap);
+        if (shift != null) {
+            predicates.add(cb.equal(hallAvailabilityRoot.get("shift"), shift));
         }
+
 
         if (numberOfGuests > 0) {
             predicates.add(cb.greaterThanOrEqualTo(hallAvailabilityJoin.get("capacity"), numberOfGuests));
         }
-
         predicates.add(cb.equal(hallAvailabilityRoot.get("status"), HallStatus.AVAILABLE));
 
         query.where(predicates.toArray(new Predicate[0]));
@@ -203,10 +202,19 @@ public class HallServiceImpl implements HallService {
 
         List<HallAvailability> pagedHallAvailabilities = typedQuery.getResultList();
 
+        //Checking Shift Availability
+        boolean morningAvailable = hallAvailabilities.stream()
+                .anyMatch(availability -> availability.getShift() == HallShift.MORNING);
+        boolean eveningAvailable = hallAvailabilities.stream()
+                .anyMatch(availability -> availability.getShift() == HallShift.EVENING);
+
         int currentPage = page - 1;
         int totalElements = hallAvailabilities.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
-        return toHallAvailabilityDTO(pagedHallAvailabilities, currentPage, totalElements, totalPages);
+        HallAvailabilityDTO hallAvailabilityDTO = toHallAvailabilityDTO(pagedHallAvailabilities, currentPage, totalElements, totalPages);
+        hallAvailabilityDTO.setMorningAvailable(morningAvailable);
+        hallAvailabilityDTO.setEveningAvailable(eveningAvailable);
+        return hallAvailabilityDTO;
     }
 
     private HallAvailabilityDTO toHallAvailabilityDTO(List<HallAvailability> pagedHallAvailabilities, int currentPage, int totalElements, int totalPages) {
@@ -222,7 +230,7 @@ public class HallServiceImpl implements HallService {
     private List<HallAvailabilityDetail> toHallAvailabilityDetails(List<HallAvailability> hallAvailabilities) {
         List<HallAvailabilityDetail> hallAvailabilityDetails = new ArrayList<>();
         for (HallAvailability hallAvailability: hallAvailabilities
-             ) {
+        ) {
             hallAvailabilityDetails.add(toHallAvailabilityDetail(hallAvailability));
         }
         return hallAvailabilityDetails;
@@ -238,8 +246,7 @@ public class HallServiceImpl implements HallService {
                 .capacity(hallAvailability.getHall().getCapacity())
                 .status(String.valueOf(hallAvailability.getStatus()))
                 .date(Formatter.convertDateToStr(hallAvailability.getDate(),"yyyy-MM-dd"))
-                .endTime(Formatter.getStringFromTime(hallAvailability.getEndTime()))
-                .startTime(Formatter.getStringFromTime(hallAvailability.getStartTime()))
+                .shift(hallAvailability.getShift())
                 .build();
     }
 
@@ -249,8 +256,9 @@ public class HallServiceImpl implements HallService {
         hallAvailability.setHall(hall);
         hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
         hallAvailability.setDate(Formatter.convertStrToDate(request.getDate(),"yyyy-MM-dd"));
-        hallAvailability.setStartTime(Formatter.getTimeFromString(request.getStartTime()));
-        hallAvailability.setEndTime(Formatter.getTimeFromString(request.getEndTime()));
+        hallAvailability.setStartTime(request.getStartTime());
+        hallAvailability.setEndTime(request.getEndTime());
+        hallAvailability.setShift(HallShift.valueOf(request.getShift()));
         return hallAvailability;
     }
 

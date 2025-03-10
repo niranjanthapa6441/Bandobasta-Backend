@@ -1,6 +1,7 @@
 package com.example.BookEatNepal.Model;
 
 import com.example.BookEatNepal.Enums.BookingStatus;
+import com.example.BookEatNepal.Enums.HallShift;
 import com.example.BookEatNepal.Enums.HallStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -31,6 +32,10 @@ public class HallAvailability {
 
     @Column(nullable = false,name = "end_time")
     private Time endTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="shift",length = 20, nullable = false)
+    private HallShift shift;
 
     @Enumerated(EnumType.STRING)
     @Column(name="status",length = 20, nullable = false)

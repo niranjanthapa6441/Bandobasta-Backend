@@ -2,6 +2,7 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.Enums.BookingStatus;
 import com.example.BookEatNepal.Enums.EventType;
+import com.example.BookEatNepal.Enums.HallShift;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Payload.DTO.*;
@@ -87,10 +88,10 @@ public class HallBookingServiceImpl implements HallBookingService {
             emailService.sendEmail(user.getEmail(),"Thank You For Booking",
                     buildEmail(
                             String.valueOf(hallBooking.getId()),
-                    user.getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
-                    hallBooking.getHallAvailability().getHall().getVenue().getVenueName(),
-                    Integer.toString(hallBooking.getNumberOfGuests()),
-                    hallBooking.getHallAvailability().getHall().getName()
+                            user.getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
+                            hallBooking.getHallAvailability().getHall().getVenue().getVenueName(),
+                            Integer.toString(hallBooking.getNumberOfGuests()),
+                            hallBooking.getHallAvailability().getHall().getName()
                     ));
             return SUCCESS_MESSAGE;
         }
@@ -341,6 +342,15 @@ public class HallBookingServiceImpl implements HallBookingService {
         HallAvailability hallAvailability = getHallAvailability(id);
         hallAvailability.setStatus(status);
         hallAvailabilityRepo.save(hallAvailability);
+    }
+
+    public String updateHallAvailablityByShift(HallShift shift,String id,HallStatus status)
+    {
+        HallAvailability hallAvailability = getHallAvailability(id);
+        hallAvailability.setShift(shift);
+        hallAvailability.setStatus(status);
+        hallAvailabilityRepo.save(hallAvailability);
+        return SUCCESS_MESSAGE;
     }
 
     private AppUser getUser(String id) {
