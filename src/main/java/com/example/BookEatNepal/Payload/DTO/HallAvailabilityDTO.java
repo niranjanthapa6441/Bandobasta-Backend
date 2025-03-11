@@ -12,6 +12,4 @@ public class HallAvailabilityDTO {
     private int currentPage;
     private int totalElements;
     private int totalPages;
-    private boolean morningAvailable;
-    private boolean eveningAvailable;
 }

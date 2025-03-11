@@ -344,14 +344,7 @@ public class HallBookingServiceImpl implements HallBookingService {
         hallAvailabilityRepo.save(hallAvailability);
     }
 
-    public String updateHallAvailablityByShift(HallShift shift,String id,HallStatus status)
-    {
-        HallAvailability hallAvailability = getHallAvailability(id);
-        hallAvailability.setShift(shift);
-        hallAvailability.setStatus(status);
-        hallAvailabilityRepo.save(hallAvailability);
-        return SUCCESS_MESSAGE;
-    }
+
 
     private AppUser getUser(String id) {
         return appUserRepo.findById(Integer.valueOf(id))

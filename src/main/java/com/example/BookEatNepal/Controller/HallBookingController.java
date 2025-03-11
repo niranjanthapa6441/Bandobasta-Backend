@@ -94,11 +94,4 @@ public class HallBookingController {
         return RestResponse.ok(hallBookingService.cancelBooking(id));
     }
 
-    @PostMapping("/hall/update/{id}")
-    private ResponseEntity<Object> updateShift(@RequestParam HallShift shift,
-                                               @PathVariable String id,
-                                               @RequestParam HallStatus status)
-    {
-        return RestResponse.ok(hallBookingService.updateHallAvailablityByShift(shift,id,status));
-    }
 }

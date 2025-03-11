@@ -26,5 +26,5 @@ public interface HallBookingService {
     String confirmBooking(int id );
     String cancelBooking(int id );
     String bookingDateRequest(BookingDateRequest bookingDateRequest);
-    String updateHallAvailablityByShift(HallShift shift, String id, HallStatus status);
+
 }

@@ -18,6 +18,7 @@ import com.example.BookEatNepal.Service.HallService;
 import com.example.BookEatNepal.Util.Formatter;
 import com.example.BookEatNepal.Util.CustomException;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
@@ -28,10 +29,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -159,7 +159,7 @@ public class HallServiceImpl implements HallService {
 
     //Changes Done here
     @Override
-    public HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, HallShift shift, int numberOfGuests, int page, int size) {
+    public HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, String shift, int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
@@ -201,20 +201,37 @@ public class HallServiceImpl implements HallService {
         typedQuery.setMaxResults(size);
 
         List<HallAvailability> pagedHallAvailabilities = typedQuery.getResultList();
-
-        //Checking Shift Availability
-        boolean morningAvailable = hallAvailabilities.stream()
-                .anyMatch(availability -> availability.getShift() == HallShift.MORNING);
-        boolean eveningAvailable = hallAvailabilities.stream()
-                .anyMatch(availability -> availability.getShift() == HallShift.EVENING);
-
         int currentPage = page - 1;
         int totalElements = hallAvailabilities.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
-        HallAvailabilityDTO hallAvailabilityDTO = toHallAvailabilityDTO(pagedHallAvailabilities, currentPage, totalElements, totalPages);
-        hallAvailabilityDTO.setMorningAvailable(morningAvailable);
-        hallAvailabilityDTO.setEveningAvailable(eveningAvailable);
-        return hallAvailabilityDTO;
+        return toHallAvailabilityDTO(pagedHallAvailabilities, currentPage, totalElements, totalPages);
+
+    }
+
+    public String updateHallAvailability(String shift,String status,LocalDate date)
+    {
+        HallAvailability hallAvailability = findAvailableHallByDateAndShift(date,HallShift.valueOf(shift));
+        hallAvailability.setShift(HallShift.valueOf(shift));
+        hallAvailability.setStatus(HallStatus.valueOf(status));
+        hallAvailabilityRepo.save(hallAvailability);
+        return SUCCESS_MESSAGE;
+    }
+
+    public HallAvailability findAvailableHallByDateAndShift(LocalDate date, HallShift shift) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
+        Root<HallAvailability> hallAvailabilityRoot = query.from(HallAvailability.class);
+
+        Predicate datePredicate = cb.equal(hallAvailabilityRoot.get("date"), date);
+        Predicate shiftPredicate = cb.equal(hallAvailabilityRoot.get("shift"), shift);
+
+        Predicate finalPredicate = cb.and(datePredicate, shiftPredicate);
+        query.select(hallAvailabilityRoot).where(finalPredicate);
+        try {
+             return entityManager.createQuery(query).getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     private HallAvailabilityDTO toHallAvailabilityDTO(List<HallAvailability> pagedHallAvailabilities, int currentPage, int totalElements, int totalPages) {

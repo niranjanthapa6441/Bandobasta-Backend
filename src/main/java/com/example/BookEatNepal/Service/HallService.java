@@ -1,6 +1,4 @@
 package com.example.BookEatNepal.Service;
-
-import com.example.BookEatNepal.Enums.HallShift;
 import com.example.BookEatNepal.Payload.DTO.HallAvailabilityDTO;
 import com.example.BookEatNepal.Payload.DTO.HallDTO;
 import com.example.BookEatNepal.Payload.DTO.HallDetail;
@@ -28,5 +26,7 @@ public interface HallService {
 
     String saveHallAvailability(List<HallAvailabilityRequest> requests);
 
-    HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, HallShift shift, int numberOfGuests, int page, int size);
+    HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, String shift, int numberOfGuests, int page, int size);
+
+    String updateHallAvailability(String shift, String status,LocalDate date);
 }
