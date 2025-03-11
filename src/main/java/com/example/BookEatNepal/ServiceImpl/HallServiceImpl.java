@@ -210,28 +210,12 @@ public class HallServiceImpl implements HallService {
 
     public String updateHallAvailability(String shift,String status,LocalDate date)
     {
-        HallAvailability hallAvailability = findAvailableHallByDateAndShift(date,HallShift.valueOf(shift));
+        HallAvailability hallAvailability = hallAvailabilityRepo.findAvailableHallByDateAndShift(date,HallShift.valueOf(shift))
+                .orElseThrow(()-> new CustomException(CustomException.Type.HALL_AVAILABILITY_NOT_FOUND));
         hallAvailability.setShift(HallShift.valueOf(shift));
         hallAvailability.setStatus(HallStatus.valueOf(status));
         hallAvailabilityRepo.save(hallAvailability);
         return SUCCESS_MESSAGE;
-    }
-
-    public HallAvailability findAvailableHallByDateAndShift(LocalDate date, HallShift shift) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
-        Root<HallAvailability> hallAvailabilityRoot = query.from(HallAvailability.class);
-
-        Predicate datePredicate = cb.equal(hallAvailabilityRoot.get("date"), date);
-        Predicate shiftPredicate = cb.equal(hallAvailabilityRoot.get("shift"), shift);
-
-        Predicate finalPredicate = cb.and(datePredicate, shiftPredicate);
-        query.select(hallAvailabilityRoot).where(finalPredicate);
-        try {
-             return entityManager.createQuery(query).getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
     }
 
     private HallAvailabilityDTO toHallAvailabilityDTO(List<HallAvailability> pagedHallAvailabilities, int currentPage, int totalElements, int totalPages) {

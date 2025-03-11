@@ -84,9 +84,9 @@ public class HallController {
 
     @PostMapping("/availability/update")
     private ResponseEntity<Object> updateHallAvailability(@RequestParam String shift,
-                                                          @RequestParam LocalDate date,
+                                                          @RequestParam String date,
                                                           @RequestParam String status)
     {
-        return RestResponse.ok(service.updateHallAvailability(shift, status, date));
+        return RestResponse.ok(service.updateHallAvailability(shift, status, LocalDate.parse(date)));
     }
 }
