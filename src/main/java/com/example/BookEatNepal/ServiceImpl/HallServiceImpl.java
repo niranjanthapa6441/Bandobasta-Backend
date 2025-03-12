@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -255,8 +256,8 @@ public class HallServiceImpl implements HallService {
         hallAvailability.setHall(hall);
         hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
         hallAvailability.setDate(Formatter.convertStrToDate(request.getDate(), "yyyy-MM-dd"));
-        hallAvailability.setStartTime(request.getStartTime());
-        hallAvailability.setEndTime(request.getEndTime());
+        hallAvailability.setStartTime(Time.valueOf(request.getStartTime()));
+        hallAvailability.setEndTime(Time.valueOf(request.getEndTime()));
         hallAvailability.setShift(HallShift.valueOf(request.getShift()));
         return hallAvailability;
     }

@@ -7,8 +7,8 @@ import java.sql.Time;
 public class HallAvailabilityRequest {
     private String hallId;
     private String date;
-    private Time startTime;
-    private Time endTime;
+    private String startTime;
+    private String endTime;
     private String status;
     private String shift;
 }
