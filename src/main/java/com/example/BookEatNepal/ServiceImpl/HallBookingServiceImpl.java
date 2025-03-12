@@ -1,5 +1,4 @@
 package com.example.BookEatNepal.ServiceImpl;
-
 import com.example.BookEatNepal.Enums.BookingStatus;
 import com.example.BookEatNepal.Enums.EventType;
 import com.example.BookEatNepal.Enums.HallStatus;
@@ -20,7 +19,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;

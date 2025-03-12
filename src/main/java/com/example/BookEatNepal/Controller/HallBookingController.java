@@ -1,5 +1,4 @@
 package com.example.BookEatNepal.Controller;
-
 import com.example.BookEatNepal.Payload.Request.BookingDateRequest;
 import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Payload.Request.UpdateBookingRequest;

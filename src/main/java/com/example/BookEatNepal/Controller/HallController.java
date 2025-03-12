@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -85,8 +84,7 @@ public class HallController {
     @PostMapping("/availability/update")
     private ResponseEntity<Object> updateHallAvailability(@RequestParam String shift,
                                                           @RequestParam String date,
-                                                          @RequestParam String status)
-    {
+                                                          @RequestParam String status) {
         return RestResponse.ok(service.updateHallAvailability(shift, status, LocalDate.parse(date)));
     }
 }
