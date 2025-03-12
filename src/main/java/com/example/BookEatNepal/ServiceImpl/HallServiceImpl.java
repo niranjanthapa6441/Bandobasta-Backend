@@ -1,24 +1,25 @@
 package com.example.BookEatNepal.ServiceImpl;
-
 import com.example.BookEatNepal.Enums.HallShift;
 import com.example.BookEatNepal.Enums.HallStatus;
-import com.example.BookEatNepal.Model.*;
+import com.example.BookEatNepal.Model.Hall;
+import com.example.BookEatNepal.Model.HallAvailability;
+import com.example.BookEatNepal.Model.HallImage;
+import com.example.BookEatNepal.Model.Venue;
 import com.example.BookEatNepal.Payload.DTO.HallAvailabilityDTO;
 import com.example.BookEatNepal.Payload.DTO.HallAvailabilityDetail;
 import com.example.BookEatNepal.Payload.DTO.HallDTO;
 import com.example.BookEatNepal.Payload.DTO.HallDetail;
+import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
+import com.example.BookEatNepal.Payload.Request.HallRequest;
 import com.example.BookEatNepal.Repository.HallAvailabilityRepo;
 import com.example.BookEatNepal.Repository.HallImageRepo;
 import com.example.BookEatNepal.Repository.HallRepo;
 import com.example.BookEatNepal.Repository.VenueRepo;
-import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
-import com.example.BookEatNepal.Payload.Request.HallRequest;
 import com.example.BookEatNepal.Service.AWSService;
 import com.example.BookEatNepal.Service.HallService;
-import com.example.BookEatNepal.Util.Formatter;
 import com.example.BookEatNepal.Util.CustomException;
+import com.example.BookEatNepal.Util.Formatter;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
@@ -77,7 +78,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallDTO findAll(String venueId,int numberOfGuests, int page, int size, String checkAvailableDate) {
+    public HallDTO findAll(String venueId, int numberOfGuests, int page, int size, String checkAvailableDate) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Hall> query = cb.createQuery(Hall.class);
@@ -105,7 +106,7 @@ public class HallServiceImpl implements HallService {
             predicates.add(cb.in(hallRoot.get("id")).value(hallAvailabilitySubquery)); // Check if the hall's ID is in the subquery result
         }
 
-        if (numberOfGuests != 0){
+        if (numberOfGuests != 0) {
             predicates.add(cb.greaterThanOrEqualTo(hallRoot.get("capacity"), numberOfGuests));
         }
         query.where(predicates.toArray(new Predicate[0]));
@@ -148,16 +149,15 @@ public class HallServiceImpl implements HallService {
 
     @Override
     public String saveHallAvailability(List<HallAvailabilityRequest> requests) {
-        for (HallAvailabilityRequest request: requests
+        for (HallAvailabilityRequest request : requests
         ) {
             Hall hall = hallRepo.findById(Integer.parseInt(request.getHallId()))
                     .orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
-            hallAvailabilityRepo.save(convertToHallAvailability(request,hall));
+            hallAvailabilityRepo.save(convertToHallAvailability(request, hall));
         }
         return SUCCESS_MESSAGE;
     }
 
-    //Changes Done here
     @Override
     public HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, String shift, int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
@@ -174,18 +174,17 @@ public class HallServiceImpl implements HallService {
             predicates.add(cb.equal(hallVenueJoin.get("id"), id));
         }
 
-        if (hallId!= 0) {
+        if (hallId != 0) {
             predicates.add(cb.equal(hallAvailabilityJoin.get("id"), hallId));
         }
 
         if (date != null) {
-            predicates.add(cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(date,"yyyy-MM-dd")));
+            predicates.add(cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(date, "yyyy-MM-dd")));
         }
 
         if (shift != null) {
             predicates.add(cb.equal(hallAvailabilityRoot.get("shift"), shift));
         }
-
 
         if (numberOfGuests > 0) {
             predicates.add(cb.greaterThanOrEqualTo(hallAvailabilityJoin.get("capacity"), numberOfGuests));
@@ -205,13 +204,11 @@ public class HallServiceImpl implements HallService {
         int totalElements = hallAvailabilities.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
         return toHallAvailabilityDTO(pagedHallAvailabilities, currentPage, totalElements, totalPages);
-
     }
 
-    public String updateHallAvailability(String shift,String status,LocalDate date)
-    {
-        HallAvailability hallAvailability = hallAvailabilityRepo.findAvailableHallByDateAndShift(date,HallShift.valueOf(shift))
-                .orElseThrow(()-> new CustomException(CustomException.Type.HALL_AVAILABILITY_NOT_FOUND));
+    public String updateHallAvailability(String shift, String status, LocalDate date) {
+        HallAvailability hallAvailability = hallAvailabilityRepo.findAvailableHallByDateAndShift(date, HallShift.valueOf(shift))
+                .orElseThrow(() -> new CustomException(CustomException.Type.HALL_AVAILABILITY_NOT_FOUND));
         hallAvailability.setShift(HallShift.valueOf(shift));
         hallAvailability.setStatus(HallStatus.valueOf(status));
         hallAvailabilityRepo.save(hallAvailability);
@@ -230,7 +227,7 @@ public class HallServiceImpl implements HallService {
 
     private List<HallAvailabilityDetail> toHallAvailabilityDetails(List<HallAvailability> hallAvailabilities) {
         List<HallAvailabilityDetail> hallAvailabilityDetails = new ArrayList<>();
-        for (HallAvailability hallAvailability: hallAvailabilities
+        for (HallAvailability hallAvailability : hallAvailabilities
         ) {
             hallAvailabilityDetails.add(toHallAvailabilityDetail(hallAvailability));
         }
@@ -246,17 +243,18 @@ public class HallServiceImpl implements HallService {
                 .description(String.valueOf(hallAvailability.getHall().getDescription()))
                 .capacity(hallAvailability.getHall().getCapacity())
                 .status(String.valueOf(hallAvailability.getStatus()))
-                .date(Formatter.convertDateToStr(hallAvailability.getDate(),"yyyy-MM-dd"))
+                .date(Formatter.convertDateToStr(hallAvailability.getDate(), "yyyy-MM-dd"))
                 .shift(hallAvailability.getShift())
+                .startTime(String.valueOf(hallAvailability.getStartTime()))
+                .endTime(String.valueOf(hallAvailability.getEndTime()))
                 .build();
     }
 
-
-    private HallAvailability convertToHallAvailability(HallAvailabilityRequest request, Hall hall){
-        HallAvailability hallAvailability= new HallAvailability();
+    private HallAvailability convertToHallAvailability(HallAvailabilityRequest request, Hall hall) {
+        HallAvailability hallAvailability = new HallAvailability();
         hallAvailability.setHall(hall);
         hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
-        hallAvailability.setDate(Formatter.convertStrToDate(request.getDate(),"yyyy-MM-dd"));
+        hallAvailability.setDate(Formatter.convertStrToDate(request.getDate(), "yyyy-MM-dd"));
         hallAvailability.setStartTime(request.getStartTime());
         hallAvailability.setEndTime(request.getEndTime());
         hallAvailability.setShift(HallShift.valueOf(request.getShift()));
@@ -291,7 +289,7 @@ public class HallServiceImpl implements HallService {
         String contentType = image.getContentType();
         long fileSize = image.getSize();
         InputStream inputStream = image.getInputStream();
-        return awsService.uploadFile(bucketName,s3Key,fileSize,contentType,inputStream);
+        return awsService.uploadFile(bucketName, s3Key, fileSize, contentType, inputStream);
     }
 
     private void validate(MultipartFile multipartFile) {
@@ -318,7 +316,6 @@ public class HallServiceImpl implements HallService {
             throw new RuntimeException(e);
         }
         return (mimeType.equals("image/png") || mimeType.equals("image/jpg") || mimeType.equals("image/jpeg"));
-
     }
 
     private Hall toHall(HallRequest request, Venue venue) {

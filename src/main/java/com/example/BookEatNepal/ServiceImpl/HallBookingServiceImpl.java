@@ -2,14 +2,13 @@ package com.example.BookEatNepal.ServiceImpl;
 
 import com.example.BookEatNepal.Enums.BookingStatus;
 import com.example.BookEatNepal.Enums.EventType;
-import com.example.BookEatNepal.Enums.HallShift;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.*;
 import com.example.BookEatNepal.Payload.DTO.*;
 import com.example.BookEatNepal.Payload.Request.BookingDateRequest;
+import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Payload.Request.UpdateBookingRequest;
 import com.example.BookEatNepal.Repository.*;
-import com.example.BookEatNepal.Payload.Request.BookingRequest;
 import com.example.BookEatNepal.Service.EmailService;
 import com.example.BookEatNepal.Service.HallBookingService;
 import com.example.BookEatNepal.Util.CustomException;
@@ -26,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -76,16 +74,16 @@ public class HallBookingServiceImpl implements HallBookingService {
 
         AppUser user = getUser(request.getUserId());
 
-        if (request.getNumberOfGuests() == 0){
-            throw  new CustomException(CustomException.Type.NUMBER_OF_GUESTS_SHOULD_NOT_BE_EMPTY);
+        if (request.getNumberOfGuests() == 0) {
+            throw new CustomException(CustomException.Type.NUMBER_OF_GUESTS_SHOULD_NOT_BE_EMPTY);
         }
-        if (hallAvailability.getStatus().equals(HallStatus.AVAILABLE)){
-            HallBooking hallBooking=hallBookingRepo.save(toBooking(request, menu, hallAvailability, user));
+        if (hallAvailability.getStatus().equals(HallStatus.AVAILABLE)) {
+            HallBooking hallBooking = hallBookingRepo.save(toBooking(request, menu, hallAvailability, user));
 
             updateHallAvailabilityStatus(request.getId(), HallStatus.PENDING);
 
-            toBookingMenuItem(request.getFoodIds(),hallBooking);
-            emailService.sendEmail(user.getEmail(),"Thank You For Booking",
+            toBookingMenuItem(request.getFoodIds(), hallBooking);
+            emailService.sendEmail(user.getEmail(), "Thank You For Booking",
                     buildEmail(
                             String.valueOf(hallBooking.getId()),
                             user.getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
@@ -94,8 +92,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                             hallBooking.getHallAvailability().getHall().getName()
                     ));
             return SUCCESS_MESSAGE;
-        }
-        else throw  new CustomException(CustomException.Type.BOOKING_HAS_ALREADY_BEEN_MADE);
+        } else throw new CustomException(CustomException.Type.BOOKING_HAS_ALREADY_BEEN_MADE);
     }
 
 
@@ -119,16 +116,16 @@ public class HallBookingServiceImpl implements HallBookingService {
         query.select(bookingRoot);
         List<Predicate> predicates = new ArrayList<>();
 
-        if (id != 0 ) {
+        if (id != 0) {
             predicates.add(cb.equal(hallBookingAppUserJoin.get("id"), id));
         }
 
-        if (bookingStatus != null && !bookingStatus.isBlank() ) {
+        if (bookingStatus != null && !bookingStatus.isBlank()) {
             predicates.add(cb.equal(bookingRoot.get("status"), bookingStatus));
         }
 
-        if ((startDate != null && !startDate.isEmpty())&&(endDate != null && !endDate.isEmpty())) {
-            predicates.add(cb.between(bookingRoot.get("bookedForDate"), Formatter.convertStrToDate(startDate,"yyyy-MM-dd"),Formatter.convertStrToDate(endDate,"yyyy-MM-dd")));
+        if ((startDate != null && !startDate.isEmpty()) && (endDate != null && !endDate.isEmpty())) {
+            predicates.add(cb.between(bookingRoot.get("bookedForDate"), Formatter.convertStrToDate(startDate, "yyyy-MM-dd"), Formatter.convertStrToDate(endDate, "yyyy-MM-dd")));
         }
         query.where(predicates.toArray(new Predicate[0]));
 
@@ -161,7 +158,7 @@ public class HallBookingServiceImpl implements HallBookingService {
         query.select(bookingRoot);
         List<Predicate> predicates = new ArrayList<>();
 
-        if (id != 0 ) {
+        if (id != 0) {
             predicates.add(cb.equal(hallVenueJoin.get("id"), id));
         }
         query.where(predicates.toArray(new Predicate[0]));
@@ -183,7 +180,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     @Override
     @Transactional
     public String update(UpdateBookingRequest request, int id) {
-        HallBooking booking= getHallBooking(id);
+        HallBooking booking = getHallBooking(id);
         updateHallAvailabilityStatus(String.valueOf(booking.getHallAvailability().getId()), HallStatus.AVAILABLE);
 
         booking.setPrice(request.getPrice());
@@ -200,8 +197,8 @@ public class HallBookingServiceImpl implements HallBookingService {
         updateHallAvailabilityStatus(String.valueOf(updatedBooking.getHallAvailability().getId()), HallStatus.PENDING);
 
         deleteBookingMenu(booking);
-        toBookingMenuItem(request.getFoodIds(),booking);
-        emailService.sendEmail(booking.getUser().getEmail(),"Your Booking has been updated",
+        toBookingMenuItem(request.getFoodIds(), booking);
+        emailService.sendEmail(booking.getUser().getEmail(), "Your Booking has been updated",
                 buildEmail(
                         String.valueOf(booking.getId()),
                         booking.getUser().getFirstName(), Formatter.convertDateToStr(booking.getBookedForDate(), "yyyy-MM-dd"),
@@ -227,7 +224,7 @@ public class HallBookingServiceImpl implements HallBookingService {
 
         updateHallAvailabilityStatus(String.valueOf(hallBooking.getHallAvailability().getId()), HallStatus.BOOKED);
 
-        emailService.sendEmail(hallBooking.getUser().getEmail(),"Your Booking has been Confirmed",
+        emailService.sendEmail(hallBooking.getUser().getEmail(), "Your Booking has been Confirmed",
                 buildEmail(
                         String.valueOf(hallBooking.getId()),
                         hallBooking.getUser().getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
@@ -248,7 +245,7 @@ public class HallBookingServiceImpl implements HallBookingService {
         hallBookingRepo.save(hallBooking);
 
         updateHallAvailabilityStatus(String.valueOf(hallBooking.getHallAvailability().getId()), HallStatus.AVAILABLE);
-        emailService.sendEmail(hallBooking.getUser().getEmail(),"Your Booking has been Cancelled",
+        emailService.sendEmail(hallBooking.getUser().getEmail(), "Your Booking has been Cancelled",
                 buildEmail(
                         String.valueOf(hallBooking.getId()),
                         hallBooking.getUser().getFirstName(), Formatter.convertDateToStr(hallBooking.getBookedForDate(), "yyyy-MM-dd"),
@@ -264,7 +261,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     public String bookingDateRequest(BookingDateRequest bookingDateRequest) {
         Venue venue = venueRepo.findById(Integer.valueOf(bookingDateRequest.getVenueId())).orElseThrow(() -> new CustomException(CustomException.Type.VENUE_NOT_FOUND));
         AppUser appUser = appUserRepo.findById(Integer.valueOf(bookingDateRequest.getUserId())).orElseThrow(() -> new CustomException(CustomException.Type.USER_NOT_FOUND));
-        sendBookingDateRequestEmail(venue,appUser,bookingDateRequest);
+        sendBookingDateRequestEmail(venue, appUser, bookingDateRequest);
         return SUCCESS_MESSAGE;
     }
 
@@ -280,7 +277,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 .hallAvailabilityId(hallBooking.getHallAvailability().getId())
                 .venueName(hallBooking.getHallAvailability().getHall().getVenue().getVenueName())
                 .hallDetail(toHallDetail(getHall(hallBooking.getHallAvailability().getHall().getId())))
-                .menuDetail(findBookingMenu(hallBooking,hallBooking.getMenu()))
+                .menuDetail(findBookingMenu(hallBooking, hallBooking.getMenu()))
                 .startTime(hallBooking.getHallAvailability().getStartTime())
                 .endTime(hallBooking.getHallAvailability().getEndTime())
                 .userId(String.valueOf(hallBooking.getUser().getId()))
@@ -297,7 +294,7 @@ public class HallBookingServiceImpl implements HallBookingService {
     }
 
     private MenuDetail findBookingMenu(HallBooking hallBooking, Menu menu) {
-        List<Food> foods= bookingMenuItemRepo.findFoodsByBookingId(hallBooking);
+        List<Food> foods = bookingMenuItemRepo.findFoodsByBookingId(hallBooking);
         return MenuDetail.builder().
                 id(String.valueOf(menu.getId())).
                 menuType(String.valueOf(menu.getMenuType())).
@@ -308,7 +305,6 @@ public class HallBookingServiceImpl implements HallBookingService {
                 foodDetails(toFoodDetails(foods))
                 .build();
     }
-
 
     private Hall getHall(int id) {
         return hallRepo.findById(id)
@@ -343,7 +339,6 @@ public class HallBookingServiceImpl implements HallBookingService {
         hallAvailability.setStatus(status);
         hallAvailabilityRepo.save(hallAvailability);
     }
-
 
 
     private AppUser getUser(String id) {
@@ -411,6 +406,7 @@ public class HallBookingServiceImpl implements HallBookingService {
         }
         return foodDetails;
     }
+
     private List<FoodDetail> toFoodDetails(List<Food> foods) {
         List<FoodDetail> foodDetails = new ArrayList<>();
         for (Food food : foods
@@ -427,9 +423,10 @@ public class HallBookingServiceImpl implements HallBookingService {
         }
         return foodDetails;
     }
+
     private HallBookingDTO toBookingDTO(List<HallBooking> bookings, int currentPage, int totalElements, int totalPages) {
         List<HallBookingDetail> bookingDetails = getBookingDetails(bookings);
-        return  HallBookingDTO.builder()
+        return HallBookingDTO.builder()
                 .bookings(bookingDetails)
                 .currentPage(currentPage)
                 .totalElements(totalElements)
@@ -439,15 +436,16 @@ public class HallBookingServiceImpl implements HallBookingService {
 
     private List<HallBookingDetail> getBookingDetails(List<HallBooking> bookings) {
         List<HallBookingDetail> bookingDetails = new ArrayList<>();
-        for (HallBooking hallBooking: bookings
+        for (HallBooking hallBooking : bookings
         ) {
             bookingDetails.add(convertToBookingDetail(hallBooking));
         }
         return bookingDetails;
     }
-    private void toBookingMenuItem(List<String> foodIds,HallBooking hallBooking) {
-        for (String id : foodIds){
-            BookingMenuItem bookingMenuItem= new BookingMenuItem();
+
+    private void toBookingMenuItem(List<String> foodIds, HallBooking hallBooking) {
+        for (String id : foodIds) {
+            BookingMenuItem bookingMenuItem = new BookingMenuItem();
             bookingMenuItem.setBooking(hallBooking);
             bookingMenuItem.setFood(toFood(id));
 
@@ -458,22 +456,23 @@ public class HallBookingServiceImpl implements HallBookingService {
     private Food toFood(String id) {
         return foodRepo.findById(Integer.parseInt(id)).orElseThrow(() -> new CustomException(CustomException.Type.FOOD_NOT_FOUND));
     }
+
     private void sendBookingDateRequestEmail(Venue venue, AppUser customer, BookingDateRequest bookingDateRequest) {
-        buildBookingDateRequestEmailCustomer(customer,venue,bookingDateRequest);
-        buildBookingDateRequestEmailVenue(customer,venue,bookingDateRequest);
-        buildBookingDateRequestEmailAdmin(customer,venue,bookingDateRequest);
+        buildBookingDateRequestEmailCustomer(customer, venue, bookingDateRequest);
+        buildBookingDateRequestEmailVenue(customer, venue, bookingDateRequest);
+        buildBookingDateRequestEmailAdmin(customer, venue, bookingDateRequest);
     }
 
-    private void buildBookingDateRequestEmailAdmin(AppUser customer, Venue venue,BookingDateRequest bookingDateRequest) {
-        emailService.sendEmail("bandobastanepal@gmail.com","A booking Request has been made",buildEmail(bookingDateRequest,customer,venue));
+    private void buildBookingDateRequestEmailAdmin(AppUser customer, Venue venue, BookingDateRequest bookingDateRequest) {
+        emailService.sendEmail("bandobastanepal@gmail.com", "A booking Request has been made", buildEmail(bookingDateRequest, customer, venue));
     }
 
     private void buildBookingDateRequestEmailVenue(AppUser customer, Venue venue, BookingDateRequest bookingDateRequest) {
-        emailService.sendEmail(venue.getEmail(), "A Booking Request has been made", buildEmailVenue(bookingDateRequest,customer,venue));
+        emailService.sendEmail(venue.getEmail(), "A Booking Request has been made", buildEmailVenue(bookingDateRequest, customer, venue));
     }
 
     private void buildBookingDateRequestEmailCustomer(AppUser customer, Venue venue, BookingDateRequest bookingDateRequest) {
-        emailService.sendEmail(customer.getEmail(),"Booking Request Update" ,buildEmailCustomer(customer,venue,bookingDateRequest));
+        emailService.sendEmail(customer.getEmail(), "Booking Request Update", buildEmailCustomer(customer, venue, bookingDateRequest));
     }
 
     private String buildEmailCustomer(AppUser customer, Venue venue, BookingDateRequest bookingDateRequest) {
@@ -535,7 +534,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 "</div>";
     }
 
-    private String buildEmail(String bookingId, String name,String bookedForDate, String venueName, String numberOfGuests, String hallName) {
+    private String buildEmail(String bookingId, String name, String bookedForDate, String venueName, String numberOfGuests, String hallName) {
 
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">" +
                 "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>" +
@@ -596,7 +595,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 "</div>";
     }
 
-    private String buildEmail(BookingDateRequest bookingDateRequest,AppUser customer, Venue venue){
+    private String buildEmail(BookingDateRequest bookingDateRequest, AppUser customer, Venue venue) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">" +
                 "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>" +
                 "<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
@@ -639,7 +638,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 "<td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + "Bandobasta Nepal" + ",</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">A booking request has been made. Below are the booking request details:</p>" +
-                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Customer:</strong> " + customer.getFirstName() + " "+customer.getMiddleName()+ " " +customer.getLastName() + "</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Customer:</strong> " + customer.getFirstName() + " " + customer.getMiddleName() + " " + customer.getLastName() + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Customer email:</strong> " + customer.getEmail() + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Customer Phone number:</strong> " + customer.getPhoneNumber() + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Venue:</strong> " + venue.getVenueName() + "</p>" +
@@ -700,7 +699,7 @@ public class HallBookingServiceImpl implements HallBookingService {
                 "<td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + venue.getVenueName() + ",</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">A booking request has been made. Below are the booking request details:</p>" +
-                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Customer:</strong> " + customer.getFirstName() + " "+customer.getMiddleName()+ " " +customer.getLastName() + "</p>" +
+                "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Customer:</strong> " + customer.getFirstName() + " " + customer.getMiddleName() + " " + customer.getLastName() + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Customer email:</strong> " + customer.getEmail() + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Venue:</strong> " + venue.getVenueName() + "</p>" +
                 "<p style=\"margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><strong>Requested Date:</strong> " + bookingDateRequest.getRequestedDate() + "</p>" +

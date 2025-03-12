@@ -6,7 +6,6 @@ import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Payload.Request.HallRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,8 +16,7 @@ public interface HallService {
 
     String delete(int id);
 
-
-    HallDTO findAll(String venueId,int numberOfGuests, int page, int size, String checkAvailableDate);
+    HallDTO findAll(String venueId, int numberOfGuests, int page, int size, String checkAvailableDate);
 
     HallDetail findById(int id);
 
@@ -28,5 +26,5 @@ public interface HallService {
 
     HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, String shift, int numberOfGuests, int page, int size);
 
-    String updateHallAvailability(String shift, String status,LocalDate date);
+    String updateHallAvailability(String shift, String status, LocalDate date);
 }
