@@ -44,13 +44,12 @@ public class HallController {
             @RequestParam(required = true) String venueId,
             @RequestParam(required = true) String date,
             @RequestParam(required = false, defaultValue = HALL_ID) int hallId,
-            @RequestParam(required = false) String shift,
             @RequestParam(defaultValue = NUMBER_OF_GUESTS) int numberOfGuests,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.checkAvailability(venueId, hallId, date, shift, numberOfGuests, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.checkAvailability(venueId, hallId, date, numberOfGuests, page, size), "Data Retrieval Successful");
     }
 
     @PostMapping(value = "/{id}",

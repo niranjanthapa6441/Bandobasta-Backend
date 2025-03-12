@@ -160,7 +160,7 @@ public class HallServiceImpl implements HallService {
     }
 
     @Override
-    public HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, String shift, int numberOfGuests, int page, int size) {
+    public HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, int numberOfGuests, int page, int size) {
         int id = Integer.parseInt(venueId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HallAvailability> query = cb.createQuery(HallAvailability.class);
@@ -181,10 +181,6 @@ public class HallServiceImpl implements HallService {
 
         if (date != null) {
             predicates.add(cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(date, "yyyy-MM-dd")));
-        }
-
-        if (shift != null) {
-            predicates.add(cb.equal(hallAvailabilityRoot.get("shift"), shift));
         }
 
         if (numberOfGuests > 0) {
