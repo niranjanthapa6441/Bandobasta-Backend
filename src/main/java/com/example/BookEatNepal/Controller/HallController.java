@@ -1,5 +1,4 @@
 package com.example.BookEatNepal.Controller;
-
 import com.example.BookEatNepal.Payload.Request.HallAvailabilityRequest;
 import com.example.BookEatNepal.Payload.Request.HallRequest;
 import com.example.BookEatNepal.Service.HallService;
@@ -11,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -33,27 +32,26 @@ public class HallController {
         return RestResponse.ok(service.save(request, hallImages));
     }
 
-    @PostMapping(value = "/availability/save",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/availability/save", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> saveAvailability(
             @RequestBody List<HallAvailabilityRequest> requests
-            ) {
+    ) {
         return RestResponse.ok(service.saveHallAvailability(requests));
     }
 
-    @GetMapping(value = "/availability",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/availability", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> checkAvailability(
             @RequestParam(required = true) String venueId,
             @RequestParam(required = true) String date,
-            @RequestParam(required = false,defaultValue = HALL_ID) int hallId,
-            @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false, defaultValue = HALL_ID) int hallId,
             @RequestParam(defaultValue = NUMBER_OF_GUESTS) int numberOfGuests,
             @RequestParam(defaultValue = PAGE) int page,
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.checkAvailability(venueId, hallId,date, startTime, endTime, numberOfGuests, page, size), "Data Retrieval Successful");
+        return RestResponse.ok(service.checkAvailability(venueId, hallId, date, numberOfGuests, page, size), "Data Retrieval Successful");
     }
+
     @PostMapping(value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -70,7 +68,7 @@ public class HallController {
         return RestResponse.ok(service.delete(id));
     }
 
-    @GetMapping(value="/findAll",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/findAll", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> findAll(
             @RequestParam(required = true) String venueId,
             @RequestParam(required = false) String checkAvailableDate,
@@ -79,6 +77,13 @@ public class HallController {
             @RequestParam(defaultValue = SIZE) int size
 
     ) {
-        return RestResponse.ok(service.findAll(venueId,numberOfGuests, page, size,checkAvailableDate), "Data Retrieval Successful");
+        return RestResponse.ok(service.findAll(venueId, numberOfGuests, page, size, checkAvailableDate), "Data Retrieval Successful");
+    }
+
+    @PostMapping("/availability/update")
+    private ResponseEntity<Object> updateHallAvailability(@RequestParam String shift,
+                                                          @RequestParam String date,
+                                                          @RequestParam String status) {
+        return RestResponse.ok(service.updateHallAvailability(shift, status, LocalDate.parse(date)));
     }
 }

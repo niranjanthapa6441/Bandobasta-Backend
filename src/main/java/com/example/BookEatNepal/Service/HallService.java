@@ -18,8 +18,7 @@ public interface HallService {
 
     String delete(int id);
 
-
-    HallDTO findAll(String venueId,int numberOfGuests, int page, int size, String checkAvailableDate);
+    HallDTO findAll(String venueId, int numberOfGuests, int page, int size, String checkAvailableDate);
 
     HallDetail findById(int id);
 
@@ -27,5 +26,7 @@ public interface HallService {
 
     String saveHallAvailability(List<HallAvailabilityRequest> requests);
 
-    HallAvailabilityDTO checkAvailability(String venueId, int hallId,String date, String startTime, String endTime, int numberOfGuests, int page, int size);
+    HallAvailabilityDTO checkAvailability(String venueId, int hallId, String date, int numberOfGuests, int page, int size);
+
+    String updateHallAvailability(String shift, String status, LocalDate date);
 }

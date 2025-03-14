@@ -1,5 +1,7 @@
 package com.example.BookEatNepal.Payload.DTO;
-
+import com.example.BookEatNepal.Enums.HallShift;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,9 +13,11 @@ public class HallAvailabilityDetail {
     private String hallId;
     private String hallName;
     private String description;
-    private String date;
     private String startTime;
     private String endTime;
+    private String date;
+    @Enumerated(EnumType.STRING)
+    private HallShift shift;
     private int capacity;
     private String status;
 }

@@ -1,8 +1,6 @@
 package com.example.BookEatNepal.Payload.DTO;
-
 import lombok.Builder;
 import lombok.Data;
-
 import java.util.List;
 
 @Data
