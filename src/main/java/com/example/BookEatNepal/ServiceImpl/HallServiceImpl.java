@@ -1,4 +1,5 @@
 package com.example.BookEatNepal.ServiceImpl;
+
 import com.example.BookEatNepal.Enums.HallShift;
 import com.example.BookEatNepal.Enums.HallStatus;
 import com.example.BookEatNepal.Model.Hall;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Time;
@@ -37,6 +39,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
+import static com.example.BookEatNepal.Util.Formatter.convertStrToDate;
 
 @Service
 public class HallServiceImpl implements HallService {
@@ -100,7 +105,7 @@ public class HallServiceImpl implements HallService {
 
             hallAvailabilitySubquery.select(hallJoin.get("id")) // Select hall IDs that match the criteria
                     .where(
-                            cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(checkAvailableDate, "yyyy-MM-dd")), // Match the date
+                            cb.equal(hallAvailabilityRoot.get("date"), convertStrToDate(checkAvailableDate, "yyyy-MM-dd")), // Match the date
                             cb.equal(hallAvailabilityRoot.get("status"), HallStatus.AVAILABLE) // Ensure the hall is available
                     );
 
@@ -154,7 +159,13 @@ public class HallServiceImpl implements HallService {
         ) {
             Hall hall = hallRepo.findById(Integer.parseInt(request.getHallId()))
                     .orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
-            hallAvailabilityRepo.save(convertToHallAvailability(request, hall));
+            Optional<HallAvailability> availableHallByDateAndShift = hallAvailabilityRepo.findAvailableHallByDateAndShift((convertStrToDate(request.getDate(), "yyyy-MM-dd")),
+                    HallShift.valueOf(request.getShift()));
+            boolean isEmpty = availableHallByDateAndShift.isEmpty();
+            if (isEmpty) {
+                hallAvailabilityRepo.save(convertToHallAvailability(request, hall));
+            } else
+                throw new CustomException(CustomException.Type.HALL_AVAILABILITY_FOUND);
         }
         return SUCCESS_MESSAGE;
     }
@@ -180,7 +191,7 @@ public class HallServiceImpl implements HallService {
         }
 
         if (date != null) {
-            predicates.add(cb.equal(hallAvailabilityRoot.get("date"), Formatter.convertStrToDate(date, "yyyy-MM-dd")));
+            predicates.add(cb.equal(hallAvailabilityRoot.get("date"), convertStrToDate(date, "yyyy-MM-dd")));
         }
 
         if (numberOfGuests > 0) {
@@ -251,7 +262,7 @@ public class HallServiceImpl implements HallService {
         HallAvailability hallAvailability = new HallAvailability();
         hallAvailability.setHall(hall);
         hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
-        hallAvailability.setDate(Formatter.convertStrToDate(request.getDate(), "yyyy-MM-dd"));
+        hallAvailability.setDate(convertStrToDate(request.getDate(), "yyyy-MM-dd"));
         hallAvailability.setStartTime(Time.valueOf(request.getStartTime()));
         hallAvailability.setEndTime(Time.valueOf(request.getEndTime()));
         hallAvailability.setShift(HallShift.valueOf(request.getShift()));
