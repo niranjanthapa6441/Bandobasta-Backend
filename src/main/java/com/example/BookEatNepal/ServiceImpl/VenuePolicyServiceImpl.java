@@ -62,8 +62,8 @@ public class VenuePolicyServiceImpl implements VenuePolicyService {
     }
 
     @Override
-    public String delete(int venueId) {
-        VenuePolicy venuePolicy = venuePolicyRepository.findById(venueId).get();
+    public String delete(int policyId) {
+        VenuePolicy venuePolicy = venuePolicyRepository.findById(policyId).get();
         venuePolicy.setStatus(PolicyStatus.INACTIVE);
         return SUCCESS_MESSAGE;
     }
