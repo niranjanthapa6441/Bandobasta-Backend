@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "venue_policies")
+@Table(name = "venue_policy")
 public class VenuePolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
