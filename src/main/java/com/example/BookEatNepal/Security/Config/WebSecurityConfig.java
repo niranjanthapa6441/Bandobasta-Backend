@@ -97,6 +97,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/event/ticket/findAllByUser").permitAll()
                         .requestMatchers("/event/order/findAllTicketOrderByEvent").permitAll()
                         .requestMatchers("/event/order/countOfBookedAndCheckedInTicket").permitAll()
+                        .requestMatchers("/send").permitAll()
                         .anyRequest().authenticated()
                 );
 
