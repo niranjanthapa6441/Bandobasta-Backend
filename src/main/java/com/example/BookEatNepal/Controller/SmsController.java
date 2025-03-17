@@ -23,7 +23,7 @@ public class SmsController {
             @RequestParam String from,
             @RequestParam String to,
             @RequestParam String text) {
-        return RestResponse.ok(smsService.sendSms(token, from, to, text));
+        return RestResponse.ok(smsService.sendSms(token, from, to, text),"Otp Sent Successfully");
 
     }
 }
