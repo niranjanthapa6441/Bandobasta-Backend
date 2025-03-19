@@ -31,7 +31,7 @@ public class HallAvailability {
     private Time endTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "shift", length = 20, nullable = false)
+    @Column(name = "shift", length = 20, nullable = true)
     private HallShift shift;
 
     @Enumerated(EnumType.STRING)
