@@ -4,18 +4,35 @@ import com.example.BookEatNepal.Payload.Request.SignUpRequest;
 import com.example.BookEatNepal.Service.AuthenticationService;
 import com.example.BookEatNepal.Service.EmailService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RegistrationService {
+    private String FAILURE = "Something Went Wrong";
+    @Value("${sparrow-sms.code}")
+    private String apiKey;
+
+    private final RestTemplate restTemplate;
     private final AuthenticationService authenticationService;
     private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
+
+
     public Status register(SignUpRequest registrationRequest){
         boolean isValidEmail = emailValidator.test(registrationRequest.getEmail());
         if (!isValidEmail){
@@ -27,6 +44,7 @@ public class RegistrationService {
                 buildEmail(
                 registrationRequest.getFirstName(),
                 token));
+        sendSms(registrationRequest,token);
         return Status.REGISTERED;
     }
 
@@ -116,4 +134,30 @@ public class RegistrationService {
                 "</div>";
     }
 
-}
+    public String sendSms(SignUpRequest signUpRequest,String token) {
+        String url = "https://api.sparrowsms.com/v2/sms/";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("token", apiKey);
+        formData.add("from","Demo");
+        formData.add("to", signUpRequest.getPhoneNumber());
+        formData.add("text", "Hey your otp for login at Bandobasta is "+token);
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formData, headers);
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String.class
+            );
+            return response.getBody();
+        } catch (Exception e) {
+            return FAILURE;
+        }
+    }
+    }
