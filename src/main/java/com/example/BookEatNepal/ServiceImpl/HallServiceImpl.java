@@ -36,7 +36,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -158,32 +160,36 @@ public class HallServiceImpl implements HallService {
     @Override
     public String saveHallAvailability(List<HallAvailabilityRequest> requests) {
         for (HallAvailabilityRequest request : requests) {
-            LocalDate startDate = LocalDate.parse(request.getStartDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            LocalDate endDate = LocalDate.parse(request.getEndDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            if (request.getStartDate() == null || request.getStartDate().isEmpty()) {
+                throw new CustomException(CustomException.Type.INVALID_DATE);
+            }
+            LocalDate startDate = LocalDate.parse(request.getStartDate());
+
+            LocalDate endDate = (request.getEndDate() == null || request.getEndDate().trim().isEmpty())
+                    ? LocalDate.parse(request.getStartDate())
+                    : LocalDate.parse(request.getEndDate());
             long n = ChronoUnit.DAYS.between(startDate, endDate) + 1;
             for (long i = 0; i < n; i++) {
                 LocalDate currentDate = startDate.plusDays(i);
-                HallAvailabilityRequest updatedRequest = HallAvailabilityRequest.builder()
-                        .hallId(request.getHallId())
-                        .date(currentDate)
-                        .startTime(request.getStartTime())
-                        .endTime(request.getEndTime())
-                        .status(request.getStatus())
-                        .shift(request.getShift())
-                        .build();
-
-                Hall hall = hallRepo.findById(Integer.parseInt(updatedRequest.getHallId()))
+                Hall hall = hallRepo.findById(Integer.parseInt(request.getHallId()))
                         .orElseThrow(() -> new CustomException(CustomException.Type.HALL_NOT_FOUND));
-
-                Optional<HallAvailability> availableHallByDateAndShift =
-                        hallAvailabilityRepo.findAvailableHallByDateAndShift(
-                                (updatedRequest.getDate()),
-                                HallShift.valueOf(updatedRequest.getShift()));
-
-                if (availableHallByDateAndShift.isEmpty()) {
-                    hallAvailabilityRepo.save(convertToHallAvailability(updatedRequest, hall));
-                } else {
-                    throw new CustomException(CustomException.Type.HALL_AVAILABILITY_FOUND);
+                for (HallAvailabilityRequest.Shift shiftRequest : request.getShift()) {
+                    Optional<HallAvailability> existingAvailability =
+                            hallAvailabilityRepo.findAvailableHallByDateAndShift(
+                                    currentDate,
+                                    HallShift.valueOf(shiftRequest.getShift())
+                            );
+                    if (existingAvailability.isPresent()) {
+                        throw new CustomException(CustomException.Type.HALL_AVAILABILITY_FOUND);
+                    }
+                    HallAvailability hallAvailability = new HallAvailability();
+                    hallAvailability.setHall(hall);
+                    hallAvailability.setDate(currentDate);
+                    hallAvailability.setStartTime(Time.valueOf(LocalTime.parse(shiftRequest.getStartTime())));
+                    hallAvailability.setEndTime(Time.valueOf(LocalTime.parse(shiftRequest.getEndTime())));
+                    hallAvailability.setShift(HallShift.valueOf(shiftRequest.getShift()));
+                    hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
+                    hallAvailabilityRepo.save(hallAvailability);
                 }
             }
         }
@@ -279,13 +285,25 @@ public class HallServiceImpl implements HallService {
     }
 
     private HallAvailability convertToHallAvailability(HallAvailabilityRequest request, Hall hall) {
+        // Check if shifts are provided
+        if (request.getShift() == null || request.getShift().isEmpty()) {
+            throw new CustomException(CustomException.Type.INVALID_SHIFT);
+        }
+
+        // Take the first shift from the list (or you can decide on a specific logic if needed)
+        HallAvailabilityRequest.Shift shift = request.getShift().get(0);
+
         HallAvailability hallAvailability = new HallAvailability();
         hallAvailability.setHall(hall);
         hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
-        hallAvailability.setDate((request.getDate()));
-        hallAvailability.setStartTime(Time.valueOf(request.getStartTime()));
-        hallAvailability.setEndTime(Time.valueOf(request.getEndTime()));
-        hallAvailability.setShift(HallShift.valueOf(request.getShift()));
+        hallAvailability.setDate(request.getDate() != null
+                ? LocalDate.parse(request.getDate())
+                : LocalDate.parse(request.getStartDate()));
+
+        hallAvailability.setStartTime(Time.valueOf(LocalTime.parse(shift.getStartTime())));
+        hallAvailability.setEndTime(Time.valueOf(LocalTime.parse(shift.getEndTime())));
+        hallAvailability.setShift(HallShift.valueOf(shift.getShift()));
+
         return hallAvailability;
     }
 

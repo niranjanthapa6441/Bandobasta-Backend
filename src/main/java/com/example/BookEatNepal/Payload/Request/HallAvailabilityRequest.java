@@ -3,16 +3,23 @@ import lombok.Builder;
 import lombok.Data;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
 public class HallAvailabilityRequest {
-    private String hallId;
-    private LocalDate date;
-    private String startTime;
-    private String endTime;
-    private String status;
-    private String shift;
-    private String startDate;
-    private String endDate;
-}
+        private String hallId;
+        private String date;
+        private String startDate;
+        private String endDate;
+        private List<Shift> shift; // A list of Shift objects
+        private String status;
+
+        @Data
+        @Builder// Apply Lombok to the inner class as well
+        public static class Shift {
+            private String startTime;
+            private String endTime;
+            private String shift; // Represents the shift name (e.g., Morning, Evening)
+        }
+    }
