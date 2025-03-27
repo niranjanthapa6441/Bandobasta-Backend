@@ -292,13 +292,10 @@ public class HallServiceImpl implements HallService {
 
         // Take the first shift from the list (or you can decide on a specific logic if needed)
         HallAvailabilityRequest.Shift shift = request.getShift().get(0);
-
         HallAvailability hallAvailability = new HallAvailability();
         hallAvailability.setHall(hall);
         hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
-        hallAvailability.setDate(request.getDate() != null
-                ? LocalDate.parse(request.getDate())
-                : LocalDate.parse(request.getStartDate()));
+        hallAvailability.setDate(LocalDate.parse(request.getStartDate()));
 
         hallAvailability.setStartTime(Time.valueOf(LocalTime.parse(shift.getStartTime())));
         hallAvailability.setEndTime(Time.valueOf(LocalTime.parse(shift.getEndTime())));

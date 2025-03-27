@@ -9,7 +9,6 @@ import java.util.List;
 @Builder
 public class HallAvailabilityRequest {
         private String hallId;
-        private String date;
         private String startDate;
         private String endDate;
         private List<Shift> shift; // A list of Shift objects
