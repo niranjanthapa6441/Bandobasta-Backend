@@ -182,18 +182,23 @@ public class HallServiceImpl implements HallService {
                     if (existingAvailability.isPresent()) {
                         throw new CustomException(CustomException.Type.HALL_AVAILABILITY_FOUND);
                     }
-                    HallAvailability hallAvailability = new HallAvailability();
-                    hallAvailability.setHall(hall);
-                    hallAvailability.setDate(currentDate);
-                    hallAvailability.setStartTime(Time.valueOf(LocalTime.parse(shiftRequest.getStartTime())));
-                    hallAvailability.setEndTime(Time.valueOf(LocalTime.parse(shiftRequest.getEndTime())));
-                    hallAvailability.setShift(HallShift.valueOf(shiftRequest.getShift()));
-                    hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
+                    HallAvailability hallAvailability = convertToHallAvailability(request, shiftRequest, hall, currentDate);
                     hallAvailabilityRepo.save(hallAvailability);
                 }
             }
         }
         return SUCCESS_MESSAGE;
+    }
+
+    private static HallAvailability convertToHallAvailability(HallAvailabilityRequest request, HallAvailabilityRequest.Shift shiftRequest, Hall hall, LocalDate currentDate) {
+        HallAvailability hallAvailability = new HallAvailability();
+        hallAvailability.setHall(hall);
+        hallAvailability.setDate(currentDate);
+        hallAvailability.setStartTime(Time.valueOf(LocalTime.parse(shiftRequest.getStartTime())));
+        hallAvailability.setEndTime(Time.valueOf(LocalTime.parse(shiftRequest.getEndTime())));
+        hallAvailability.setShift(HallShift.valueOf(shiftRequest.getShift()));
+        hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
+        return hallAvailability;
     }
 
     @Override
@@ -284,26 +289,6 @@ public class HallServiceImpl implements HallService {
                 .build();
     }
 
-    private HallAvailability convertToHallAvailability(HallAvailabilityRequest request, Hall hall) {
-        // Check if shifts are provided
-        if (request.getShift() == null || request.getShift().isEmpty()) {
-            throw new CustomException(CustomException.Type.INVALID_SHIFT);
-        }
-
-        // Take the first shift from the list (or you can decide on a specific logic if needed)
-        HallAvailabilityRequest.Shift shift = request.getShift().get(0);
-        HallAvailability hallAvailability = new HallAvailability();
-        hallAvailability.setHall(hall);
-        hallAvailability.setStatus(HallStatus.valueOf(request.getStatus()));
-        hallAvailability.setDate(LocalDate.parse(request.getStartDate()));
-
-        hallAvailability.setStartTime(Time.valueOf(LocalTime.parse(shift.getStartTime())));
-        hallAvailability.setEndTime(Time.valueOf(LocalTime.parse(shift.getEndTime())));
-        hallAvailability.setShift(HallShift.valueOf(shift.getShift()));
-
-        return hallAvailability;
-    }
-
     private void saveHallImages(List<MultipartFile> hallImages, Hall hall, String venueName) {
         for (MultipartFile image : hallImages) {
             try {
@@ -336,7 +321,7 @@ public class HallServiceImpl implements HallService {
     }
 
     private void validate(MultipartFile multipartFile) {
-        if (multipartFile.getSize() > 3000000)
+        if (multipartFile.getSize() >3000000)
             throw new CustomException(CustomException.Type.INVALID_FILE_SIZE);
         String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
         if (!checkFileExtension(extension))
