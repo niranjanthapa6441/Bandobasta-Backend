@@ -60,7 +60,9 @@ public class CustomException extends RuntimeException {
         TICKET_HAS_ALREADY_BEEN_CHECKED_IN("Ticket has already been checked in", 400),
         INVALID_TICKET_ORDER_ID("Ticket not found", 500),
         POLICY_NOT_FOUND("Policy not Found", 404),
-        HALL_AVAILABILITY_FOUND("Hall availability already exists", 400);
+        HALL_AVAILABILITY_FOUND("Hall availability already exists", 400),
+        INVALID_SHIFT("Shift Invalid",500),
+        INVALID_DATE("Start date must be Provided",500);
 
         private String message;
         private int code;
